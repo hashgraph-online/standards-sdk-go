@@ -6,7 +6,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/hashgraph-online/standards-sdk-go)](https://github.com/hashgraph-online/standards-sdk-go/releases)
 [![License](https://img.shields.io/github/license/hashgraph-online/standards-sdk-go)](./LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/hashgraph-online/standards-sdk-go?style=social)](https://github.com/hashgraph-online/standards-sdk-go/stargazers)
-[![CodeSandbox Examples](https://img.shields.io/badge/CodeSandbox-Examples-151515?logo=codesandbox&logoColor=white)](https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples)
+[![CodeSandbox Examples](https://img.shields.io/badge/CodeSandbox-Examples-151515?logo=codesandbox&logoColor=white)](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples)
 
 | ![](./Hashgraph-Online.png) | Go reference implementation of the Hiero Consensus Specifications (HCS) and Registry Broker utilities.<br><br>[📚 Standards SDK Documentation](https://hol.org/docs/libraries/standards-sdk/)<br>[📖 Hiero Consensus Specifications Documentation](https://hol.org/docs/standards) |
 | :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -28,10 +28,10 @@ go get github.com/hashgraph-online/standards-sdk-go@latest
 ## CodeSandbox Examples
 
 - [Examples index](./examples/README.md)
-- [HCS-2 create registry](https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs2-create-registry)
-- [HCS-14 parse UAID](https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs14-parse-uaid)
-- [HCS-27 publish checkpoint](https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs27-publish-checkpoint)
-- [Inscriber authenticate + client](https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples/inscriber-auth-client)
+- [HCS-2 create registry](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs2-create-registry)
+- [HCS-14 parse UAID](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs14-parse-uaid)
+- [HCS-27 publish checkpoint](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs27-publish-checkpoint)
+- [Inscriber authenticate + client](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/inscriber-auth-client)
 
 ## Supported Packages
 

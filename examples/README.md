@@ -15,7 +15,7 @@ go run ./examples/hcs2-create-registry
 
 CodeSandbox:
 
-- `hcs2-create-registry`: https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs2-create-registry
-- `hcs14-parse-uaid`: https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs14-parse-uaid
-- `hcs27-publish-checkpoint`: https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs27-publish-checkpoint
-- `inscriber-auth-client`: https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples/inscriber-auth-client
+- `hcs2-create-registry`: https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs2-create-registry
+- `hcs14-parse-uaid`: https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs14-parse-uaid
+- `hcs27-publish-checkpoint`: https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs27-publish-checkpoint
+- `inscriber-auth-client`: https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/inscriber-auth-client
