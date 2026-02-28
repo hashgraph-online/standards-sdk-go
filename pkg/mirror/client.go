@@ -50,6 +50,17 @@ func NewClient(config Config) (*Client, error) {
 			baseURL = "https://testnet.mirrornode.hedera.com"
 		}
 	}
+	parsedBaseURL, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid mirror base URL: %w", err)
+	}
+	if parsedBaseURL.Scheme != "http" && parsedBaseURL.Scheme != "https" {
+		return nil, fmt.Errorf("invalid mirror base URL: scheme must be http or https")
+	}
+	if strings.TrimSpace(parsedBaseURL.Host) == "" {
+		return nil, fmt.Errorf("invalid mirror base URL: host is required")
+	}
+	baseURL = strings.TrimRight(parsedBaseURL.String(), "/")
 
 	httpClient := config.HTTPClient
 	if httpClient == nil {

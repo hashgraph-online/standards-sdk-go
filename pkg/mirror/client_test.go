@@ -42,6 +42,26 @@ func TestNewClientCustomBaseURL(t *testing.T) {
 	}
 }
 
+func TestNewClientInvalidBaseURL(t *testing.T) {
+	_, err := NewClient(Config{
+		Network: "testnet",
+		BaseURL: "http://[::1]:namedport",
+	})
+	if err == nil {
+		t.Fatal("expected error for invalid mirror base URL")
+	}
+}
+
+func TestNewClientBaseURLMissingScheme(t *testing.T) {
+	_, err := NewClient(Config{
+		Network: "testnet",
+		BaseURL: "mirror.example.com",
+	})
+	if err == nil {
+		t.Fatal("expected error for mirror base URL without scheme")
+	}
+}
+
 func TestNewClientUnsupportedNetwork(t *testing.T) {
 	_, err := NewClient(Config{Network: "badnet"})
 	if err == nil {
