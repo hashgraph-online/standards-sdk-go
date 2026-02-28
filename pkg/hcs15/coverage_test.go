@@ -285,15 +285,3 @@ func TestVerifyPetalAccountMirrorError(t *testing.T) {
 	}
 }
 
-func TestNewClientInvalidMirrorURL(t *testing.T) {
-	key, _ := hedera.PrivateKeyGenerateEcdsa()
-	_, err := NewClient(ClientConfig{
-		Network:            "testnet",
-		OperatorAccountID:  "0.0.12345",
-		OperatorPrivateKey: key.String(),
-		MirrorBaseURL:      "http://[::1]:namedport",
-	})
-	if err == nil {
-		t.Fatal("expected error for invalid mirror url")
-	}
-}

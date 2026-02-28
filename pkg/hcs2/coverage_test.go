@@ -1,8 +1,11 @@
 package hcs2
 
 import (
+	"context"
 	"strings"
 	"testing"
+
+	"github.com/hashgraph/hedera-sdk-go/v2"
 )
 
 func TestBuildTopicMemoIndexed(t *testing.T) {
@@ -334,5 +337,164 @@ func TestBuildHCS2RegisterTxWithAnalyticsMemo(t *testing.T) {
 	}
 	if tx.GetTransactionMemo() != "analytics-memo" {
 		t.Fatalf("unexpected transaction memo: %s", tx.GetTransactionMemo())
+	}
+}
+
+func TestNewClientHCS2(t *testing.T) {
+	_, err := NewClient(ClientConfig{Network: "invalid"})
+	if err == nil {
+		t.Fatal("expected failure on invalid network")
+	}
+
+	pk, _ := hedera.PrivateKeyGenerateEcdsa()
+	client, err := NewClient(ClientConfig{
+		Network:            "testnet",
+		OperatorAccountID:  "0.0.123",
+		OperatorPrivateKey: pk.String(),
+	})
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+
+	if client.MirrorClient() == nil {
+		t.Fatal("expected mirror client to be set")
+	}
+}
+
+func TestCreateRegistryFail(t *testing.T) {
+	pk, _ := hedera.PrivateKeyGenerateEcdsa()
+	client, _ := NewClient(ClientConfig{
+		Network:            "testnet",
+		OperatorAccountID:  "0.0.123",
+		OperatorPrivateKey: pk.String(),
+	})
+
+	// Try with invalid topic ID or something to fail
+	_, err := client.CreateRegistry(context.Background(), CreateRegistryOptions{
+		RegistryType: RegistryTypeIndexed,
+		TTL:          86400,
+	})
+	if err == nil {
+		t.Fatal("expected execution failure")
+	}
+}
+
+func TestRegisterEntryFail(t *testing.T) {
+	pk, _ := hedera.PrivateKeyGenerateEcdsa()
+	client, _ := NewClient(ClientConfig{
+		Network:            "testnet",
+		OperatorAccountID:  "0.0.123",
+		OperatorPrivateKey: pk.String(),
+	})
+	_, err := client.RegisterEntry(context.Background(), "invalid-topic-id", RegisterEntryOptions{}, "0.0.2")
+	if err == nil {
+		t.Fatal("expected fail")
+	}
+}
+
+func TestUpdateEntryFail(t *testing.T) {
+	pk, _ := hedera.PrivateKeyGenerateEcdsa()
+	client, _ := NewClient(ClientConfig{
+		Network:            "testnet",
+		OperatorAccountID:  "0.0.123",
+		OperatorPrivateKey: pk.String(),
+	})
+	_, err := client.UpdateEntry(context.Background(), "invalid-topic-id", UpdateEntryOptions{})
+	if err == nil {
+		t.Fatal("expected fail")
+	}
+}
+
+func TestDeleteEntryFail(t *testing.T) {
+	pk, _ := hedera.PrivateKeyGenerateEcdsa()
+	client, _ := NewClient(ClientConfig{
+		Network:            "testnet",
+		OperatorAccountID:  "0.0.123",
+		OperatorPrivateKey: pk.String(),
+	})
+	_, err := client.DeleteEntry(context.Background(), "invalid-topic-id", DeleteEntryOptions{})
+	if err == nil {
+		t.Fatal("expected fail")
+	}
+}
+
+func TestMigrateRegistryFail(t *testing.T) {
+	pk, _ := hedera.PrivateKeyGenerateEcdsa()
+	client, _ := NewClient(ClientConfig{
+		Network:            "testnet",
+		OperatorAccountID:  "0.0.123",
+		OperatorPrivateKey: pk.String(),
+	})
+	_, err := client.MigrateRegistry(context.Background(), "invalid-topic-id", MigrateRegistryOptions{})
+	if err == nil {
+		t.Fatal("expected fail")
+	}
+}
+
+func TestGetRegistryFail(t *testing.T) {
+	pk, _ := hedera.PrivateKeyGenerateEcdsa()
+	client, _ := NewClient(ClientConfig{
+		Network:            "testnet",
+		OperatorAccountID:  "0.0.123",
+		OperatorPrivateKey: pk.String(),
+	})
+
+	_, err := client.GetRegistry(context.Background(), "invalid-topic", QueryRegistryOptions{})
+	if err == nil {
+		t.Fatal("expected fail")
+	}
+}
+
+func TestGetTopicInfoFail(t *testing.T) {
+	pk, _ := hedera.PrivateKeyGenerateEcdsa()
+	client, _ := NewClient(ClientConfig{
+		Network:            "testnet",
+		OperatorAccountID:  "0.0.123",
+		OperatorPrivateKey: pk.String(),
+	})
+
+	_, err := client.GetTopicInfo(context.Background(), "invalid-topic")
+	if err == nil {
+		t.Fatal("expected fail")
+	}
+}
+
+func TestSubmitMessageFail(t *testing.T) {
+	pk, _ := hedera.PrivateKeyGenerateEcdsa()
+	client, _ := NewClient(ClientConfig{
+		Network:            "testnet",
+		OperatorAccountID:  "0.0.123",
+		OperatorPrivateKey: pk.String(),
+	})
+
+	_, err := client.SubmitMessage(context.Background(), "0.0.1", Message{Op: "bad"}, "")
+	// The bad operation will fail the validation step
+	if err == nil {
+		t.Fatal("expected fail from validation")
+	}
+
+	_, err = client.SubmitMessage(context.Background(), "0.0.1", Message{Op: OperationRegister, TopicID: "0.0.2", P: "hcs-2"}, "")
+	// The payload is valid, but the user's mock testnet operator Account ID doesn't exist
+	if err == nil {
+		t.Fatal("expected fail from Hedera execution due to fake pk")
+	}
+}
+
+func TestResolveRegistryFailures(t *testing.T) {
+	pk, _ := hedera.PrivateKeyGenerateEcdsa()
+	client, _ := NewClient(ClientConfig{
+		Network:            "testnet",
+		OperatorAccountID:  "0.0.123",
+		OperatorPrivateKey: pk.String(),
+	})
+
+	_, err := client.resolveRegistryType(context.Background(), "invalid-topic", nil)
+	if err == nil {
+		t.Fatal("expected get topic info fail in resolveRegistryType")
+	}
+
+	_, err = client.resolvePublicKey("invalid-topic", false)
+	if err == nil {
+		t.Fatal("expected get topic info fail in resolvePublicKey")
 	}
 }
