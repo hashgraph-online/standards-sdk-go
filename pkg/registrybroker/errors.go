@@ -9,6 +9,7 @@ type RegistryBrokerError struct {
 	Body       any
 }
 
+// Error performs the requested operation.
 func (e *RegistryBrokerError) Error() string {
 	if e == nil {
 		return "registry broker request failed"
@@ -25,6 +26,7 @@ type RegistryBrokerParseError struct {
 	Cause   error
 }
 
+// Error performs the requested operation.
 func (e *RegistryBrokerParseError) Error() string {
 	if e == nil {
 		return "registry broker parse error"

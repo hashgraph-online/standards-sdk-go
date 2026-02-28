@@ -24,6 +24,7 @@ type Client struct {
 	inscriberAPIURL    string
 }
 
+// NewClient creates a new Client.
 func NewClient(config ClientConfig) (*Client, error) {
 	network, err := shared.NormalizeNetwork(config.Network)
 	if err != nil {
@@ -79,18 +80,22 @@ func NewClient(config ClientConfig) (*Client, error) {
 	}, nil
 }
 
+// HederaClient returns the configured Hedera SDK client.
 func (c *Client) HederaClient() *hedera.Client {
 	return c.hederaClient
 }
 
+// OperatorID returns the configured operator account ID.
 func (c *Client) OperatorID() string {
 	return c.operatorAccountID
 }
 
+// MirrorClient returns the configured mirror node client.
 func (c *Client) MirrorClient() *mirror.Client {
 	return c.mirrorClient
 }
 
+// CreatePersonalProfile creates the requested resource.
 func (c *Client) CreatePersonalProfile(
 	displayName string,
 	options map[string]any,
@@ -104,6 +109,7 @@ func (c *Client) CreatePersonalProfile(
 	return profile
 }
 
+// CreateAIAgentProfile creates the requested resource.
 func (c *Client) CreateAIAgentProfile(
 	displayName string,
 	agentType AIAgentType,
@@ -129,6 +135,7 @@ func (c *Client) CreateAIAgentProfile(
 	return profile, nil
 }
 
+// CreateMCPServerProfile creates the requested resource.
 func (c *Client) CreateMCPServerProfile(
 	displayName string,
 	serverDetails MCPServerDetails,
@@ -148,6 +155,7 @@ func (c *Client) CreateMCPServerProfile(
 	return profile, nil
 }
 
+// ValidateProfile validates the provided input value.
 func (c *Client) ValidateProfile(profile HCS11Profile) ValidationResult {
 	errors := make([]string, 0)
 	if strings.TrimSpace(profile.Version) == "" {
@@ -220,6 +228,7 @@ func (c *Client) ValidateProfile(profile HCS11Profile) ValidationResult {
 	}
 }
 
+// ProfileToJSONString performs the requested operation.
 func (c *Client) ProfileToJSONString(profile HCS11Profile) (string, error) {
 	encodedProfile, err := json.Marshal(profile)
 	if err != nil {
@@ -228,6 +237,7 @@ func (c *Client) ProfileToJSONString(profile HCS11Profile) (string, error) {
 	return string(encodedProfile), nil
 }
 
+// ParseProfileFromString parses the provided input value.
 func (c *Client) ParseProfileFromString(profileString string) (*HCS11Profile, error) {
 	var profile HCS11Profile
 	if err := json.Unmarshal([]byte(profileString), &profile); err != nil {
@@ -240,6 +250,7 @@ func (c *Client) ParseProfileFromString(profileString string) (*HCS11Profile, er
 	return &profile, nil
 }
 
+// SetProfileForAccountMemo sets the requested value.
 func (c *Client) SetProfileForAccountMemo(topicID string, topicStandard int) string {
 	if topicStandard == 0 {
 		topicStandard = 1
@@ -247,6 +258,7 @@ func (c *Client) SetProfileForAccountMemo(topicID string, topicStandard int) str
 	return fmt.Sprintf("hcs-11:hcs://%d/%s", topicStandard, strings.TrimSpace(topicID))
 }
 
+// GetCapabilitiesFromTags returns the requested value.
 func (c *Client) GetCapabilitiesFromTags(capabilityNames []string) []int {
 	if len(capabilityNames) == 0 {
 		return []int{int(AIAgentCapabilityTextGeneration)}
@@ -264,6 +276,7 @@ func (c *Client) GetCapabilitiesFromTags(capabilityNames []string) []int {
 	return capabilities
 }
 
+// GetAgentTypeFromMetadata returns the requested value.
 func (c *Client) GetAgentTypeFromMetadata(metadata AgentMetadata) AIAgentType {
 	if strings.EqualFold(metadata.Type, "autonomous") {
 		return AIAgentTypeAutonomous
@@ -271,6 +284,7 @@ func (c *Client) GetAgentTypeFromMetadata(metadata AgentMetadata) AIAgentType {
 	return AIAgentTypeManual
 }
 
+// AttachUAIDIfMissing attaches the requested value when required.
 func (c *Client) AttachUAIDIfMissing(_ context.Context, profile *HCS11Profile) error {
 	if profile == nil || strings.TrimSpace(profile.UAID) != "" {
 		return nil

@@ -8,18 +8,22 @@ import (
 
 type UAIDDidResolutionResolver struct{}
 
+// NewUAIDDidResolutionResolver creates a new UAIDDidResolutionResolver.
 func NewUAIDDidResolutionResolver() *UAIDDidResolutionResolver {
 	return &UAIDDidResolutionResolver{}
 }
 
+// ProfileID returns the resolver profile identifier.
 func (resolver *UAIDDidResolutionResolver) ProfileID() string {
 	return UAIDDidResolutionProfileID
 }
 
+// Supports reports whether the resolver supports the provided input.
 func (resolver *UAIDDidResolutionResolver) Supports(_ string, parsed ParsedUAID) bool {
 	return parsed.Target == "did"
 }
 
+// ResolveProfile resolves the requested identifier data.
 func (resolver *UAIDDidResolutionResolver) ResolveProfile(
 	ctx context.Context,
 	uaid string,

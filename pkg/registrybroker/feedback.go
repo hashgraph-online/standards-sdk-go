@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// GetAgentFeedback returns the requested value.
 func (c *RegistryBrokerClient) GetAgentFeedback(
 	ctx context.Context,
 	uaid string,
@@ -26,6 +27,7 @@ func (c *RegistryBrokerClient) GetAgentFeedback(
 	return c.requestJSON(ctx, http.MethodGet, pathWithQuery(path, query), nil, nil)
 }
 
+// ListAgentFeedbackIndex performs the requested operation.
 func (c *RegistryBrokerClient) ListAgentFeedbackIndex(
 	ctx context.Context,
 	options AgentFeedbackIndexOptions,
@@ -58,6 +60,7 @@ func (c *RegistryBrokerClient) ListAgentFeedbackIndex(
 	)
 }
 
+// ListAgentFeedbackEntriesIndex performs the requested operation.
 func (c *RegistryBrokerClient) ListAgentFeedbackEntriesIndex(
 	ctx context.Context,
 	options AgentFeedbackIndexOptions,
@@ -90,6 +93,7 @@ func (c *RegistryBrokerClient) ListAgentFeedbackEntriesIndex(
 	)
 }
 
+// CheckAgentFeedbackEligibility performs the requested operation.
 func (c *RegistryBrokerClient) CheckAgentFeedbackEligibility(
 	ctx context.Context,
 	uaid string,
@@ -109,6 +113,7 @@ func (c *RegistryBrokerClient) CheckAgentFeedbackEligibility(
 	)
 }
 
+// SubmitAgentFeedback submits the requested message payload.
 func (c *RegistryBrokerClient) SubmitAgentFeedback(
 	ctx context.Context,
 	uaid string,

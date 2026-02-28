@@ -36,6 +36,7 @@ type CreateTopicOptions struct {
 	SubmitKey           string
 }
 
+// NewClient creates a new Client.
 func NewClient(config ClientConfig) (*Client, error) {
 	network, err := shared.NormalizeNetwork(config.Network)
 	if err != nil {
@@ -80,10 +81,12 @@ func NewClient(config ClientConfig) (*Client, error) {
 	}, nil
 }
 
+// MirrorClient returns the configured mirror node client.
 func (c *Client) MirrorClient() *mirror.Client {
 	return c.mirrorClient
 }
 
+// CreateCheckpointTopic creates the requested resource.
 func (c *Client) CreateCheckpointTopic(
 	ctx context.Context,
 	options CreateTopicOptions,
@@ -122,6 +125,7 @@ func (c *Client) CreateCheckpointTopic(
 	return receipt.TopicID.String(), response.TransactionID.String(), nil
 }
 
+// PublishCheckpoint publishes the requested message payload.
 func (c *Client) PublishCheckpoint(
 	ctx context.Context,
 	topicID string,
@@ -296,6 +300,7 @@ func (c *Client) publishMetadata(
 	return c.publishMetadataHCS1(ctx, metadataBytes)
 }
 
+// GetCheckpoints returns the requested value.
 func (c *Client) GetCheckpoints(
 	ctx context.Context,
 	topicID string,
@@ -339,6 +344,7 @@ func (c *Client) GetCheckpoints(
 	return records, nil
 }
 
+// ValidateCheckpointChain validates the provided input value.
 func ValidateCheckpointChain(records []CheckpointRecord) error {
 	type previousRecord struct {
 		TreeSize    uint64
@@ -380,6 +386,7 @@ func ValidateCheckpointChain(records []CheckpointRecord) error {
 	return nil
 }
 
+// ResolveHCS1Reference resolves the requested identifier data.
 func (c *Client) ResolveHCS1Reference(ctx context.Context, hcs1Reference string) ([]byte, error) {
 	trimmedReference := strings.TrimSpace(hcs1Reference)
 

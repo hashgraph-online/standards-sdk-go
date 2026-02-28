@@ -19,6 +19,7 @@ type BrokerClient struct {
 	pollInterval time.Duration
 }
 
+// NewBrokerClient creates a new BrokerClient.
 func NewBrokerClient(baseURL string, apiKey string) (*BrokerClient, error) {
 	normalizedURL := strings.TrimSpace(baseURL)
 	if normalizedURL == "" {
@@ -39,6 +40,7 @@ func NewBrokerClient(baseURL string, apiKey string) (*BrokerClient, error) {
 	}, nil
 }
 
+// CreateQuote creates the requested resource.
 func (c *BrokerClient) CreateQuote(
 	ctx context.Context,
 	request BrokerQuoteRequest,
@@ -50,6 +52,7 @@ func (c *BrokerClient) CreateQuote(
 	return response, nil
 }
 
+// CreateJob creates the requested resource.
 func (c *BrokerClient) CreateJob(
 	ctx context.Context,
 	request BrokerQuoteRequest,
@@ -61,6 +64,7 @@ func (c *BrokerClient) CreateJob(
 	return response, nil
 }
 
+// GetJob returns the requested value.
 func (c *BrokerClient) GetJob(
 	ctx context.Context,
 	jobID string,
@@ -72,6 +76,7 @@ func (c *BrokerClient) GetJob(
 	return response, nil
 }
 
+// WaitForJob performs the requested operation.
 func (c *BrokerClient) WaitForJob(
 	ctx context.Context,
 	jobID string,
@@ -111,6 +116,7 @@ func (c *BrokerClient) WaitForJob(
 	return latest, fmt.Errorf("registry broker job %s did not complete before timeout", jobID)
 }
 
+// InscribeAndWait inscribes the requested payload.
 func (c *BrokerClient) InscribeAndWait(
 	ctx context.Context,
 	request BrokerQuoteRequest,

@@ -15,6 +15,7 @@ type ResolverRegistry struct {
 	uaidProfileResolvers []UAIDProfileResolver
 }
 
+// NewResolverRegistry creates a new ResolverRegistry.
 func NewResolverRegistry() *ResolverRegistry {
 	return &ResolverRegistry{
 		didResolvers:         make([]DIDResolver, 0),
@@ -23,18 +24,22 @@ func NewResolverRegistry() *ResolverRegistry {
 	}
 }
 
+// RegisterDIDResolver registers the requested resource.
 func (registry *ResolverRegistry) RegisterDIDResolver(resolver DIDResolver) {
 	registry.didResolvers = append(registry.didResolvers, resolver)
 }
 
+// RegisterDIDProfileResolver registers the requested resource.
 func (registry *ResolverRegistry) RegisterDIDProfileResolver(resolver DIDProfileResolver) {
 	registry.didProfileResolvers = append(registry.didProfileResolvers, resolver)
 }
 
+// RegisterUAIDProfileResolver registers the requested resource.
 func (registry *ResolverRegistry) RegisterUAIDProfileResolver(resolver UAIDProfileResolver) {
 	registry.uaidProfileResolvers = append(registry.uaidProfileResolvers, resolver)
 }
 
+// ResolveDID resolves the requested identifier data.
 func (registry *ResolverRegistry) ResolveDID(ctx context.Context, did string) (*DIDDocument, error) {
 	for _, resolver := range registry.didResolvers {
 		if !resolver.Supports(did) {
@@ -51,6 +56,7 @@ func (registry *ResolverRegistry) ResolveDID(ctx context.Context, did string) (*
 	return nil, nil
 }
 
+// ResolveUAIDProfile resolves the requested identifier data.
 func (registry *ResolverRegistry) ResolveUAIDProfile(
 	ctx context.Context,
 	uaid string,

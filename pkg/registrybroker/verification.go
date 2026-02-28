@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// GetVerificationStatus returns the requested value.
 func (c *RegistryBrokerClient) GetVerificationStatus(
 	ctx context.Context,
 	uaid string,
@@ -17,6 +18,7 @@ func (c *RegistryBrokerClient) GetVerificationStatus(
 	return c.requestJSON(ctx, http.MethodGet, path, nil, nil)
 }
 
+// CreateVerificationChallenge creates the requested resource.
 func (c *RegistryBrokerClient) CreateVerificationChallenge(
 	ctx context.Context,
 	uaid string,
@@ -34,6 +36,7 @@ func (c *RegistryBrokerClient) CreateVerificationChallenge(
 	)
 }
 
+// GetVerificationChallenge returns the requested value.
 func (c *RegistryBrokerClient) GetVerificationChallenge(
 	ctx context.Context,
 	challengeID string,
@@ -45,6 +48,7 @@ func (c *RegistryBrokerClient) GetVerificationChallenge(
 	return c.requestJSON(ctx, http.MethodGet, path, nil, nil)
 }
 
+// VerifyVerificationChallenge performs the requested operation.
 func (c *RegistryBrokerClient) VerifyVerificationChallenge(
 	ctx context.Context,
 	payload VerifyVerificationChallengeRequest,
@@ -66,6 +70,7 @@ func (c *RegistryBrokerClient) VerifyVerificationChallenge(
 	)
 }
 
+// GetVerificationOwnership returns the requested value.
 func (c *RegistryBrokerClient) GetVerificationOwnership(
 	ctx context.Context,
 	uaid string,
@@ -77,6 +82,7 @@ func (c *RegistryBrokerClient) GetVerificationOwnership(
 	return c.requestJSON(ctx, http.MethodGet, path, nil, nil)
 }
 
+// VerifySenderOwnership performs the requested operation.
 func (c *RegistryBrokerClient) VerifySenderOwnership(
 	ctx context.Context,
 	uaid string,

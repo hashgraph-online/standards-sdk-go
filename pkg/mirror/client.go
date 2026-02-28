@@ -35,6 +35,7 @@ type MessageQueryOptions struct {
 	Order          string
 }
 
+// NewClient creates a new Client.
 func NewClient(config Config) (*Client, error) {
 	network, err := shared.NormalizeNetwork(config.Network)
 	if err != nil {
@@ -68,10 +69,12 @@ func NewClient(config Config) (*Client, error) {
 	}, nil
 }
 
+// BaseURL performs the requested operation.
 func (c *Client) BaseURL() string {
 	return c.baseURL
 }
 
+// GetTopicInfo returns the requested value.
 func (c *Client) GetTopicInfo(ctx context.Context, topicID string) (TopicInfo, error) {
 	var topicInfo TopicInfo
 	if strings.TrimSpace(topicID) == "" {
@@ -86,6 +89,7 @@ func (c *Client) GetTopicInfo(ctx context.Context, topicID string) (TopicInfo, e
 	return topicInfo, nil
 }
 
+// GetAccount returns the requested value.
 func (c *Client) GetAccount(ctx context.Context, accountID string) (AccountInfo, error) {
 	var accountInfo AccountInfo
 	normalizedAccountID := strings.TrimSpace(accountID)
@@ -101,6 +105,7 @@ func (c *Client) GetAccount(ctx context.Context, accountID string) (AccountInfo,
 	return accountInfo, nil
 }
 
+// GetAccountMemo returns the requested value.
 func (c *Client) GetAccountMemo(ctx context.Context, accountID string) (string, error) {
 	accountInfo, err := c.GetAccount(ctx, accountID)
 	if err != nil {
@@ -109,6 +114,7 @@ func (c *Client) GetAccountMemo(ctx context.Context, accountID string) (string, 
 	return accountInfo.Memo, nil
 }
 
+// GetTopicMessages returns the requested value.
 func (c *Client) GetTopicMessages(
 	ctx context.Context,
 	topicID string,
@@ -150,6 +156,7 @@ func (c *Client) GetTopicMessages(
 	return result, nil
 }
 
+// GetTopicMessageBySequence returns the requested value.
 func (c *Client) GetTopicMessageBySequence(
 	ctx context.Context,
 	topicID string,
@@ -174,6 +181,7 @@ func (c *Client) GetTopicMessageBySequence(
 	return &messages[0], nil
 }
 
+// DecodeMessageData performs the requested operation.
 func DecodeMessageData(message TopicMessage) ([]byte, error) {
 	if strings.TrimSpace(message.Message) == "" {
 		return nil, fmt.Errorf("message payload is empty")
@@ -181,6 +189,7 @@ func DecodeMessageData(message TopicMessage) ([]byte, error) {
 	return base64.StdEncoding.DecodeString(message.Message)
 }
 
+// DecodeMessageJSON performs the requested operation.
 func DecodeMessageJSON[T any](message TopicMessage, target *T) error {
 	payload, err := DecodeMessageData(message)
 	if err != nil {
@@ -194,6 +203,7 @@ func DecodeMessageJSON[T any](message TopicMessage, target *T) error {
 	return nil
 }
 
+// GetTransaction returns the requested value.
 func (c *Client) GetTransaction(ctx context.Context, transactionID string) (*Transaction, error) {
 	normalized := strings.TrimSpace(transactionID)
 	if normalized == "" {

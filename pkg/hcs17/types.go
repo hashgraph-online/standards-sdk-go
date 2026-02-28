@@ -104,6 +104,7 @@ const (
 	HCS17TopicTypeState HCS17TopicType = 0
 )
 
+// GenerateTopicMemo performs the requested operation.
 func GenerateTopicMemo(ttlSeconds int64) string {
 	if ttlSeconds <= 0 {
 		ttlSeconds = 86400
@@ -111,6 +112,7 @@ func GenerateTopicMemo(ttlSeconds int64) string {
 	return fmt.Sprintf("hcs-17:%d:%d", HCS17TopicTypeState, ttlSeconds)
 }
 
+// ParseTopicMemo parses the provided input value.
 func ParseTopicMemo(memo string) (*TopicMemo, error) {
 	trimmed := strings.TrimSpace(memo)
 	matches := regexp.MustCompile(`^hcs-17:(\d+):(\d+)$`).FindStringSubmatch(trimmed)
@@ -134,6 +136,7 @@ func ParseTopicMemo(memo string) (*TopicMemo, error) {
 	}, nil
 }
 
+// ValidateStateHashMessage validates the provided input value.
 func ValidateStateHashMessage(message StateHashMessage) []string {
 	errors := make([]string, 0)
 	if message.Protocol != "hcs-17" {

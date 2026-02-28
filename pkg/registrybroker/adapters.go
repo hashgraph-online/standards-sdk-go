@@ -8,18 +8,22 @@ import (
 	"strings"
 )
 
+// Adapters performs the requested operation.
 func (c *RegistryBrokerClient) Adapters(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/adapters", nil, nil)
 }
 
+// AdaptersDetailed performs the requested operation.
 func (c *RegistryBrokerClient) AdaptersDetailed(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/adapters/details", nil, nil)
 }
 
+// AdapterRegistryCategories performs the requested operation.
 func (c *RegistryBrokerClient) AdapterRegistryCategories(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/adapters/registry/categories", nil, nil)
 }
 
+// AdapterRegistryAdapters performs the requested operation.
 func (c *RegistryBrokerClient) AdapterRegistryAdapters(
 	ctx context.Context,
 	filters AdapterRegistryFilters,
@@ -55,6 +59,7 @@ func (c *RegistryBrokerClient) AdapterRegistryAdapters(
 	)
 }
 
+// CreateAdapterRegistryCategory creates the requested resource.
 func (c *RegistryBrokerClient) CreateAdapterRegistryCategory(
 	ctx context.Context,
 	payload CreateAdapterRegistryCategoryRequest,
@@ -68,6 +73,7 @@ func (c *RegistryBrokerClient) CreateAdapterRegistryCategory(
 	)
 }
 
+// SubmitAdapterRegistryAdapter submits the requested message payload.
 func (c *RegistryBrokerClient) SubmitAdapterRegistryAdapter(
 	ctx context.Context,
 	payload SubmitAdapterRegistryAdapterRequest,
@@ -81,6 +87,7 @@ func (c *RegistryBrokerClient) SubmitAdapterRegistryAdapter(
 	)
 }
 
+// AdapterRegistrySubmissionStatus performs the requested operation.
 func (c *RegistryBrokerClient) AdapterRegistrySubmissionStatus(
 	ctx context.Context,
 	submissionID string,

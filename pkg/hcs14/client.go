@@ -18,6 +18,7 @@ type ClientOptions struct {
 	Registry  *ResolverRegistry
 }
 
+// NewClient creates a new Client.
 func NewClient(options ClientOptions) *Client {
 	uaidOptions := options.UAID
 	ansOptions := options.HTTP
@@ -57,6 +58,7 @@ func NewClient(options ClientOptions) *Client {
 	}
 }
 
+// Resolve resolves the requested identifier data.
 func (client *Client) Resolve(ctx context.Context, uaid string) (*UAIDResolutionResult, error) {
 	result, err := client.registry.ResolveUAIDProfile(ctx, uaid, ResolveUaidProfileOptions{})
 	if err != nil {
@@ -79,6 +81,7 @@ func (client *Client) Resolve(ctx context.Context, uaid string) (*UAIDResolution
 	}, nil
 }
 
+// ResolveProfile resolves the requested identifier data.
 func (client *Client) ResolveProfile(
 	ctx context.Context,
 	uaid string,
@@ -89,6 +92,7 @@ func (client *Client) ResolveProfile(
 	})
 }
 
+// ResolveUAIDDNSWeb resolves the requested identifier data.
 func (client *Client) ResolveUAIDDNSWeb(
 	ctx context.Context,
 	uaid string,
@@ -96,6 +100,7 @@ func (client *Client) ResolveUAIDDNSWeb(
 	return client.ResolveProfile(ctx, uaid, UAIDDNSWebProfileID)
 }
 
+// ResolveANSDNSWeb resolves the requested identifier data.
 func (client *Client) ResolveANSDNSWeb(
 	ctx context.Context,
 	uaid string,
@@ -103,6 +108,7 @@ func (client *Client) ResolveANSDNSWeb(
 	return client.ResolveProfile(ctx, uaid, ANSDNSWebProfileID)
 }
 
+// ResolveAIDDNSWeb resolves the requested identifier data.
 func (client *Client) ResolveAIDDNSWeb(
 	ctx context.Context,
 	uaid string,
@@ -110,6 +116,7 @@ func (client *Client) ResolveAIDDNSWeb(
 	return client.ResolveProfile(ctx, uaid, AIDDNSWebProfileID)
 }
 
+// ResolveUAIDDidResolution resolves the requested identifier data.
 func (client *Client) ResolveUAIDDidResolution(
 	ctx context.Context,
 	uaid string,
@@ -117,22 +124,27 @@ func (client *Client) ResolveUAIDDidResolution(
 	return client.ResolveProfile(ctx, uaid, UAIDDidResolutionProfileID)
 }
 
+// Registry performs the requested operation.
 func (client *Client) Registry() *ResolverRegistry {
 	return client.registry
 }
 
+// UaidDNSResolver performs the requested operation.
 func (client *Client) UaidDNSResolver() *UaidDNSWebResolver {
 	return client.uaidDNSResolver
 }
 
+// AnsDNSResolver performs the requested operation.
 func (client *Client) AnsDNSResolver() *ANSDNSWebResolver {
 	return client.ansDNSResolver
 }
 
+// AidDNSResolver performs the requested operation.
 func (client *Client) AidDNSResolver() *AIDDNSWebResolver {
 	return client.aidDNSResolver
 }
 
+// UaidDidResolver performs the requested operation.
 func (client *Client) UaidDidResolver() *UAIDDidResolutionResolver {
 	return client.uaidDIDResolver
 }

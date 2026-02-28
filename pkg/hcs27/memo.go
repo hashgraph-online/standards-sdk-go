@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// BuildTopicMemo builds and returns the configured value.
 func BuildTopicMemo(ttlSeconds int64) string {
 	if ttlSeconds <= 0 {
 		ttlSeconds = 86400
@@ -13,6 +14,7 @@ func BuildTopicMemo(ttlSeconds int64) string {
 	return fmt.Sprintf("hcs-27:0:%d:0", ttlSeconds)
 }
 
+// ParseTopicMemo parses the provided input value.
 func ParseTopicMemo(memo string) (*TopicMemo, bool) {
 	parts := strings.Split(strings.TrimSpace(memo), ":")
 	if len(parts) != 4 {
@@ -44,6 +46,7 @@ func ParseTopicMemo(memo string) (*TopicMemo, bool) {
 	}, true
 }
 
+// BuildTransactionMemo builds and returns the configured value.
 func BuildTransactionMemo() string {
 	return "hcs-27:op:0:0"
 }

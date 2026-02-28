@@ -7,6 +7,7 @@ import (
 	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 
+// BuildBaseAccountCreateTx builds and returns the configured value.
 func BuildBaseAccountCreateTx(params BaseAccountCreateTxParams) (*hedera.AccountCreateTransaction, error) {
 	if params.PublicKey.String() == "" {
 		return nil, fmt.Errorf("public key is required")
@@ -33,6 +34,7 @@ func BuildBaseAccountCreateTx(params BaseAccountCreateTxParams) (*hedera.Account
 	return transaction, nil
 }
 
+// BuildPetalAccountCreateTx builds and returns the configured value.
 func BuildPetalAccountCreateTx(params PetalAccountCreateTxParams) (*hedera.AccountCreateTransaction, error) {
 	if params.PublicKey.String() == "" {
 		return nil, fmt.Errorf("public key is required")

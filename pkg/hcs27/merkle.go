@@ -12,11 +12,13 @@ import (
 	"strings"
 )
 
+// EmptyRoot performs the requested operation.
 func EmptyRoot() []byte {
 	sum := sha256.Sum256([]byte{})
 	return sum[:]
 }
 
+// HashLeaf performs the requested operation.
 func HashLeaf(canonicalEntry []byte) []byte {
 	payload := make([]byte, 1+len(canonicalEntry))
 	payload[0] = 0x00
@@ -25,6 +27,7 @@ func HashLeaf(canonicalEntry []byte) []byte {
 	return sum[:]
 }
 
+// HashNode performs the requested operation.
 func HashNode(left, right []byte) []byte {
 	payload := make([]byte, 1+len(left)+len(right))
 	payload[0] = 0x01
@@ -34,6 +37,7 @@ func HashNode(left, right []byte) []byte {
 	return sum[:]
 }
 
+// MerkleRootFromCanonicalEntries performs the requested operation.
 func MerkleRootFromCanonicalEntries(entries [][]byte) []byte {
 	switch len(entries) {
 	case 0:
@@ -48,6 +52,7 @@ func MerkleRootFromCanonicalEntries(entries [][]byte) []byte {
 	}
 }
 
+// MerkleRootFromEntries performs the requested operation.
 func MerkleRootFromEntries(entries []any) ([]byte, error) {
 	canonicalEntries := make([][]byte, 0, len(entries))
 	for _, entry := range entries {
@@ -61,6 +66,7 @@ func MerkleRootFromEntries(entries []any) ([]byte, error) {
 	return MerkleRootFromCanonicalEntries(canonicalEntries), nil
 }
 
+// LeafHashHexFromEntry performs the requested operation.
 func LeafHashHexFromEntry(entry any) (string, error) {
 	canonical, err := CanonicalizeJSON(entry)
 	if err != nil {
@@ -69,6 +75,7 @@ func LeafHashHexFromEntry(entry any) (string, error) {
 	return hex.EncodeToString(HashLeaf(canonical)), nil
 }
 
+// VerifyInclusionProof performs the requested operation.
 func VerifyInclusionProof(
 	leafIndex uint64,
 	treeSize uint64,
@@ -122,6 +129,7 @@ func VerifyInclusionProof(
 	return sn == 0 && base64.StdEncoding.EncodeToString(current) == expectedRootB64, nil
 }
 
+// VerifyConsistencyProof performs the requested operation.
 func VerifyConsistencyProof(
 	oldTreeSize uint64,
 	newTreeSize uint64,
@@ -199,6 +207,7 @@ func VerifyConsistencyProof(
 		base64.StdEncoding.EncodeToString(sr) == newRootB64, nil
 }
 
+// CanonicalizeJSON performs the requested operation.
 func CanonicalizeJSON(value any) ([]byte, error) {
 	normalized, err := normalizeJSONValue(value)
 	if err != nil {

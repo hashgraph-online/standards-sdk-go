@@ -11,6 +11,7 @@ import (
 	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 
+// UpdateAccountMemoWithProfile updates the requested resource.
 func (c *Client) UpdateAccountMemoWithProfile(
 	ctx context.Context,
 	accountID string,
@@ -57,6 +58,7 @@ func (c *Client) UpdateAccountMemoWithProfile(
 	}, nil
 }
 
+// FetchProfileByAccountID fetches the requested resource data.
 func (c *Client) FetchProfileByAccountID(
 	ctx context.Context,
 	accountID string,

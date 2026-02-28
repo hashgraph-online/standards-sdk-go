@@ -17,10 +17,12 @@ type EncryptionUnavailableError struct {
 	Summary   JSONObject
 }
 
+// Error performs the requested operation.
 func (e *EncryptionUnavailableError) Error() string {
 	return "encryption is not enabled for this session"
 }
 
+// CreateEncryptedSession creates the requested resource.
 func (c *RegistryBrokerClient) CreateEncryptedSession(
 	ctx context.Context,
 	options StartEncryptedChatSessionOptions,
@@ -64,6 +66,7 @@ func (c *RegistryBrokerClient) CreateEncryptedSession(
 	})
 }
 
+// AcceptEncryptedSession performs the requested operation.
 func (c *RegistryBrokerClient) AcceptEncryptedSession(
 	ctx context.Context,
 	options AcceptEncryptedChatSessionOptions,

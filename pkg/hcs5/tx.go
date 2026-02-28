@@ -7,6 +7,7 @@ import (
 	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 
+// BuildMintTx builds and returns the configured value.
 func BuildMintTx(tokenID string, metadata string, transactionMemo string) (*hedera.TokenMintTransaction, error) {
 	trimmedTokenID := strings.TrimSpace(tokenID)
 	if trimmedTokenID == "" {
@@ -28,6 +29,7 @@ func BuildMintTx(tokenID string, metadata string, transactionMemo string) (*hede
 	return transaction, nil
 }
 
+// BuildMintWithHRLTx builds and returns the configured value.
 func BuildMintWithHRLTx(
 	tokenID string,
 	metadataTopicID string,

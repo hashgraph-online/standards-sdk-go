@@ -7,6 +7,8 @@
 [![License](https://img.shields.io/github/license/hashgraph-online/standards-sdk-go)](./LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/hashgraph-online/standards-sdk-go?style=social)](https://github.com/hashgraph-online/standards-sdk-go/stargazers)
 [![CodeSandbox Examples](https://img.shields.io/badge/CodeSandbox-Examples-151515?logo=codesandbox&logoColor=white)](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples)
+[![HOL SDK Docs](https://img.shields.io/badge/📚_SDK_Docs-hol.org-4A90D9)](https://hol.org/docs/libraries/standards-sdk/)
+[![HCS Standards](https://img.shields.io/badge/📖_HCS_Standards-hol.org-8B5CF6)](https://hol.org/docs/standards)
 
 | ![](./Hashgraph-Online.png) | Go reference implementation of the Hiero Consensus Specifications (HCS) and Registry Broker utilities.<br><br>[📚 Standards SDK Documentation](https://hol.org/docs/libraries/standards-sdk/)<br>[📖 Hiero Consensus Specifications Documentation](https://hol.org/docs/standards) |
 | :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -21,6 +21,7 @@ type Client struct {
 	mutex           sync.RWMutex
 }
 
+// NewClient creates a new Client.
 func NewClient(config ClientConfig) (*Client, error) {
 	network, err := shared.NormalizeNetwork(config.Network)
 	if err != nil {
@@ -68,10 +69,12 @@ func NewClient(config ClientConfig) (*Client, error) {
 	}, nil
 }
 
+// MirrorClient returns the configured mirror node client.
 func (c *Client) MirrorClient() *mirror.Client {
 	return c.mirrorClient
 }
 
+// CreateRegistry creates the requested resource.
 func (c *Client) CreateRegistry(
 	ctx context.Context,
 	options CreateRegistryOptions,
@@ -128,6 +131,7 @@ func (c *Client) CreateRegistry(
 	}, nil
 }
 
+// RegisterEntry registers the requested resource.
 func (c *Client) RegisterEntry(
 	ctx context.Context,
 	registryTopicID string,
@@ -161,6 +165,7 @@ func (c *Client) RegisterEntry(
 	return c.submitMessage(registryTopicID, message, analyticsMemo)
 }
 
+// UpdateEntry updates the requested resource.
 func (c *Client) UpdateEntry(
 	ctx context.Context,
 	registryTopicID string,
@@ -194,6 +199,7 @@ func (c *Client) UpdateEntry(
 	return c.submitMessage(registryTopicID, message, analyticsMemo)
 }
 
+// DeleteEntry deletes the requested resource.
 func (c *Client) DeleteEntry(
 	ctx context.Context,
 	registryTopicID string,
@@ -225,6 +231,7 @@ func (c *Client) DeleteEntry(
 	return c.submitMessage(registryTopicID, message, analyticsMemo)
 }
 
+// MigrateRegistry performs the requested operation.
 func (c *Client) MigrateRegistry(
 	ctx context.Context,
 	registryTopicID string,
@@ -254,6 +261,7 @@ func (c *Client) MigrateRegistry(
 	return c.submitMessage(registryTopicID, message, analyticsMemo)
 }
 
+// GetRegistry returns the requested value.
 func (c *Client) GetRegistry(
 	ctx context.Context,
 	topicID string,
@@ -338,10 +346,12 @@ func (c *Client) GetRegistry(
 	}, nil
 }
 
+// GetTopicInfo returns the requested value.
 func (c *Client) GetTopicInfo(ctx context.Context, topicID string) (mirror.TopicInfo, error) {
 	return c.mirrorClient.GetTopicInfo(ctx, topicID)
 }
 
+// SubmitMessage submits the requested message payload.
 func (c *Client) SubmitMessage(
 	ctx context.Context,
 	registryTopicID string,

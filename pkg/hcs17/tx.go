@@ -9,6 +9,7 @@ import (
 	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 
+// BuildCreateStateTopicTx builds and returns the configured value.
 func BuildCreateStateTopicTx(options CreateTopicOptions) *hedera.TopicCreateTransaction {
 	ttlSeconds := options.TTLSeconds
 	if ttlSeconds <= 0 {
@@ -28,6 +29,7 @@ func BuildCreateStateTopicTx(options CreateTopicOptions) *hedera.TopicCreateTran
 	return transaction
 }
 
+// BuildStateHashMessageTx builds and returns the configured value.
 func BuildStateHashMessageTx(topicID string, message StateHashMessage, transactionMemo string) (*hedera.TopicMessageSubmitTransaction, error) {
 	if strings.TrimSpace(topicID) == "" {
 		return nil, fmt.Errorf("topic ID is required")

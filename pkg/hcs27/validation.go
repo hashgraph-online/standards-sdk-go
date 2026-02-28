@@ -11,6 +11,7 @@ import (
 
 type HCS1ResolverFunc func(ctx context.Context, hcs1Reference string) ([]byte, error)
 
+// ValidateCheckpointMessage validates the provided input value.
 func ValidateCheckpointMessage(
 	ctx context.Context,
 	message CheckpointMessage,

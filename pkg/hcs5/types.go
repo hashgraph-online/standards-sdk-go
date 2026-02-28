@@ -36,6 +36,7 @@ type MintResponse struct {
 	Error         string
 }
 
+// BuildHCS1HRL builds and returns the configured value.
 func BuildHCS1HRL(topicID string) string {
 	return "hcs://1/" + topicID
 }

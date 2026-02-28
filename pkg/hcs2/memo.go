@@ -11,10 +11,12 @@ type TopicMemo struct {
 	TTL          int64
 }
 
+// BuildTopicMemo builds and returns the configured value.
 func BuildTopicMemo(registryType RegistryType, ttl int64) string {
 	return fmt.Sprintf("hcs-2:%d:%d", registryType, ttl)
 }
 
+// ParseTopicMemo parses the provided input value.
 func ParseTopicMemo(memo string) (*TopicMemo, bool) {
 	parts := strings.Split(strings.TrimSpace(memo), ":")
 	if len(parts) != 3 {
@@ -44,6 +46,7 @@ func ParseTopicMemo(memo string) (*TopicMemo, bool) {
 	}, true
 }
 
+// BuildTransactionMemo builds and returns the configured value.
 func BuildTransactionMemo(operation Operation, registryType RegistryType) string {
 	operationCode := map[Operation]int{
 		OperationRegister: 0,

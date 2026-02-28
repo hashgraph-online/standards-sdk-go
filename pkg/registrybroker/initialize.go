@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// InitializeAgent performs the requested operation.
 func InitializeAgent(
 	ctx context.Context,
 	options InitializeAgentClientOptions,
@@ -46,16 +47,19 @@ func InitializeAgent(
 	}, nil
 }
 
+// IsPendingRegisterAgentResponse performs the requested operation.
 func IsPendingRegisterAgentResponse(response JSONObject) bool {
 	return strings.EqualFold(strings.TrimSpace(stringField(response, "status")), "pending")
 }
 
+// IsPartialRegisterAgentResponse performs the requested operation.
 func IsPartialRegisterAgentResponse(response JSONObject) bool {
 	status := strings.EqualFold(strings.TrimSpace(stringField(response, "status")), "partial")
 	success, hasSuccess := response["success"].(bool)
 	return status && hasSuccess && !success
 }
 
+// IsSuccessRegisterAgentResponse performs the requested operation.
 func IsSuccessRegisterAgentResponse(response JSONObject) bool {
 	success, hasSuccess := response["success"].(bool)
 	if !hasSuccess || !success {

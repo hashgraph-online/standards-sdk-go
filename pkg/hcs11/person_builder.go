@@ -9,6 +9,7 @@ type PersonBuilder struct {
 	profile HCS11Profile
 }
 
+// NewPersonBuilder creates a new PersonBuilder.
 func NewPersonBuilder() *PersonBuilder {
 	return &PersonBuilder{
 		profile: HCS11Profile{
@@ -18,25 +19,30 @@ func NewPersonBuilder() *PersonBuilder {
 	}
 }
 
+// SetName sets the requested value.
 func (builder *PersonBuilder) SetName(name string) *PersonBuilder {
 	builder.profile.DisplayName = strings.TrimSpace(name)
 	return builder
 }
 
+// SetAlias sets the requested value.
 func (builder *PersonBuilder) SetAlias(alias string) *PersonBuilder {
 	builder.profile.Alias = strings.TrimSpace(alias)
 	return builder
 }
 
+// SetBio sets the requested value.
 func (builder *PersonBuilder) SetBio(bio string) *PersonBuilder {
 	builder.profile.Bio = strings.TrimSpace(bio)
 	return builder
 }
 
+// SetDescription sets the requested value.
 func (builder *PersonBuilder) SetDescription(description string) *PersonBuilder {
 	return builder.SetBio(description)
 }
 
+// AddSocial adds the provided value to the current configuration.
 func (builder *PersonBuilder) AddSocial(platform string, handle string) *PersonBuilder {
 	trimmedPlatform := strings.TrimSpace(platform)
 	trimmedHandle := strings.TrimSpace(handle)
@@ -57,26 +63,31 @@ func (builder *PersonBuilder) AddSocial(platform string, handle string) *PersonB
 	return builder
 }
 
+// SetProfileImage sets the requested value.
 func (builder *PersonBuilder) SetProfileImage(profileImage string) *PersonBuilder {
 	builder.profile.ProfileImage = strings.TrimSpace(profileImage)
 	return builder
 }
 
+// SetBaseAccount sets the requested value.
 func (builder *PersonBuilder) SetBaseAccount(accountID string) *PersonBuilder {
 	builder.profile.BaseAccount = strings.TrimSpace(accountID)
 	return builder
 }
 
+// SetInboundTopicID sets the requested value.
 func (builder *PersonBuilder) SetInboundTopicID(topicID string) *PersonBuilder {
 	builder.profile.InboundTopicID = strings.TrimSpace(topicID)
 	return builder
 }
 
+// SetOutboundTopicID sets the requested value.
 func (builder *PersonBuilder) SetOutboundTopicID(topicID string) *PersonBuilder {
 	builder.profile.OutboundTopicID = strings.TrimSpace(topicID)
 	return builder
 }
 
+// AddProperty adds the provided value to the current configuration.
 func (builder *PersonBuilder) AddProperty(key string, value any) *PersonBuilder {
 	trimmedKey := strings.TrimSpace(key)
 	if trimmedKey == "" {
@@ -89,6 +100,7 @@ func (builder *PersonBuilder) AddProperty(key string, value any) *PersonBuilder 
 	return builder
 }
 
+// Build builds and returns the configured value.
 func (builder *PersonBuilder) Build() (HCS11Profile, error) {
 	if strings.TrimSpace(builder.profile.DisplayName) == "" {
 		return HCS11Profile{}, fmt.Errorf("display name is required for person profile")

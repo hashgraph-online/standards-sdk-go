@@ -15,6 +15,7 @@ type Client struct {
 	mirrorClient *mirror.Client
 }
 
+// NewClient creates a new Client.
 func NewClient(config ClientConfig) (*Client, error) {
 	network, err := shared.NormalizeNetwork(config.Network)
 	if err != nil {
@@ -60,14 +61,17 @@ func NewClient(config ClientConfig) (*Client, error) {
 	}, nil
 }
 
+// HederaClient returns the configured Hedera SDK client.
 func (c *Client) HederaClient() *hedera.Client {
 	return c.hederaClient
 }
 
+// MirrorClient returns the configured mirror node client.
 func (c *Client) MirrorClient() *mirror.Client {
 	return c.mirrorClient
 }
 
+// CreateBaseAccount creates the requested resource.
 func (c *Client) CreateBaseAccount(
 	ctx context.Context,
 	options BaseAccountCreateOptions,
@@ -118,6 +122,7 @@ func (c *Client) CreateBaseAccount(
 	}, nil
 }
 
+// CreatePetalAccount creates the requested resource.
 func (c *Client) CreatePetalAccount(
 	ctx context.Context,
 	options PetalAccountCreateOptions,
@@ -169,6 +174,7 @@ func (c *Client) CreatePetalAccount(
 	}, nil
 }
 
+// VerifyPetalAccount performs the requested operation.
 func (c *Client) VerifyPetalAccount(
 	ctx context.Context,
 	petalAccountID string,

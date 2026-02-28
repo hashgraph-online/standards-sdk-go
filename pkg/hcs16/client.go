@@ -24,6 +24,7 @@ type Client struct {
 	inscriberAPIURL  string
 }
 
+// NewClient creates a new Client.
 func NewClient(config ClientConfig) (*Client, error) {
 	network, err := shared.NormalizeNetwork(config.Network)
 	if err != nil {
@@ -74,14 +75,17 @@ func NewClient(config ClientConfig) (*Client, error) {
 	}, nil
 }
 
+// HederaClient returns the configured Hedera SDK client.
 func (c *Client) HederaClient() *hedera.Client {
 	return c.hederaClient
 }
 
+// MirrorClient returns the configured mirror node client.
 func (c *Client) MirrorClient() *mirror.Client {
 	return c.mirrorClient
 }
 
+// ParseTopicMemo parses the provided input value.
 func (c *Client) ParseTopicMemo(memo string) *ParseTopicMemoResult {
 	matches := regexp.MustCompile(`^hcs-16:([0-9.]+):(\d)$`).FindStringSubmatch(strings.TrimSpace(memo))
 	if len(matches) != 3 {
@@ -107,6 +111,7 @@ func (c *Client) ParseTopicMemo(memo string) *ParseTopicMemoResult {
 	}
 }
 
+// AssembleKeyList performs the requested operation.
 func (c *Client) AssembleKeyList(ctx context.Context, members []string, threshold int) (*hedera.KeyList, error) {
 	if len(members) == 0 {
 		return nil, fmt.Errorf("members are required")
@@ -129,6 +134,7 @@ func (c *Client) AssembleKeyList(ctx context.Context, members []string, threshol
 	return keyList, nil
 }
 
+// AssembleSubmitKeyList performs the requested operation.
 func (c *Client) AssembleSubmitKeyList(ctx context.Context, members []string) (*hedera.KeyList, error) {
 	if len(members) == 0 {
 		return nil, fmt.Errorf("members are required")
@@ -148,6 +154,7 @@ func (c *Client) AssembleSubmitKeyList(ctx context.Context, members []string) (*
 	return keyList, nil
 }
 
+// BuildFloraTopicCreateTxs builds and returns the configured value.
 func (c *Client) BuildFloraTopicCreateTxs(
 	floraAccountID string,
 	keyList *hedera.KeyList,
@@ -199,6 +206,7 @@ func (c *Client) BuildFloraTopicCreateTxs(
 	}, nil
 }
 
+// CreateFloraTopic creates the requested resource.
 func (c *Client) CreateFloraTopic(
 	ctx context.Context,
 	options CreateFloraTopicOptions,
@@ -246,6 +254,7 @@ func (c *Client) CreateFloraTopic(
 	return receipt.TopicID.String(), nil
 }
 
+// CreateFloraAccount creates the requested resource.
 func (c *Client) CreateFloraAccount(
 	ctx context.Context,
 	options CreateFloraAccountOptions,
@@ -281,6 +290,7 @@ func (c *Client) CreateFloraAccount(
 	return receipt.AccountID.String(), receipt, nil
 }
 
+// CreateFloraAccountWithTopics creates the requested resource.
 func (c *Client) CreateFloraAccountWithTopics(
 	ctx context.Context,
 	options CreateFloraAccountWithTopicsOptions,
@@ -336,6 +346,7 @@ func (c *Client) CreateFloraAccountWithTopics(
 	}, nil
 }
 
+// SendFloraCreated performs the requested operation.
 func (c *Client) SendFloraCreated(
 	ctx context.Context,
 	topicID string,
@@ -351,6 +362,7 @@ func (c *Client) SendFloraCreated(
 	return c.executeMessage(transaction)
 }
 
+// SendTransaction performs the requested operation.
 func (c *Client) SendTransaction(
 	ctx context.Context,
 	topicID string,
@@ -366,6 +378,7 @@ func (c *Client) SendTransaction(
 	return c.executeMessage(transaction)
 }
 
+// SendStateUpdate performs the requested operation.
 func (c *Client) SendStateUpdate(
 	ctx context.Context,
 	topicID string,
@@ -395,6 +408,7 @@ func (c *Client) SendStateUpdate(
 	return c.executeMessageWithSigners(transaction, signerKeys)
 }
 
+// SendFloraJoinRequest performs the requested operation.
 func (c *Client) SendFloraJoinRequest(
 	ctx context.Context,
 	topicID string,
@@ -423,6 +437,7 @@ func (c *Client) SendFloraJoinRequest(
 	return c.executeMessageWithSigners(transaction, []hedera.PrivateKey{*signerKey})
 }
 
+// SendFloraJoinVote performs the requested operation.
 func (c *Client) SendFloraJoinVote(
 	ctx context.Context,
 	topicID string,
@@ -451,6 +466,7 @@ func (c *Client) SendFloraJoinVote(
 	return c.executeMessageWithSigners(transaction, []hedera.PrivateKey{*signerKey})
 }
 
+// SendFloraJoinAccepted performs the requested operation.
 func (c *Client) SendFloraJoinAccepted(
 	ctx context.Context,
 	topicID string,
@@ -467,6 +483,7 @@ func (c *Client) SendFloraJoinAccepted(
 	return c.executeMessageWithSigners(transaction, signerKeys)
 }
 
+// SignSchedule signs the requested transaction payload.
 func (c *Client) SignSchedule(
 	ctx context.Context,
 	scheduleID string,
@@ -498,6 +515,7 @@ func (c *Client) SignSchedule(
 	return receipt, nil
 }
 
+// PublishFloraCreated publishes the requested message payload.
 func (c *Client) PublishFloraCreated(
 	ctx context.Context,
 	communicationTopicID string,
@@ -508,6 +526,7 @@ func (c *Client) PublishFloraCreated(
 	return c.SendFloraCreated(ctx, communicationTopicID, operatorID, floraAccountID, topics)
 }
 
+// CreateFloraProfile creates the requested resource.
 func (c *Client) CreateFloraProfile(
 	ctx context.Context,
 	options CreateFloraProfileOptions,
@@ -583,6 +602,7 @@ func (c *Client) CreateFloraProfile(
 	}, nil
 }
 
+// GetRecentMessages returns the requested value.
 func (c *Client) GetRecentMessages(
 	ctx context.Context,
 	topicID string,
@@ -641,6 +661,7 @@ func (c *Client) GetRecentMessages(
 	return results, nil
 }
 
+// GetLatestMessage returns the requested value.
 func (c *Client) GetLatestMessage(
 	ctx context.Context,
 	topicID string,

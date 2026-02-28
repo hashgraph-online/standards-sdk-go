@@ -12,6 +12,7 @@ const (
 	NetworkTestnet = "testnet"
 )
 
+// NormalizeNetwork performs the requested operation.
 func NormalizeNetwork(network string) (string, error) {
 	normalized := strings.ToLower(strings.TrimSpace(network))
 	if normalized == "" {
@@ -26,6 +27,7 @@ func NormalizeNetwork(network string) (string, error) {
 	}
 }
 
+// NewHederaClient creates a new HederaClient.
 func NewHederaClient(network string) (*hedera.Client, error) {
 	normalized, err := NormalizeNetwork(network)
 	if err != nil {

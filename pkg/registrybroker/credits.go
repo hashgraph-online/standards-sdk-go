@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// PurchaseCreditsWithHbar performs the requested operation.
 func (c *RegistryBrokerClient) PurchaseCreditsWithHbar(
 	ctx context.Context,
 	params PurchaseCreditsWithHbarParams,
@@ -43,10 +44,12 @@ func (c *RegistryBrokerClient) PurchaseCreditsWithHbar(
 	)
 }
 
+// GetX402Minimums returns the requested value.
 func (c *RegistryBrokerClient) GetX402Minimums(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/credits/purchase/x402/minimums", nil, nil)
 }
 
+// PurchaseCreditsWithX402 performs the requested operation.
 func (c *RegistryBrokerClient) PurchaseCreditsWithX402(
 	ctx context.Context,
 	params PurchaseCreditsWithX402Params,
@@ -91,6 +94,7 @@ func (c *RegistryBrokerClient) PurchaseCreditsWithX402(
 	)
 }
 
+// BuyCreditsWithX402 performs the requested operation.
 func (c *RegistryBrokerClient) BuyCreditsWithX402(
 	ctx context.Context,
 	params BuyCreditsWithX402Params,

@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// ResolveUaid resolves the requested identifier data.
 func (c *RegistryBrokerClient) ResolveUaid(ctx context.Context, uaid string) (JSONObject, error) {
 	if err := ensureNonEmpty(uaid, "uaid"); err != nil {
 		return nil, err
@@ -17,6 +18,7 @@ func (c *RegistryBrokerClient) ResolveUaid(ctx context.Context, uaid string) (JS
 	return c.requestJSON(ctx, http.MethodGet, path, nil, nil)
 }
 
+// PerformRegisterAgent performs the requested operation.
 func (c *RegistryBrokerClient) PerformRegisterAgent(
 	ctx context.Context,
 	payload AgentRegistrationRequest,
@@ -31,6 +33,7 @@ func (c *RegistryBrokerClient) PerformRegisterAgent(
 	)
 }
 
+// RegisterAgent registers the requested resource.
 func (c *RegistryBrokerClient) RegisterAgent(
 	ctx context.Context,
 	payload AgentRegistrationRequest,
@@ -69,6 +72,7 @@ func (c *RegistryBrokerClient) RegisterAgent(
 	}
 }
 
+// GetRegistrationQuote returns the requested value.
 func (c *RegistryBrokerClient) GetRegistrationQuote(
 	ctx context.Context,
 	payload AgentRegistrationRequest,
@@ -83,6 +87,7 @@ func (c *RegistryBrokerClient) GetRegistrationQuote(
 	)
 }
 
+// UpdateAgent updates the requested resource.
 func (c *RegistryBrokerClient) UpdateAgent(
 	ctx context.Context,
 	uaid string,
@@ -102,6 +107,7 @@ func (c *RegistryBrokerClient) UpdateAgent(
 	)
 }
 
+// GetRegisterStatus returns the requested value.
 func (c *RegistryBrokerClient) GetRegisterStatus(
 	ctx context.Context,
 	uaid string,
@@ -113,6 +119,7 @@ func (c *RegistryBrokerClient) GetRegisterStatus(
 	return c.requestJSON(ctx, http.MethodGet, path, nil, nil)
 }
 
+// RegisterOwnedMoltbookAgent registers the requested resource.
 func (c *RegistryBrokerClient) RegisterOwnedMoltbookAgent(
 	ctx context.Context,
 	uaid string,
@@ -131,6 +138,7 @@ func (c *RegistryBrokerClient) RegisterOwnedMoltbookAgent(
 	)
 }
 
+// GetRegistrationProgress returns the requested value.
 func (c *RegistryBrokerClient) GetRegistrationProgress(
 	ctx context.Context,
 	attemptID string,
@@ -158,6 +166,7 @@ func (c *RegistryBrokerClient) GetRegistrationProgress(
 	return nil, err
 }
 
+// WaitForRegistrationCompletion performs the requested operation.
 func (c *RegistryBrokerClient) WaitForRegistrationCompletion(
 	ctx context.Context,
 	attemptID string,
@@ -223,6 +232,7 @@ func (c *RegistryBrokerClient) WaitForRegistrationCompletion(
 	}
 }
 
+// ValidateUaid validates the provided input value.
 func (c *RegistryBrokerClient) ValidateUaid(ctx context.Context, uaid string) (JSONObject, error) {
 	if err := ensureNonEmpty(uaid, "uaid"); err != nil {
 		return nil, err
@@ -231,6 +241,7 @@ func (c *RegistryBrokerClient) ValidateUaid(ctx context.Context, uaid string) (J
 	return c.requestJSON(ctx, http.MethodGet, path, nil, nil)
 }
 
+// GetUaidConnectionStatus returns the requested value.
 func (c *RegistryBrokerClient) GetUaidConnectionStatus(
 	ctx context.Context,
 	uaid string,
@@ -242,6 +253,7 @@ func (c *RegistryBrokerClient) GetUaidConnectionStatus(
 	return c.requestJSON(ctx, http.MethodGet, path, nil, nil)
 }
 
+// CloseUaidConnection performs the requested operation.
 func (c *RegistryBrokerClient) CloseUaidConnection(ctx context.Context, uaid string) error {
 	if err := ensureNonEmpty(uaid, "uaid"); err != nil {
 		return err
@@ -250,6 +262,7 @@ func (c *RegistryBrokerClient) CloseUaidConnection(ctx context.Context, uaid str
 	return c.requestNoResponse(ctx, http.MethodDelete, path, nil, nil)
 }
 
+// DashboardStats performs the requested operation.
 func (c *RegistryBrokerClient) DashboardStats(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/dashboard/stats", nil, nil)
 }

@@ -19,6 +19,7 @@ type AuthClient struct {
 	httpClient *http.Client
 }
 
+// NewAuthClient creates a new AuthClient.
 func NewAuthClient(baseURL string) *AuthClient {
 	normalizedBaseURL := strings.TrimSpace(baseURL)
 	if normalizedBaseURL == "" {
@@ -37,6 +38,7 @@ func NewAuthClient(baseURL string) *AuthClient {
 	}
 }
 
+// Authenticate authenticates the current request.
 func (c *AuthClient) Authenticate(
 	ctx context.Context,
 	accountID string,

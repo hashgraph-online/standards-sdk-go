@@ -18,6 +18,7 @@ var uaidParamOrder = []string{
 	"version",
 }
 
+// CreateUAIDAID creates the requested resource.
 func CreateUAIDAID(
 	input CanonicalAgentData,
 	params RoutingParams,
@@ -49,6 +50,7 @@ func CreateUAIDAID(
 	return BuildCanonicalUAID("aid", identifier, routingParamsToMap(defaulted)), nil
 }
 
+// CreateUAIDFromDID creates the requested resource.
 func CreateUAIDFromDID(existingDID string, params RoutingParams) (string, error) {
 	trimmed := strings.TrimSpace(existingDID)
 	if trimmed == "" {
@@ -93,6 +95,7 @@ func CreateUAIDFromDID(existingDID string, params RoutingParams) (string, error)
 	return BuildCanonicalUAID("did", finalID, paramMap), nil
 }
 
+// ParseUAID parses the provided input value.
 func ParseUAID(value string) (ParsedUAID, error) {
 	trimmed := strings.TrimSpace(value)
 	if !strings.HasPrefix(trimmed, "uaid:") {
@@ -136,6 +139,7 @@ func ParseUAID(value string) (ParsedUAID, error) {
 	}, nil
 }
 
+// BuildCanonicalUAID builds and returns the configured value.
 func BuildCanonicalUAID(target string, identifier string, params map[string]string) string {
 	entries := make([]string, 0)
 	usedKeys := map[string]struct{}{}

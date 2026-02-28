@@ -9,11 +9,13 @@ import (
 	"strings"
 )
 
+// Search performs the requested operation.
 func (c *RegistryBrokerClient) Search(ctx context.Context, params SearchParams) (JSONObject, error) {
 	path := "/search" + buildSearchQuery(params)
 	return c.requestJSON(ctx, http.MethodGet, path, nil, nil)
 }
 
+// SearchErc8004ByAgentID performs the requested operation.
 func (c *RegistryBrokerClient) SearchErc8004ByAgentID(
 	ctx context.Context,
 	chainID int,
@@ -54,26 +56,32 @@ func (c *RegistryBrokerClient) SearchErc8004ByAgentID(
 	return c.Search(ctx, query)
 }
 
+// Stats performs the requested operation.
 func (c *RegistryBrokerClient) Stats(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/stats", nil, nil)
 }
 
+// Registries performs the requested operation.
 func (c *RegistryBrokerClient) Registries(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/registries", nil, nil)
 }
 
+// GetAdditionalRegistries returns the requested value.
 func (c *RegistryBrokerClient) GetAdditionalRegistries(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/register/additional-registries", nil, nil)
 }
 
+// PopularSearches performs the requested operation.
 func (c *RegistryBrokerClient) PopularSearches(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/popular", nil, nil)
 }
 
+// ListProtocols performs the requested operation.
 func (c *RegistryBrokerClient) ListProtocols(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/protocols", nil, nil)
 }
 
+// DetectProtocol performs the requested operation.
 func (c *RegistryBrokerClient) DetectProtocol(
 	ctx context.Context,
 	message JSONObject,
@@ -88,6 +96,7 @@ func (c *RegistryBrokerClient) DetectProtocol(
 	)
 }
 
+// RegistrySearchByNamespace performs the requested operation.
 func (c *RegistryBrokerClient) RegistrySearchByNamespace(
 	ctx context.Context,
 	registry string,
@@ -104,6 +113,7 @@ func (c *RegistryBrokerClient) RegistrySearchByNamespace(
 	return c.requestJSON(ctx, http.MethodGet, pathWithQuery(path, params), nil, nil)
 }
 
+// VectorSearch performs the requested operation.
 func (c *RegistryBrokerClient) VectorSearch(
 	ctx context.Context,
 	request VectorSearchRequest,
@@ -132,18 +142,22 @@ func (c *RegistryBrokerClient) VectorSearch(
 	return convertSearchResultToVectorResponse(fallback), nil
 }
 
+// SearchStatus performs the requested operation.
 func (c *RegistryBrokerClient) SearchStatus(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/search/status", nil, nil)
 }
 
+// WebsocketStats performs the requested operation.
 func (c *RegistryBrokerClient) WebsocketStats(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/websocket/stats", nil, nil)
 }
 
+// MetricsSummary performs the requested operation.
 func (c *RegistryBrokerClient) MetricsSummary(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/metrics", nil, nil)
 }
 
+// Facets performs the requested operation.
 func (c *RegistryBrokerClient) Facets(ctx context.Context, adapter string) (JSONObject, error) {
 	query := url.Values{}
 	if strings.TrimSpace(adapter) != "" {

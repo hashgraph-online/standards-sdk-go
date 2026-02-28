@@ -8,6 +8,7 @@ import (
 
 var topicIDPattern = regexp.MustCompile(`^\d+\.\d+\.\d+$`)
 
+// ValidateMessage validates the provided input value.
 func ValidateMessage(message Message) error {
 	if !regexp.MustCompile(`^hcs-\d+$`).MatchString(message.P) {
 		return fmt.Errorf("protocol must be in format hcs-N")

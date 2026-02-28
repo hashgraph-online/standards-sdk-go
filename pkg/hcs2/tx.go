@@ -52,6 +52,7 @@ type MigrateTxParams struct {
 	Protocol        string
 }
 
+// BuildHCS2CreateRegistryTx builds and returns the configured value.
 func BuildHCS2CreateRegistryTx(params CreateRegistryTxParams) *hedera.TopicCreateTransaction {
 	registryType := params.RegistryType
 	if registryType != RegistryTypeIndexed && registryType != RegistryTypeNonIndexed {
@@ -80,6 +81,7 @@ func BuildHCS2CreateRegistryTx(params CreateRegistryTxParams) *hedera.TopicCreat
 	return transaction
 }
 
+// BuildHCS2RegisterTx builds and returns the configured value.
 func BuildHCS2RegisterTx(params RegisterTxParams) (*hedera.TopicMessageSubmitTransaction, error) {
 	protocol := strings.TrimSpace(params.Protocol)
 	if protocol == "" {
@@ -96,6 +98,7 @@ func BuildHCS2RegisterTx(params RegisterTxParams) (*hedera.TopicMessageSubmitTra
 	return buildHCS2MessageTx(params.RegistryTopicID, message, params.AnalyticsMemo)
 }
 
+// BuildHCS2UpdateTx builds and returns the configured value.
 func BuildHCS2UpdateTx(params UpdateTxParams) (*hedera.TopicMessageSubmitTransaction, error) {
 	protocol := strings.TrimSpace(params.Protocol)
 	if protocol == "" {
@@ -113,6 +116,7 @@ func BuildHCS2UpdateTx(params UpdateTxParams) (*hedera.TopicMessageSubmitTransac
 	return buildHCS2MessageTx(params.RegistryTopicID, message, params.AnalyticsMemo)
 }
 
+// BuildHCS2DeleteTx builds and returns the configured value.
 func BuildHCS2DeleteTx(params DeleteTxParams) (*hedera.TopicMessageSubmitTransaction, error) {
 	protocol := strings.TrimSpace(params.Protocol)
 	if protocol == "" {
@@ -128,6 +132,7 @@ func BuildHCS2DeleteTx(params DeleteTxParams) (*hedera.TopicMessageSubmitTransac
 	return buildHCS2MessageTx(params.RegistryTopicID, message, params.AnalyticsMemo)
 }
 
+// BuildHCS2MigrateTx builds and returns the configured value.
 func BuildHCS2MigrateTx(params MigrateTxParams) (*hedera.TopicMessageSubmitTransaction, error) {
 	protocol := strings.TrimSpace(params.Protocol)
 	if protocol == "" {

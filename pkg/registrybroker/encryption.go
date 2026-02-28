@@ -16,6 +16,7 @@ import (
 	"github.com/btcsuite/btcd/btcec/v2"
 )
 
+// RegisterEncryptionKey registers the requested resource.
 func (c *RegistryBrokerClient) RegisterEncryptionKey(
 	ctx context.Context,
 	payload RegisterEncryptionKeyPayload,
@@ -30,6 +31,7 @@ func (c *RegistryBrokerClient) RegisterEncryptionKey(
 	)
 }
 
+// EnsureAgentKey performs the requested operation.
 func (c *RegistryBrokerClient) EnsureAgentKey(
 	ctx context.Context,
 	options EnsureAgentKeyOptions,
@@ -84,10 +86,12 @@ func (c *RegistryBrokerClient) EnsureAgentKey(
 	return result, nil
 }
 
+// GenerateEncryptionKeyPair performs the requested operation.
 func (c *RegistryBrokerClient) GenerateEncryptionKeyPair() (EphemeralKeyPair, error) {
 	return c.GenerateEphemeralKeyPair()
 }
 
+// GenerateEphemeralKeyPair performs the requested operation.
 func (c *RegistryBrokerClient) GenerateEphemeralKeyPair() (EphemeralKeyPair, error) {
 	privateKey, err := btcec.NewPrivateKey()
 	if err != nil {
@@ -99,6 +103,7 @@ func (c *RegistryBrokerClient) GenerateEphemeralKeyPair() (EphemeralKeyPair, err
 	}, nil
 }
 
+// DeriveSharedSecret performs the requested operation.
 func (c *RegistryBrokerClient) DeriveSharedSecret(options DeriveSharedSecretOptions) ([]byte, error) {
 	privateKeyBytes, err := parseHexString(options.PrivateKey)
 	if err != nil {
@@ -119,6 +124,7 @@ func (c *RegistryBrokerClient) DeriveSharedSecret(options DeriveSharedSecretOpti
 	return digest[:], nil
 }
 
+// BuildCipherEnvelope builds and returns the configured value.
 func (c *RegistryBrokerClient) BuildCipherEnvelope(
 	options EncryptCipherEnvelopeOptions,
 ) (CipherEnvelope, error) {
@@ -184,6 +190,7 @@ func (c *RegistryBrokerClient) BuildCipherEnvelope(
 	}, nil
 }
 
+// OpenCipherEnvelope performs the requested operation.
 func (c *RegistryBrokerClient) OpenCipherEnvelope(
 	options DecryptCipherEnvelopeOptions,
 ) (string, error) {

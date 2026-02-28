@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	hedera "github.com/hashgraph/hedera-sdk-go/v2"
-	"github.com/joho/godotenv"
 )
 
 type OperatorConfig struct {
@@ -21,6 +20,7 @@ type OperatorConfig struct {
 
 var dotenvLoadOnce sync.Once
 
+// OperatorConfigFromEnv performs the requested operation.
 func OperatorConfigFromEnv() (OperatorConfig, error) {
 	loadDotEnvIfPresent()
 
@@ -122,10 +122,6 @@ func loadDotEnvIfPresent() {
 }
 
 func loadDotEnvFile(path string) bool {
-	if err := godotenv.Load(path); err == nil {
-		return true
-	}
-
 	file, err := os.Open(path)
 	if err != nil {
 		return false
@@ -199,6 +195,7 @@ func firstNonEmptyEnv(keys ...string) string {
 	return ""
 }
 
+// ParsePrivateKey parses the provided input value.
 func ParsePrivateKey(raw string) (hedera.PrivateKey, error) {
 	candidate := strings.TrimSpace(raw)
 	if candidate == "" {

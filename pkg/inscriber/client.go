@@ -43,6 +43,7 @@ type WaitOptions struct {
 	Interval    time.Duration
 }
 
+// NewClient creates a new Client.
 func NewClient(config Config) (*Client, error) {
 	apiKey := strings.TrimSpace(config.APIKey)
 	if apiKey == "" {
@@ -89,6 +90,7 @@ func NewClient(config Config) (*Client, error) {
 	}, nil
 }
 
+// StartInscription performs the requested operation.
 func (c *Client) StartInscription(
 	ctx context.Context,
 	request StartInscriptionRequest,
@@ -155,6 +157,7 @@ func (c *Client) StartInscription(
 	return parseInscriptionJob(raw)
 }
 
+// RetrieveInscription performs the requested operation.
 func (c *Client) RetrieveInscription(ctx context.Context, txID string) (InscriptionJob, error) {
 	normalizedID := normalizeTransactionID(txID)
 	if normalizedID == "" {
@@ -181,6 +184,7 @@ func (c *Client) RetrieveInscription(ctx context.Context, txID string) (Inscript
 	return job, nil
 }
 
+// WaitForInscription performs the requested operation.
 func (c *Client) WaitForInscription(
 	ctx context.Context,
 	txID string,
@@ -248,6 +252,7 @@ func isRetryableWaitError(err error) bool {
 		strings.Contains(lower, "eof")
 }
 
+// InscribeAndExecute inscribes the requested payload.
 func (c *Client) InscribeAndExecute(
 	ctx context.Context,
 	request StartInscriptionRequest,
@@ -291,6 +296,7 @@ func (c *Client) InscribeAndExecute(
 	return result, nil
 }
 
+// ExecuteTransaction performs the requested operation.
 func ExecuteTransaction(
 	ctx context.Context,
 	transactionBytes string,

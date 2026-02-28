@@ -23,6 +23,7 @@ type Client struct {
 	operatorKey  hedera.PrivateKey
 }
 
+// NewClient creates a new Client.
 func NewClient(config ClientConfig) (*Client, error) {
 	network, err := shared.NormalizeNetwork(config.Network)
 	if err != nil {
@@ -70,14 +71,17 @@ func NewClient(config ClientConfig) (*Client, error) {
 	}, nil
 }
 
+// HederaClient returns the configured Hedera SDK client.
 func (c *Client) HederaClient() *hedera.Client {
 	return c.hederaClient
 }
 
+// MirrorClient returns the configured mirror node client.
 func (c *Client) MirrorClient() *mirror.Client {
 	return c.mirrorClient
 }
 
+// CreateStateTopic creates the requested resource.
 func (c *Client) CreateStateTopic(
 	ctx context.Context,
 	options CreateTopicOptions,
@@ -99,6 +103,7 @@ func (c *Client) CreateStateTopic(
 	return receipt.TopicID.String(), nil
 }
 
+// SubmitMessage submits the requested message payload.
 func (c *Client) SubmitMessage(
 	ctx context.Context,
 	topicID string,
@@ -122,6 +127,7 @@ func (c *Client) SubmitMessage(
 	return receipt, nil
 }
 
+// ComputeAndPublish computes the requested state payload.
 func (c *Client) ComputeAndPublish(
 	ctx context.Context,
 	options ComputeAndPublishOptions,
@@ -172,6 +178,7 @@ func (c *Client) ComputeAndPublish(
 	}, nil
 }
 
+// ValidateTopic validates the provided input value.
 func (c *Client) ValidateTopic(ctx context.Context, topicID string) (bool, *TopicMemo, error) {
 	info, err := c.mirrorClient.GetTopicInfo(ctx, topicID)
 	if err != nil {
@@ -184,6 +191,7 @@ func (c *Client) ValidateTopic(ctx context.Context, topicID string) (bool, *Topi
 	return true, parsed, nil
 }
 
+// GetRecentMessages returns the requested value.
 func (c *Client) GetRecentMessages(
 	ctx context.Context,
 	topicID string,
@@ -232,6 +240,7 @@ func (c *Client) GetRecentMessages(
 	return results, nil
 }
 
+// GetLatestMessage returns the requested value.
 func (c *Client) GetLatestMessage(ctx context.Context, topicID string) (*MessageRecord, error) {
 	items, err := c.GetRecentMessages(ctx, topicID, 1, "desc")
 	if err != nil {
@@ -243,6 +252,7 @@ func (c *Client) GetLatestMessage(ctx context.Context, topicID string) (*Message
 	return &items[0], nil
 }
 
+// CalculateAccountStateHash calculates the requested value.
 func (c *Client) CalculateAccountStateHash(input AccountStateInput) (StateHashResult, error) {
 	if strings.TrimSpace(input.AccountID) == "" {
 		return StateHashResult{}, fmt.Errorf("account ID is required")
@@ -275,6 +285,7 @@ func (c *Client) CalculateAccountStateHash(input AccountStateInput) (StateHashRe
 	}, nil
 }
 
+// CalculateCompositeStateHash calculates the requested value.
 func (c *Client) CalculateCompositeStateHash(input CompositeStateInput) (CompositeStateHashResult, error) {
 	if strings.TrimSpace(input.CompositeAccountID) == "" {
 		return CompositeStateHashResult{}, fmt.Errorf("composite account ID is required")
@@ -314,6 +325,7 @@ func (c *Client) CalculateCompositeStateHash(input CompositeStateInput) (Composi
 	}, nil
 }
 
+// CalculateKeyFingerprint calculates the requested value.
 func (c *Client) CalculateKeyFingerprint(keys []hedera.PublicKey, threshold int) (string, error) {
 	if len(keys) == 0 {
 		return "", fmt.Errorf("keys are required")
@@ -341,6 +353,7 @@ func (c *Client) CalculateKeyFingerprint(keys []hedera.PublicKey, threshold int)
 	return hex.EncodeToString(hash[:]), nil
 }
 
+// CreateStateHashMessage creates the requested resource.
 func (c *Client) CreateStateHashMessage(
 	stateHash string,
 	accountID string,
@@ -360,6 +373,7 @@ func (c *Client) CreateStateHashMessage(
 	}
 }
 
+// VerifyStateHash performs the requested operation.
 func (c *Client) VerifyStateHash(input any, expectedHash string) (bool, error) {
 	switch typed := input.(type) {
 	case AccountStateInput:

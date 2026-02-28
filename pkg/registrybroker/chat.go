@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// FetchHistorySnapshot fetches the requested resource data.
 func (c *RegistryBrokerClient) FetchHistorySnapshot(
 	ctx context.Context,
 	sessionID string,
@@ -24,6 +25,7 @@ func (c *RegistryBrokerClient) FetchHistorySnapshot(
 	return c.AttachDecryptedHistory(sessionID, snapshot, options), nil
 }
 
+// AttachDecryptedHistory attaches the requested value when required.
 func (c *RegistryBrokerClient) AttachDecryptedHistory(
 	sessionID string,
 	snapshot JSONObject,
@@ -66,6 +68,7 @@ func (c *RegistryBrokerClient) AttachDecryptedHistory(
 	return result
 }
 
+// RegisterConversationContextForEncryption registers the requested resource.
 func (c *RegistryBrokerClient) RegisterConversationContextForEncryption(
 	context ConversationContextInput,
 ) {
@@ -91,6 +94,7 @@ func (c *RegistryBrokerClient) RegisterConversationContextForEncryption(
 	c.conversationContexts[context.SessionID] = existing
 }
 
+// ResolveDecryptionContext resolves the requested identifier data.
 func (c *RegistryBrokerClient) ResolveDecryptionContext(
 	sessionID string,
 	options ChatHistoryFetchOptions,
@@ -122,6 +126,7 @@ func (c *RegistryBrokerClient) ResolveDecryptionContext(
 	return &cloned
 }
 
+// DecryptHistoryEntryFromContext performs the requested operation.
 func (c *RegistryBrokerClient) DecryptHistoryEntryFromContext(
 	entry JSONObject,
 	context *ConversationContextState,
@@ -161,6 +166,7 @@ func (c *RegistryBrokerClient) DecryptHistoryEntryFromContext(
 	return &plaintext
 }
 
+// CreateSession creates the requested resource.
 func (c *RegistryBrokerClient) CreateSession(
 	ctx context.Context,
 	payload CreateSessionRequestPayload,
@@ -199,6 +205,7 @@ func (c *RegistryBrokerClient) CreateSession(
 	return c.CreateSession(ctx, payload, false)
 }
 
+// StartChat performs the requested operation.
 func (c *RegistryBrokerClient) StartChat(
 	ctx context.Context,
 	options StartChatOptions,
@@ -239,6 +246,7 @@ func (c *RegistryBrokerClient) StartChat(
 	), nil
 }
 
+// StartConversation performs the requested operation.
 func (c *RegistryBrokerClient) StartConversation(
 	ctx context.Context,
 	options StartConversationOptions,
@@ -299,6 +307,7 @@ func (c *RegistryBrokerClient) StartConversation(
 	), nil
 }
 
+// AcceptConversation performs the requested operation.
 func (c *RegistryBrokerClient) AcceptConversation(
 	ctx context.Context,
 	options AcceptConversationOptions,
@@ -343,6 +352,7 @@ func (c *RegistryBrokerClient) AcceptConversation(
 	), nil
 }
 
+// CompactHistory performs the requested operation.
 func (c *RegistryBrokerClient) CompactHistory(
 	ctx context.Context,
 	payload CompactHistoryRequestPayload,
@@ -364,6 +374,7 @@ func (c *RegistryBrokerClient) CompactHistory(
 	)
 }
 
+// FetchEncryptionStatus fetches the requested resource data.
 func (c *RegistryBrokerClient) FetchEncryptionStatus(
 	ctx context.Context,
 	sessionID string,
@@ -375,6 +386,7 @@ func (c *RegistryBrokerClient) FetchEncryptionStatus(
 	return c.requestJSON(ctx, http.MethodGet, path, nil, nil)
 }
 
+// PostEncryptionHandshake performs the requested operation.
 func (c *RegistryBrokerClient) PostEncryptionHandshake(
 	ctx context.Context,
 	sessionID string,
@@ -401,6 +413,7 @@ func (c *RegistryBrokerClient) PostEncryptionHandshake(
 	return result, nil
 }
 
+// SendMessage performs the requested operation.
 func (c *RegistryBrokerClient) SendMessage(
 	ctx context.Context,
 	payload SendMessageRequestPayload,
@@ -462,6 +475,7 @@ func (c *RegistryBrokerClient) SendMessage(
 	)
 }
 
+// EndSession performs the requested operation.
 func (c *RegistryBrokerClient) EndSession(ctx context.Context, sessionID string) error {
 	if err := ensureNonEmpty(sessionID, "sessionId"); err != nil {
 		return err
@@ -470,6 +484,7 @@ func (c *RegistryBrokerClient) EndSession(ctx context.Context, sessionID string)
 	return c.requestNoResponse(ctx, http.MethodDelete, path, nil, nil)
 }
 
+// CreatePlaintextConversationHandle creates the requested resource.
 func (c *RegistryBrokerClient) CreatePlaintextConversationHandle(
 	sessionID string,
 	summary JSONObject,

@@ -10,6 +10,7 @@ import (
 	"github.com/hashgraph-online/standards-sdk-go/pkg/inscriber"
 )
 
+// InscribeImage inscribes the requested payload.
 func (c *Client) InscribeImage(
 	ctx context.Context,
 	buffer []byte,
@@ -105,6 +106,7 @@ func (c *Client) InscribeImage(
 	}, nil
 }
 
+// InscribeProfile inscribes the requested payload.
 func (c *Client) InscribeProfile(
 	ctx context.Context,
 	profile HCS11Profile,
@@ -210,6 +212,7 @@ func (c *Client) InscribeProfile(
 	}, nil
 }
 
+// CreateAndInscribeProfile creates the requested resource.
 func (c *Client) CreateAndInscribeProfile(
 	ctx context.Context,
 	profile HCS11Profile,

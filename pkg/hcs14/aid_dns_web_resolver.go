@@ -36,6 +36,7 @@ type AIDDNSVerificationInput struct {
 	Record   aidDNSRecord
 }
 
+// NewAIDDNSWebResolver creates a new AIDDNSWebResolver.
 func NewAIDDNSWebResolver(options AIDDNSWebResolverOptions) *AIDDNSWebResolver {
 	lookup := options.DNSLookup
 	if lookup == nil {
@@ -66,10 +67,12 @@ func NewAIDDNSWebResolver(options AIDDNSWebResolverOptions) *AIDDNSWebResolver {
 	}
 }
 
+// ProfileID returns the resolver profile identifier.
 func (resolver *AIDDNSWebResolver) ProfileID() string {
 	return AIDDNSWebProfileID
 }
 
+// Supports reports whether the resolver supports the provided input.
 func (resolver *AIDDNSWebResolver) Supports(_ string, parsed ParsedUAID) bool {
 	if parsed.Target != "aid" {
 		return false
@@ -77,6 +80,7 @@ func (resolver *AIDDNSWebResolver) Supports(_ string, parsed ParsedUAID) bool {
 	return isFQDN(parsed.Params["nativeId"])
 }
 
+// ResolveProfile resolves the requested identifier data.
 func (resolver *AIDDNSWebResolver) ResolveProfile(
 	ctx context.Context,
 	uaid string,

@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// CreateLedgerChallenge creates the requested resource.
 func (c *RegistryBrokerClient) CreateLedgerChallenge(
 	ctx context.Context,
 	payload LedgerChallengeRequest,
@@ -29,6 +30,7 @@ func (c *RegistryBrokerClient) CreateLedgerChallenge(
 	)
 }
 
+// VerifyLedgerChallenge performs the requested operation.
 func (c *RegistryBrokerClient) VerifyLedgerChallenge(
 	ctx context.Context,
 	payload LedgerVerifyRequest,
@@ -79,6 +81,7 @@ func (c *RegistryBrokerClient) VerifyLedgerChallenge(
 	return result, nil
 }
 
+// AuthenticateWithLedger authenticates the current request.
 func (c *RegistryBrokerClient) AuthenticateWithLedger(
 	ctx context.Context,
 	options LedgerAuthenticationOptions,
@@ -119,6 +122,7 @@ func (c *RegistryBrokerClient) AuthenticateWithLedger(
 	})
 }
 
+// AuthenticateWithLedgerCredentials authenticates the current request.
 func (c *RegistryBrokerClient) AuthenticateWithLedgerCredentials(
 	ctx context.Context,
 	options LedgerCredentialAuthOptions,

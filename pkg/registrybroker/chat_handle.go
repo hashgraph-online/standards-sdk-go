@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Send performs the requested operation.
 func (h *ChatConversationHandle) Send(
 	ctx context.Context,
 	plaintext string,
@@ -53,6 +54,7 @@ func (h *ChatConversationHandle) Send(
 	return h.client.SendMessage(ctx, payload)
 }
 
+// FetchHistory fetches the requested resource data.
 func (h *ChatConversationHandle) FetchHistory(
 	ctx context.Context,
 	options ChatHistoryFetchOptions,

@@ -26,6 +26,7 @@ type uaidDNSRecord struct {
 	reconstructedUAID string
 }
 
+// NewUaidDNSWebResolver creates a new UaidDNSWebResolver.
 func NewUaidDNSWebResolver(options UaidDNSWebResolverOptions) *UaidDNSWebResolver {
 	lookup := options.DNSLookup
 	if lookup == nil {
@@ -39,15 +40,18 @@ func NewUaidDNSWebResolver(options UaidDNSWebResolverOptions) *UaidDNSWebResolve
 	}
 }
 
+// ProfileID returns the resolver profile identifier.
 func (resolver *UaidDNSWebResolver) ProfileID() string {
 	return UAIDDNSWebProfileID
 }
 
+// Supports reports whether the resolver supports the provided input.
 func (resolver *UaidDNSWebResolver) Supports(_ string, parsed ParsedUAID) bool {
 	nativeID := parsed.Params["nativeId"]
 	return (parsed.Target == "aid" || parsed.Target == "did") && isFQDN(nativeID)
 }
 
+// ResolveProfile resolves the requested identifier data.
 func (resolver *UaidDNSWebResolver) ResolveProfile(
 	ctx context.Context,
 	uaid string,
@@ -61,6 +65,7 @@ func (resolver *UaidDNSWebResolver) ResolveProfile(
 	})
 }
 
+// Resolve resolves the requested identifier data.
 func (resolver *UaidDNSWebResolver) Resolve(
 	ctx context.Context,
 	uaid string,
@@ -347,6 +352,7 @@ func notApplicableError(uaid string, message string) *UAIDResolutionResult {
 	}
 }
 
+// String returns the string representation.
 func (resolver *UaidDNSWebResolver) String() string {
 	return fmt.Sprintf("UaidDNSWebResolver(profile=%s)", UAIDDNSWebProfileID)
 }

@@ -32,6 +32,7 @@ type RegistryBrokerClient struct {
 	mutex                sync.RWMutex
 }
 
+// NewRegistryBrokerClient creates a new RegistryBrokerClient.
 func NewRegistryBrokerClient(options RegistryBrokerClientOptions) (*RegistryBrokerClient, error) {
 	timeout := options.HTTPTimeout
 	if timeout <= 0 {
@@ -82,18 +83,22 @@ func optionsClient(timeout time.Duration) *http.Client {
 	return &http.Client{Timeout: timeout}
 }
 
+// NewClient creates a new Client.
 func NewClient(options RegistryBrokerClientOptions) (*RegistryBrokerClient, error) {
 	return NewRegistryBrokerClient(options)
 }
 
+// BaseURL performs the requested operation.
 func (c *RegistryBrokerClient) BaseURL() string {
 	return c.baseURL
 }
 
+// SetAPIKey sets the requested value.
 func (c *RegistryBrokerClient) SetAPIKey(apiKey string) {
 	c.SetDefaultHeader("x-api-key", apiKey)
 }
 
+// SetLedgerAPIKey sets the requested value.
 func (c *RegistryBrokerClient) SetLedgerAPIKey(apiKey string) {
 	c.SetDefaultHeader("x-api-key", apiKey)
 	c.mutex.Lock()
@@ -101,6 +106,7 @@ func (c *RegistryBrokerClient) SetLedgerAPIKey(apiKey string) {
 	c.mutex.Unlock()
 }
 
+// SetDefaultHeader sets the requested value.
 func (c *RegistryBrokerClient) SetDefaultHeader(name string, value string) {
 	normalizedName := normalizeHeaderName(name)
 	c.mutex.Lock()
@@ -112,6 +118,7 @@ func (c *RegistryBrokerClient) SetDefaultHeader(name string, value string) {
 	c.defaultHeaders[normalizedName] = strings.TrimSpace(value)
 }
 
+// GetDefaultHeaders returns the requested value.
 func (c *RegistryBrokerClient) GetDefaultHeaders() map[string]string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
@@ -122,6 +129,7 @@ func (c *RegistryBrokerClient) GetDefaultHeaders() map[string]string {
 	return cloned
 }
 
+// BuildURL builds and returns the configured value.
 func (c *RegistryBrokerClient) BuildURL(path string) string {
 	normalizedPath := path
 	if !strings.HasPrefix(normalizedPath, "/") {

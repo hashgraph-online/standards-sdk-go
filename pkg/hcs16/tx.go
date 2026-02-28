@@ -27,6 +27,7 @@ var hcs16TopicTypeByOperation = map[FloraOperation]FloraTopicType{
 	FloraOperationJoinAccepted: FloraTopicTypeState,
 }
 
+// BuildCreateFloraTopicTx builds and returns the configured value.
 func BuildCreateFloraTopicTx(params CreateFloraTopicOptions) (*hedera.TopicCreateTransaction, error) {
 	if strings.TrimSpace(params.FloraAccountID) == "" {
 		return nil, fmt.Errorf("flora account ID is required")
@@ -57,6 +58,7 @@ func BuildCreateFloraTopicTx(params CreateFloraTopicOptions) (*hedera.TopicCreat
 	return transaction, nil
 }
 
+// BuildCreateTransactionTopicTx builds and returns the configured value.
 func BuildCreateTransactionTopicTx(
 	config TransactionTopicConfig,
 ) (*hedera.TopicCreateTransaction, error) {
@@ -77,6 +79,7 @@ func BuildCreateTransactionTopicTx(
 	return transaction, nil
 }
 
+// BuildCreateFloraAccountTx builds and returns the configured value.
 func BuildCreateFloraAccountTx(
 	keyList *hedera.KeyList,
 	initialBalanceHbar float64,
@@ -105,6 +108,7 @@ func BuildCreateFloraAccountTx(
 	return transaction, nil
 }
 
+// BuildScheduleAccountKeyUpdateTx builds and returns the configured value.
 func BuildScheduleAccountKeyUpdateTx(
 	floraAccountID string,
 	newKeyList *hedera.KeyList,
@@ -134,6 +138,7 @@ func BuildScheduleAccountKeyUpdateTx(
 	return scheduleTransaction, nil
 }
 
+// BuildScheduleTopicKeyUpdateTx builds and returns the configured value.
 func BuildScheduleTopicKeyUpdateTx(
 	topicID string,
 	adminKey hedera.Key,
@@ -165,6 +170,7 @@ func BuildScheduleTopicKeyUpdateTx(
 	return scheduleTransaction, nil
 }
 
+// BuildMessageTx builds and returns the configured value.
 func BuildMessageTx(
 	topicID string,
 	operatorID string,
@@ -209,6 +215,7 @@ func BuildMessageTx(
 	return transaction, nil
 }
 
+// BuildFloraCreatedTx builds and returns the configured value.
 func BuildFloraCreatedTx(
 	topicID string,
 	operatorID string,
@@ -225,6 +232,7 @@ func BuildFloraCreatedTx(
 	}, "")
 }
 
+// BuildTransactionTx builds and returns the configured value.
 func BuildTransactionTx(
 	topicID string,
 	operatorID string,
@@ -238,6 +246,7 @@ func BuildTransactionTx(
 	}, "")
 }
 
+// BuildStateUpdateTx builds and returns the configured value.
 func BuildStateUpdateTx(
 	topicID string,
 	operatorID string,
@@ -290,6 +299,7 @@ func BuildStateUpdateTx(
 	return transaction, nil
 }
 
+// BuildFloraJoinRequestTx builds and returns the configured value.
 func BuildFloraJoinRequestTx(
 	topicID string,
 	operatorID string,
@@ -306,6 +316,7 @@ func BuildFloraJoinRequestTx(
 	}, "")
 }
 
+// BuildFloraJoinVoteTx builds and returns the configured value.
 func BuildFloraJoinVoteTx(
 	topicID string,
 	operatorID string,
@@ -322,6 +333,7 @@ func BuildFloraJoinVoteTx(
 	}, "")
 }
 
+// BuildFloraJoinAcceptedTx builds and returns the configured value.
 func BuildFloraJoinAcceptedTx(
 	topicID string,
 	operatorID string,

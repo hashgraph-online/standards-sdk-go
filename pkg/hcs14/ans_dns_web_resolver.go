@@ -43,6 +43,7 @@ type parsedAgentCard struct {
 
 var semverPattern = regexp.MustCompile(`^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$`)
 
+// NewANSDNSWebResolver creates a new ANSDNSWebResolver.
 func NewANSDNSWebResolver(options ANSDNSWebResolverOptions) *ANSDNSWebResolver {
 	lookup := options.DNSLookup
 	if lookup == nil {
@@ -72,10 +73,12 @@ func NewANSDNSWebResolver(options ANSDNSWebResolverOptions) *ANSDNSWebResolver {
 	}
 }
 
+// ProfileID returns the resolver profile identifier.
 func (resolver *ANSDNSWebResolver) ProfileID() string {
 	return ANSDNSWebProfileID
 }
 
+// Supports reports whether the resolver supports the provided input.
 func (resolver *ANSDNSWebResolver) Supports(_ string, parsed ParsedUAID) bool {
 	if parsed.Target != "aid" {
 		return false
@@ -86,6 +89,7 @@ func (resolver *ANSDNSWebResolver) Supports(_ string, parsed ParsedUAID) bool {
 	return isFQDN(parsed.Params["nativeId"])
 }
 
+// ResolveProfile resolves the requested identifier data.
 func (resolver *ANSDNSWebResolver) ResolveProfile(
 	ctx context.Context,
 	uaid string,
@@ -94,6 +98,7 @@ func (resolver *ANSDNSWebResolver) ResolveProfile(
 	return resolver.Resolve(ctx, uaid)
 }
 
+// Resolve resolves the requested identifier data.
 func (resolver *ANSDNSWebResolver) Resolve(
 	ctx context.Context,
 	uaid string,

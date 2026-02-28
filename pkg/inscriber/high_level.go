@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Inscribe inscribes the requested payload.
 func Inscribe(
 	ctx context.Context,
 	input InscriptionInput,
@@ -112,6 +113,7 @@ func Inscribe(
 	}, nil
 }
 
+// GenerateQuote performs the requested operation.
 func GenerateQuote(
 	ctx context.Context,
 	input InscriptionInput,
@@ -152,6 +154,7 @@ func GenerateQuote(
 	}, nil
 }
 
+// RetrieveInscription performs the requested operation.
 func RetrieveInscription(
 	ctx context.Context,
 	transactionID string,
@@ -194,6 +197,7 @@ func RetrieveInscription(
 	return client.RetrieveInscription(ctx, transactionID)
 }
 
+// WaitForInscriptionConfirmation performs the requested operation.
 func WaitForInscriptionConfirmation(
 	ctx context.Context,
 	client *Client,

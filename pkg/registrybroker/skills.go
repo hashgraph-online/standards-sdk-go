@@ -8,10 +8,12 @@ import (
 	"strings"
 )
 
+// SkillsConfig performs the requested operation.
 func (c *RegistryBrokerClient) SkillsConfig(ctx context.Context) (JSONObject, error) {
 	return c.requestJSON(ctx, http.MethodGet, "/skills/config", nil, nil)
 }
 
+// GetSkillsCatalog returns the requested value.
 func (c *RegistryBrokerClient) GetSkillsCatalog(
 	ctx context.Context,
 	options SkillCatalogOptions,
@@ -46,6 +48,7 @@ func (c *RegistryBrokerClient) GetSkillsCatalog(
 	)
 }
 
+// ListSkills performs the requested operation.
 func (c *RegistryBrokerClient) ListSkills(
 	ctx context.Context,
 	options ListSkillsOptions,
@@ -70,6 +73,7 @@ func (c *RegistryBrokerClient) ListSkills(
 	)
 }
 
+// ListSkillVersions performs the requested operation.
 func (c *RegistryBrokerClient) ListSkillVersions(
 	ctx context.Context,
 	name string,
@@ -88,6 +92,7 @@ func (c *RegistryBrokerClient) ListSkillVersions(
 	)
 }
 
+// ListMySkills performs the requested operation.
 func (c *RegistryBrokerClient) ListMySkills(
 	ctx context.Context,
 	options ListMySkillsOptions,
@@ -105,6 +110,7 @@ func (c *RegistryBrokerClient) ListMySkills(
 	)
 }
 
+// GetMySkillsList returns the requested value.
 func (c *RegistryBrokerClient) GetMySkillsList(
 	ctx context.Context,
 	options MySkillsListOptions,
@@ -124,6 +130,7 @@ func (c *RegistryBrokerClient) GetMySkillsList(
 	)
 }
 
+// QuoteSkillPublish performs the requested operation.
 func (c *RegistryBrokerClient) QuoteSkillPublish(
 	ctx context.Context,
 	payload SkillRegistryQuoteRequest,
@@ -137,6 +144,7 @@ func (c *RegistryBrokerClient) QuoteSkillPublish(
 	)
 }
 
+// PublishSkill publishes the requested message payload.
 func (c *RegistryBrokerClient) PublishSkill(
 	ctx context.Context,
 	payload SkillRegistryPublishRequest,
@@ -150,6 +158,7 @@ func (c *RegistryBrokerClient) PublishSkill(
 	)
 }
 
+// GetSkillPublishJob returns the requested value.
 func (c *RegistryBrokerClient) GetSkillPublishJob(
 	ctx context.Context,
 	jobID string,
@@ -164,6 +173,7 @@ func (c *RegistryBrokerClient) GetSkillPublishJob(
 	return c.requestJSON(ctx, http.MethodGet, pathWithQuery(path, query), nil, nil)
 }
 
+// GetSkillOwnership returns the requested value.
 func (c *RegistryBrokerClient) GetSkillOwnership(
 	ctx context.Context,
 	name string,
@@ -184,6 +194,7 @@ func (c *RegistryBrokerClient) GetSkillOwnership(
 	)
 }
 
+// GetRecommendedSkillVersion returns the requested value.
 func (c *RegistryBrokerClient) GetRecommendedSkillVersion(
 	ctx context.Context,
 	name string,
@@ -202,6 +213,7 @@ func (c *RegistryBrokerClient) GetRecommendedSkillVersion(
 	)
 }
 
+// SetRecommendedSkillVersion sets the requested value.
 func (c *RegistryBrokerClient) SetRecommendedSkillVersion(
 	ctx context.Context,
 	payload SkillRecommendedVersionSetRequest,
@@ -215,6 +227,7 @@ func (c *RegistryBrokerClient) SetRecommendedSkillVersion(
 	)
 }
 
+// GetSkillDeprecations returns the requested value.
 func (c *RegistryBrokerClient) GetSkillDeprecations(
 	ctx context.Context,
 	name string,
@@ -233,6 +246,7 @@ func (c *RegistryBrokerClient) GetSkillDeprecations(
 	)
 }
 
+// SetSkillDeprecation sets the requested value.
 func (c *RegistryBrokerClient) SetSkillDeprecation(
 	ctx context.Context,
 	payload SkillDeprecationSetRequest,
@@ -246,6 +260,7 @@ func (c *RegistryBrokerClient) SetSkillDeprecation(
 	)
 }
 
+// GetSkillVoteStatus returns the requested value.
 func (c *RegistryBrokerClient) GetSkillVoteStatus(
 	ctx context.Context,
 	name string,
@@ -264,6 +279,7 @@ func (c *RegistryBrokerClient) GetSkillVoteStatus(
 	)
 }
 
+// SetSkillVote sets the requested value.
 func (c *RegistryBrokerClient) SetSkillVote(
 	ctx context.Context,
 	payload SkillRegistryVoteRequest,
@@ -277,6 +293,7 @@ func (c *RegistryBrokerClient) SetSkillVote(
 	)
 }
 
+// RequestSkillVerification performs the requested operation.
 func (c *RegistryBrokerClient) RequestSkillVerification(
 	ctx context.Context,
 	payload SkillVerificationRequestCreateRequest,
@@ -290,6 +307,7 @@ func (c *RegistryBrokerClient) RequestSkillVerification(
 	)
 }
 
+// GetSkillVerificationStatus returns the requested value.
 func (c *RegistryBrokerClient) GetSkillVerificationStatus(
 	ctx context.Context,
 	name string,

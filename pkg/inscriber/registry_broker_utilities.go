@@ -19,6 +19,7 @@ type SkillInscriptionOptions struct {
 	SkillVersion string
 }
 
+// InscribeViaRegistryBroker inscribes the requested payload.
 func InscribeViaRegistryBroker(
 	ctx context.Context,
 	input InscriptionInput,
@@ -84,6 +85,7 @@ func InscribeViaRegistryBroker(
 	return brokerClient.InscribeAndWait(ctx, request, time.Duration(timeout)*time.Millisecond)
 }
 
+// GetRegistryBrokerQuote returns the requested value.
 func GetRegistryBrokerQuote(
 	ctx context.Context,
 	input InscriptionInput,
@@ -115,6 +117,7 @@ func GetRegistryBrokerQuote(
 	return brokerClient.CreateQuote(ctx, request)
 }
 
+// InscribeSkillViaRegistryBroker inscribes the requested payload.
 func InscribeSkillViaRegistryBroker(
 	ctx context.Context,
 	input InscriptionInput,

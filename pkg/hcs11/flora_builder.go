@@ -9,6 +9,7 @@ type FloraBuilder struct {
 	profile HCS11Profile
 }
 
+// NewFloraBuilder creates a new FloraBuilder.
 func NewFloraBuilder() *FloraBuilder {
 	return &FloraBuilder{
 		profile: HCS11Profile{
@@ -18,26 +19,31 @@ func NewFloraBuilder() *FloraBuilder {
 	}
 }
 
+// SetDisplayName sets the requested value.
 func (builder *FloraBuilder) SetDisplayName(displayName string) *FloraBuilder {
 	builder.profile.DisplayName = strings.TrimSpace(displayName)
 	return builder
 }
 
+// SetBio sets the requested value.
 func (builder *FloraBuilder) SetBio(bio string) *FloraBuilder {
 	builder.profile.Bio = strings.TrimSpace(bio)
 	return builder
 }
 
+// SetMembers sets the requested value.
 func (builder *FloraBuilder) SetMembers(members []FloraMember) *FloraBuilder {
 	builder.profile.Members = append([]FloraMember{}, members...)
 	return builder
 }
 
+// SetThreshold sets the requested value.
 func (builder *FloraBuilder) SetThreshold(threshold int) *FloraBuilder {
 	builder.profile.Threshold = threshold
 	return builder
 }
 
+// SetTopics sets the requested value.
 func (builder *FloraBuilder) SetTopics(topics FloraTopics) *FloraBuilder {
 	builder.profile.Topics = &FloraTopics{
 		Communication: strings.TrimSpace(topics.Communication),
@@ -49,16 +55,19 @@ func (builder *FloraBuilder) SetTopics(topics FloraTopics) *FloraBuilder {
 	return builder
 }
 
+// SetPolicies sets the requested value.
 func (builder *FloraBuilder) SetPolicies(policies map[string]any) *FloraBuilder {
 	builder.profile.Policies = copyStringAnyMap(policies)
 	return builder
 }
 
+// SetMetadata sets the requested value.
 func (builder *FloraBuilder) SetMetadata(metadata map[string]any) *FloraBuilder {
 	builder.profile.Metadata = copyStringAnyMap(metadata)
 	return builder
 }
 
+// AddMetadata adds the provided value to the current configuration.
 func (builder *FloraBuilder) AddMetadata(key string, value any) *FloraBuilder {
 	trimmedKey := strings.TrimSpace(key)
 	if trimmedKey == "" {
@@ -71,6 +80,7 @@ func (builder *FloraBuilder) AddMetadata(key string, value any) *FloraBuilder {
 	return builder
 }
 
+// Build builds and returns the configured value.
 func (builder *FloraBuilder) Build() (HCS11Profile, error) {
 	if strings.TrimSpace(builder.profile.DisplayName) == "" {
 		return HCS11Profile{}, fmt.Errorf("flora display name is required")

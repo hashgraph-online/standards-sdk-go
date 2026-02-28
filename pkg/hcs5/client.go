@@ -21,6 +21,7 @@ type Client struct {
 	inscriberAPIURL    string
 }
 
+// NewClient creates a new Client.
 func NewClient(config ClientConfig) (*Client, error) {
 	network, err := shared.NormalizeNetwork(config.Network)
 	if err != nil {
@@ -58,6 +59,7 @@ func NewClient(config ClientConfig) (*Client, error) {
 	}, nil
 }
 
+// Mint performs the requested operation.
 func (c *Client) Mint(
 	ctx context.Context,
 	options MintOptions,
@@ -113,6 +115,7 @@ func (c *Client) Mint(
 	}, nil
 }
 
+// CreateHashinal creates the requested resource.
 func (c *Client) CreateHashinal(
 	ctx context.Context,
 	options CreateHashinalOptions,
