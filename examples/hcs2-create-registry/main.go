@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hashgraph-online/standards-sdk-go/pkg/hcs2"
+	"github.com/hashgraph-online/go-sdk/pkg/hcs2"
 )
 
 func main() {

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashgraph-online/standards-sdk-go/pkg/inscriber"
+	"github.com/hashgraph-online/go-sdk/pkg/inscriber"
 )
 
 func (c *Client) InscribeImage(

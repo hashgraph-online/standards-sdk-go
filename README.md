@@ -1,11 +1,11 @@
 # Hashgraph Online HCS SDK (Go)
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/hashgraph-online/standards-sdk-go.svg)](https://pkg.go.dev/github.com/hashgraph-online/standards-sdk-go)
-[![Go Report Card](https://goreportcard.com/badge/github.com/hashgraph-online/standards-sdk-go)](https://goreportcard.com/report/github.com/hashgraph-online/standards-sdk-go)
-[![Go CI](https://github.com/hashgraph-online/standards-sdk-go/actions/workflows/go-module-release.yml/badge.svg)](https://github.com/hashgraph-online/standards-sdk-go/actions/workflows/go-module-release.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/hashgraph-online/standards-sdk-go)](https://github.com/hashgraph-online/standards-sdk-go/releases)
+[![Go Reference](https://pkg.go.dev/badge/github.com/hashgraph-online/go-sdk.svg)](https://pkg.go.dev/github.com/hashgraph-online/go-sdk)
+[![Go Report Card](https://goreportcard.com/badge/github.com/hashgraph-online/go-sdk)](https://goreportcard.com/report/github.com/hashgraph-online/go-sdk)
+[![Go CI](https://github.com/hashgraph-online/go-sdk/actions/workflows/go-module-release.yml/badge.svg)](https://github.com/hashgraph-online/go-sdk/actions/workflows/go-module-release.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/hashgraph-online/standards-sdk-go)](https://github.com/hashgraph-online/go-sdk/releases)
 [![License](https://img.shields.io/github/license/hashgraph-online/standards-sdk-go)](./LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/hashgraph-online/standards-sdk-go?style=social)](https://github.com/hashgraph-online/standards-sdk-go/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/hashgraph-online/standards-sdk-go?style=social)](https://github.com/hashgraph-online/go-sdk/stargazers)
 [![CodeSandbox Examples](https://img.shields.io/badge/CodeSandbox-Examples-151515?logo=codesandbox&logoColor=white)](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples)
 
 | ![](./Hashgraph-Online.png) | Go reference implementation of the Hiero Consensus Specifications (HCS) and Registry Broker utilities.<br><br>[📚 Standards SDK Documentation](https://hol.org/docs/libraries/standards-sdk/)<br>[📖 Hiero Consensus Specifications Documentation](https://hol.org/docs/standards) |
@@ -22,7 +22,7 @@ go test ./...
 ## Install
 
 ```bash
-go get github.com/hashgraph-online/standards-sdk-go@latest
+go get github.com/hashgraph-online/go-sdk@latest
 ```
 
 ## CodeSandbox Examples

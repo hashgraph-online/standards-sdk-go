@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashgraph-online/standards-sdk-go/pkg/shared"
+	"github.com/hashgraph-online/go-sdk/pkg/shared"
 )
 
 func TestHCS2Integration_EndToEnd(t *testing.T) {

@@ -1,6 +1,6 @@
 package hcs5
 
-import "github.com/hashgraph-online/standards-sdk-go/pkg/inscriber"
+import "github.com/hashgraph-online/go-sdk/pkg/inscriber"
 
 type ClientConfig struct {
 	OperatorAccountID  string

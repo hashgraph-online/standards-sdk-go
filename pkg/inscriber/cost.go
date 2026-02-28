@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashgraph-online/standards-sdk-go/pkg/mirror"
+	"github.com/hashgraph-online/go-sdk/pkg/mirror"
 	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 

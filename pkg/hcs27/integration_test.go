@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashgraph-online/standards-sdk-go/pkg/shared"
+	"github.com/hashgraph-online/go-sdk/pkg/shared"
 )
 
 func TestHCS27Integration_CheckpointChain(t *testing.T) {
