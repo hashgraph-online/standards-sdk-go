@@ -29,7 +29,12 @@ go get github.com/hashgraph-online/standards-sdk-go@latest
 
 - [Examples index](./examples/README.md)
 - [HCS-2 create registry](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs2-create-registry)
+- [HCS-5 build mint transaction](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs5-build-mint)
+- [HCS-11 build agent profile](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs11-build-agent-profile)
 - [HCS-14 parse UAID](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs14-parse-uaid)
+- [HCS-15 build account transaction](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs15-build-account-tx)
+- [HCS-16 build flora topic transaction](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs16-build-flora-topic-tx)
+- [HCS-17 build state hash message](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs17-build-state-message)
 - [HCS-27 publish checkpoint](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs27-publish-checkpoint)
 - [Inscriber authenticate + client](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/inscriber-auth-client)
 
