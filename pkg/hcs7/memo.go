@@ -43,4 +43,3 @@ func ParseTopicMemo(memo string) (*TopicMemo, bool) {
 func BuildTransactionMemo(operationEnum int) string {
 	return fmt.Sprintf("hcs-7:op:%d:0", operationEnum)
 }
-

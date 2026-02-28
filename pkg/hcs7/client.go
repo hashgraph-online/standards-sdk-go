@@ -357,4 +357,3 @@ func (c *Client) resolvePrivateKey(raw string) *hedera.PrivateKey {
 	}
 	return &privateKey
 }
-

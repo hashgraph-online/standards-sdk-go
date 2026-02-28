@@ -108,4 +108,3 @@ func marshalMessage(message Message) ([]byte, error) {
 		return nil, fmt.Errorf("unsupported operation %q", message.Op)
 	}
 }
-

@@ -24,4 +24,3 @@ func TestBuildSubmitMessageTx(t *testing.T) {
 		t.Fatalf("expected transaction")
 	}
 }
-

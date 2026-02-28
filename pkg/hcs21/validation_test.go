@@ -42,4 +42,3 @@ func TestValidateDeclarationMissingConfig(t *testing.T) {
 		t.Fatalf("expected validation error")
 	}
 }
-

@@ -367,10 +367,15 @@ func (c *Client) ResolveLatestVersionPointer(
 	ctx context.Context,
 	versionTopicID string,
 ) (string, int64, string, error) {
+	networkName := c.hederaClient.GetNetworkName()
+	networkStr := ""
+	if networkName != nil {
+		networkStr = string(*networkName)
+	}
 	registryClient, err := hcs2.NewClient(hcs2.ClientConfig{
 		OperatorAccountID:  c.operatorID.String(),
 		OperatorPrivateKey: c.operatorKey.String(),
-		Network:            c.hederaClient.GetNetworkName(),
+		Network:            networkStr,
 		MirrorBaseURL:      c.mirrorClient.BaseURL(),
 	})
 	if err != nil {
@@ -468,4 +473,3 @@ func (c *Client) resolvePublicKey(raw string, useOperator bool) hedera.Key {
 	}
 	return publicKey
 }
-

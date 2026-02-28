@@ -63,4 +63,3 @@ func opCode(operation DiscoveryOperation) int {
 		return 0
 	}
 }
-

@@ -85,4 +85,3 @@ func TestHCS6Integration_CreateRegisterResolve(t *testing.T) {
 		t.Fatalf("unexpected target topic id: got %s want %s", registry.Entries[0].Message.TopicID, targetRegistry.TopicID)
 	}
 }
-

@@ -70,4 +70,3 @@ func ParseRegistryMemo(memo string) (RegistryType, int64, bool) {
 func BuildTransactionMemo(operationEnum int, topicTypeEnum int) string {
 	return fmt.Sprintf("hcs-12:op:%d:%d", operationEnum, topicTypeEnum)
 }
-

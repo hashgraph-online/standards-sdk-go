@@ -10,4 +10,3 @@
 //
 // SDK documentation and guides: https://hol.org/docs/libraries/standards-sdk/
 package hcs18
-

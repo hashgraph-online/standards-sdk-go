@@ -91,4 +91,3 @@ func TestHCS21Integration_CreatePublishResolve(t *testing.T) {
 		t.Fatalf("expected at least one declaration")
 	}
 }
-

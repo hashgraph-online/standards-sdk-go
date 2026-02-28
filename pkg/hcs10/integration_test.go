@@ -91,4 +91,3 @@ func TestHCS10Integration_CreateTopicsAndSendMessage(t *testing.T) {
 		t.Fatalf("expected at least one message stream record")
 	}
 }
-

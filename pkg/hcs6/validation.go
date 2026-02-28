@@ -34,4 +34,3 @@ func ValidateMessage(message Message) error {
 	}
 	return nil
 }
-

@@ -2,7 +2,7 @@ package hcs6
 
 import "testing"
 
-func TestValidateMessage(t *testing.T) {
+func TestValidateMessagePrimary(t *testing.T) {
 	err := ValidateMessage(Message{
 		P:       "hcs-6",
 		Op:      OperationRegister,
@@ -23,4 +23,3 @@ func TestValidateMessageInvalidTopicID(t *testing.T) {
 		t.Fatalf("expected validation error")
 	}
 }
-

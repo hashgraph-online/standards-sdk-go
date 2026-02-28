@@ -23,9 +23,9 @@ type PetalDescriptor struct {
 }
 
 type CapabilityDetails struct {
-	Protocols        []string                `json:"protocols"`
-	Resources        map[string]string       `json:"resources,omitempty"`
-	GroupPreferences map[string]any         `json:"group_preferences,omitempty"`
+	Protocols        []string          `json:"protocols"`
+	Resources        map[string]string `json:"resources,omitempty"`
+	GroupPreferences map[string]any    `json:"group_preferences,omitempty"`
 }
 
 type ProposeMember struct {
@@ -77,9 +77,9 @@ type WithdrawData struct {
 }
 
 type DiscoveryMessage struct {
-	P    string            `json:"p"`
+	P    string             `json:"p"`
 	Op   DiscoveryOperation `json:"op"`
-	Data any               `json:"data"`
+	Data any                `json:"data"`
 }
 
 type MessageRecord struct {
@@ -113,11 +113,10 @@ type ClientConfig struct {
 }
 
 type CreateDiscoveryTopicOptions struct {
-	TTLSeconds      int64
+	TTLSeconds          int64
 	UseOperatorAsAdmin  bool
 	UseOperatorAsSubmit bool
-	AdminKey        string
-	SubmitKey       string
-	MemoOverride    string
+	AdminKey            string
+	SubmitKey           string
+	MemoOverride        string
 }
-

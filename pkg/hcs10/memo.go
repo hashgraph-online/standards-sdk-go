@@ -76,4 +76,3 @@ func ParseMemoType(memo string) (TopicType, bool) {
 func BuildTransactionMemo(operationEnum int, topicTypeEnum int) string {
 	return fmt.Sprintf("hcs-10:op:%d:%d", operationEnum, topicTypeEnum)
 }
-

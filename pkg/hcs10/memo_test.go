@@ -18,4 +18,3 @@ func TestParseMemoType(t *testing.T) {
 		t.Fatalf("unexpected topic type: %d", topicType)
 	}
 }
-

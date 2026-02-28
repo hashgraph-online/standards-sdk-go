@@ -58,19 +58,19 @@ type WasmConfigPayload struct {
 }
 
 type MetadataData struct {
-	Weight int64           `json:"weight"`
-	Tags   []string        `json:"tags"`
+	Weight int64          `json:"weight"`
+	Tags   []string       `json:"tags"`
 	Extra  map[string]any `json:"-"`
 }
 
 type Message struct {
-	P       string      `json:"p"`
-	Op      Operation   `json:"op"`
-	Type    ConfigType  `json:"t,omitempty"`
-	Config  any         `json:"c,omitempty"`
-	TopicID string      `json:"t_id,omitempty"`
+	P       string         `json:"p"`
+	Op      Operation      `json:"op"`
+	Type    ConfigType     `json:"t,omitempty"`
+	Config  any            `json:"c,omitempty"`
+	TopicID string         `json:"t_id,omitempty"`
 	Data    map[string]any `json:"d,omitempty"`
-	Memo    string      `json:"m,omitempty"`
+	Memo    string         `json:"m,omitempty"`
 }
 
 type TopicMemo struct {
@@ -124,15 +124,15 @@ type RegistryOperationResult struct {
 }
 
 type RegistryEntry struct {
-	SequenceNumber int64  `json:"sequence_number"`
-	Timestamp      string `json:"timestamp"`
-	Payer          string `json:"payer"`
+	SequenceNumber int64   `json:"sequence_number"`
+	Timestamp      string  `json:"timestamp"`
+	Payer          string  `json:"payer"`
 	Message        Message `json:"message"`
 }
 
 type RegistryTopic struct {
-	TopicID string         `json:"topic_id"`
-	TTL     int64          `json:"ttl,omitempty"`
+	TopicID string          `json:"topic_id"`
+	TTL     int64           `json:"ttl,omitempty"`
 	Entries []RegistryEntry `json:"entries"`
 }
 
@@ -154,4 +154,3 @@ type CreateRegistryTxParams struct {
 	AdminKey  hedera.Key
 	SubmitKey hedera.Key
 }
-

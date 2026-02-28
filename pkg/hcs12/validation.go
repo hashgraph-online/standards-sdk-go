@@ -42,4 +42,3 @@ func ValidatePayload(payload map[string]any) error {
 	}
 	return nil
 }
-

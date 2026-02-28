@@ -20,4 +20,3 @@ func TestBuildSubmitDiscoveryMessageTx(t *testing.T) {
 		t.Fatalf("expected transaction")
 	}
 }
-

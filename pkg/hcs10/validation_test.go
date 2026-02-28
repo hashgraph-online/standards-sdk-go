@@ -15,4 +15,3 @@ func TestValidateRegisterMessage(t *testing.T) {
 		t.Fatalf("expected valid register message, got %v", err)
 	}
 }
-

@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	topicIDPattern  = regexp.MustCompile(`^\d+\.\d+\.\d+$`)
+	topicIDPattern   = regexp.MustCompile(`^\d+\.\d+\.\d+$`)
 	accountIDPattern = regexp.MustCompile(`^\d+\.\d+\.\d+$`)
 )
 
@@ -52,4 +52,3 @@ func ValidateMessage(message Message) error {
 	}
 	return nil
 }
-

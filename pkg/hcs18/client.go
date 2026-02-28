@@ -200,9 +200,9 @@ func decodeDiscoveryMessage(encoded string) (DiscoveryMessage, error) {
 	}
 
 	var envelope struct {
-		P    string            `json:"p"`
+		P    string             `json:"p"`
 		Op   DiscoveryOperation `json:"op"`
-		Data json.RawMessage   `json:"data"`
+		Data json.RawMessage    `json:"data"`
 	}
 	if err := json.Unmarshal(decoded, &envelope); err != nil {
 		return DiscoveryMessage{}, err
@@ -263,4 +263,3 @@ func (c *Client) resolvePublicKey(raw string, useOperator bool) hedera.Key {
 	}
 	return publicKey
 }
-

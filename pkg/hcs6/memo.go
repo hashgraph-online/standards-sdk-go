@@ -51,4 +51,3 @@ func BuildTransactionMemo() string {
 func BuildHRL(topicID string) string {
 	return "hcs://6/" + strings.TrimSpace(topicID)
 }
-

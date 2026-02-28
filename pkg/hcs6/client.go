@@ -274,4 +274,3 @@ func (c *Client) resolvePublicKey(raw string, useOperator bool) hedera.Key {
 	}
 	return publicKey
 }
-

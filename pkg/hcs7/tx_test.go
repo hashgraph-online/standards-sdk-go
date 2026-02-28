@@ -2,7 +2,7 @@ package hcs7
 
 import "testing"
 
-func TestBuildSubmitMessageTx(t *testing.T) {
+func TestBuildSubmitMessageTxPrimary(t *testing.T) {
 	transaction, err := BuildSubmitMessageTx("0.0.1001", Message{
 		P:       "hcs-7",
 		Op:      OperationRegister,
@@ -19,4 +19,3 @@ func TestBuildSubmitMessageTx(t *testing.T) {
 		t.Fatalf("expected transaction")
 	}
 }
-

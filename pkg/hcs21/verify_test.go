@@ -1,7 +1,7 @@
 package hcs21
 
 import (
-	"crypto/sha384"
+	"crypto/sha512"
 	"encoding/base64"
 	"encoding/hex"
 	"testing"
@@ -20,7 +20,7 @@ func TestCanonicalize(t *testing.T) {
 
 func TestVerifyArtifactDigest(t *testing.T) {
 	payload := []byte("hello")
-	sum := sha384.Sum384(payload)
+	sum := sha512.Sum384(payload)
 	hexDigest := hex.EncodeToString(sum[:])
 	base64Digest := base64.StdEncoding.EncodeToString(sum[:])
 
@@ -31,4 +31,3 @@ func TestVerifyArtifactDigest(t *testing.T) {
 		t.Fatalf("expected base64 digest verification success")
 	}
 }
-

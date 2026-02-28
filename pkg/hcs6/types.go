@@ -54,21 +54,21 @@ type QueryRegistryOptions struct {
 }
 
 type RegistryEntry struct {
-	TopicID            string      `json:"topic_id"`
-	Sequence           int64       `json:"sequence"`
-	Timestamp          string      `json:"timestamp"`
-	Payer              string      `json:"payer"`
-	Message            Message     `json:"message"`
-	ConsensusTimestamp string      `json:"consensus_timestamp"`
+	TopicID            string       `json:"topic_id"`
+	Sequence           int64        `json:"sequence"`
+	Timestamp          string       `json:"timestamp"`
+	Payer              string       `json:"payer"`
+	Message            Message      `json:"message"`
+	ConsensusTimestamp string       `json:"consensus_timestamp"`
 	RegistryType       RegistryType `json:"registry_type"`
 }
 
 type TopicRegistry struct {
-	TopicID      string        `json:"topic_id"`
-	RegistryType RegistryType  `json:"registry_type"`
-	TTL          int64         `json:"ttl"`
+	TopicID      string          `json:"topic_id"`
+	RegistryType RegistryType    `json:"registry_type"`
+	TTL          int64           `json:"ttl"`
 	Entries      []RegistryEntry `json:"entries"`
-	LatestEntry  *RegistryEntry `json:"latest_entry,omitempty"`
+	LatestEntry  *RegistryEntry  `json:"latest_entry,omitempty"`
 }
 
 type CreateRegistryResult struct {
@@ -84,4 +84,3 @@ type OperationResult struct {
 	Error          string `json:"error,omitempty"`
 	SequenceNumber int64  `json:"sequence_number,omitempty"`
 }
-

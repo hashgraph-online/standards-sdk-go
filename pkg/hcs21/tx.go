@@ -85,4 +85,3 @@ func BuildDeclarationMessageTx(
 	}
 	return transaction, nil
 }
-

@@ -86,4 +86,3 @@ func ValidateMessage(message DiscoveryMessage) error {
 	}
 	return nil
 }
-

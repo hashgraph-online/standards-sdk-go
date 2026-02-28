@@ -98,4 +98,3 @@ func BuildWithdrawMessage(data WithdrawData) DiscoveryMessage {
 		Data: data,
 	}
 }
-

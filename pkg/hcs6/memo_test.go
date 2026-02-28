@@ -21,4 +21,3 @@ func TestParseTopicMemo(t *testing.T) {
 		t.Fatalf("unexpected ttl: %d", parsed.TTL)
 	}
 }
-

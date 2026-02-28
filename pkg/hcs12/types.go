@@ -5,18 +5,18 @@ import hedera "github.com/hashgraph/hedera-sdk-go/v2"
 type RegistryType string
 
 const (
-	RegistryTypeAction   RegistryType = "action"
-	RegistryTypeAssembly RegistryType = "assembly"
+	RegistryTypeAction    RegistryType = "action"
+	RegistryTypeAssembly  RegistryType = "assembly"
 	RegistryTypeHashlinks RegistryType = "hashlinks"
 )
 
 type AssemblyOperation string
 
 const (
-	OperationRegister AssemblyOperation = "register"
+	OperationRegister  AssemblyOperation = "register"
 	OperationAddAction AssemblyOperation = "add-action"
-	OperationAddBlock AssemblyOperation = "add-block"
-	OperationUpdate   AssemblyOperation = "update"
+	OperationAddBlock  AssemblyOperation = "add-block"
+	OperationUpdate    AssemblyOperation = "update"
 )
 
 type ActionRegistration struct {
@@ -83,14 +83,14 @@ type ClientConfig struct {
 }
 
 type CreateRegistryTopicOptions struct {
-	RegistryType       RegistryType
-	TTL                int64
-	UseOperatorAsAdmin bool
+	RegistryType        RegistryType
+	TTL                 int64
+	UseOperatorAsAdmin  bool
 	UseOperatorAsSubmit bool
-	AdminKey           string
-	SubmitKey          string
-	MemoOverride       string
-	TransactionMemo    string
+	AdminKey            string
+	SubmitKey           string
+	MemoOverride        string
+	TransactionMemo     string
 }
 
 type SubmitMessageResult struct {
@@ -108,9 +108,9 @@ type CreateTopicResult struct {
 }
 
 type RegistryEntry struct {
-	SequenceNumber     int64  `json:"sequence_number"`
-	ConsensusTimestamp string `json:"consensus_timestamp"`
-	Payer              string `json:"payer"`
+	SequenceNumber     int64          `json:"sequence_number"`
+	ConsensusTimestamp string         `json:"consensus_timestamp"`
+	Payer              string         `json:"payer"`
 	Payload            map[string]any `json:"payload"`
 }
 
@@ -127,4 +127,3 @@ type CreateRegistryTopicTxParams struct {
 	SubmitKey    hedera.Key
 	MemoOverride string
 }
-

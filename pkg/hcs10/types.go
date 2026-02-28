@@ -14,33 +14,33 @@ const (
 type Operation string
 
 const (
-	OperationRegister         Operation = "register"
-	OperationDelete           Operation = "delete"
+	OperationRegister          Operation = "register"
+	OperationDelete            Operation = "delete"
 	OperationConnectionRequest Operation = "connection_request"
 	OperationConnectionCreated Operation = "connection_created"
-	OperationMessage          Operation = "message"
-	OperationCloseConnection  Operation = "close_connection"
-	OperationTransaction      Operation = "transaction"
+	OperationMessage           Operation = "message"
+	OperationCloseConnection   Operation = "close_connection"
+	OperationTransaction       Operation = "transaction"
 )
 
 type Message struct {
-	P                     string    `json:"p"`
-	Op                    Operation `json:"op"`
-	AccountID             string    `json:"account_id,omitempty"`
-	InboundTopicID        string    `json:"inbound_topic_id,omitempty"`
-	OutboundTopicID       string    `json:"outbound_topic_id,omitempty"`
-	RequestorOutboundTopicID string `json:"requestor_outbound_topic_id,omitempty"`
-	ConnectionTopicID     string    `json:"connection_topic_id,omitempty"`
-	ConnectedAccountID    string    `json:"connected_account_id,omitempty"`
-	ConnectionID          int64     `json:"connection_id,omitempty"`
-	ConnectionRequestID   int64     `json:"connection_request_id,omitempty"`
-	ConfirmedRequestID    int64     `json:"confirmed_request_id,omitempty"`
-	OperatorID            string    `json:"operator_id,omitempty"`
-	Data                  string    `json:"data,omitempty"`
-	UID                   string    `json:"uid,omitempty"`
-	Memo                  string    `json:"m,omitempty"`
-	ScheduleID            string    `json:"schedule_id,omitempty"`
-	TransactionID         string    `json:"tx_id,omitempty"`
+	P                        string    `json:"p"`
+	Op                       Operation `json:"op"`
+	AccountID                string    `json:"account_id,omitempty"`
+	InboundTopicID           string    `json:"inbound_topic_id,omitempty"`
+	OutboundTopicID          string    `json:"outbound_topic_id,omitempty"`
+	RequestorOutboundTopicID string    `json:"requestor_outbound_topic_id,omitempty"`
+	ConnectionTopicID        string    `json:"connection_topic_id,omitempty"`
+	ConnectedAccountID       string    `json:"connected_account_id,omitempty"`
+	ConnectionID             int64     `json:"connection_id,omitempty"`
+	ConnectionRequestID      int64     `json:"connection_request_id,omitempty"`
+	ConfirmedRequestID       int64     `json:"confirmed_request_id,omitempty"`
+	OperatorID               string    `json:"operator_id,omitempty"`
+	Data                     string    `json:"data,omitempty"`
+	UID                      string    `json:"uid,omitempty"`
+	Memo                     string    `json:"m,omitempty"`
+	ScheduleID               string    `json:"schedule_id,omitempty"`
+	TransactionID            string    `json:"tx_id,omitempty"`
 }
 
 type ClientConfig struct {
@@ -102,4 +102,3 @@ type CreateTopicTxParams struct {
 	SubmitKey       hedera.Key
 	MemoOverride    string
 }
-

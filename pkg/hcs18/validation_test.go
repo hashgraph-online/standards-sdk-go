@@ -28,4 +28,3 @@ func TestValidateRespondMessage(t *testing.T) {
 		t.Fatalf("expected valid message, got %v", err)
 	}
 }
-

@@ -75,4 +75,3 @@ func BuildRegisterEntryTx(params RegisterEntryTxParams) (*hedera.TopicMessageSub
 
 	return transaction, nil
 }
-

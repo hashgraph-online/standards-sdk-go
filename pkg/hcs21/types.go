@@ -3,10 +3,10 @@ package hcs21
 import "regexp"
 
 const (
-	Protocol             = "hcs-21"
-	MaxMessageBytes      = 1024
-	SafeMessageBytes     = 1000
-	DefaultTopicTTL int64 = 86400
+	Protocol               = "hcs-21"
+	MaxMessageBytes        = 1024
+	SafeMessageBytes       = 1000
+	DefaultTopicTTL  int64 = 86400
 )
 
 type Operation string
@@ -119,4 +119,3 @@ var (
 	manifestPointerPattern = regexp.MustCompile(`^(?:hcs:\/\/1\/0\.0\.\d+|ipfs:\/\/\S+|ar:\/\/\S+|oci:\/\/\S+|https?:\/\/\S+)$`)
 	metaPointerPattern     = regexp.MustCompile(`^(?:0\.0\.\d+|hcs:\/\/1\/0\.0\.\d+(?:\/\d+)?|ipfs:\/\/\S+|ar:\/\/\S+|oci:\/\/\S+|https?:\/\/\S+)$`)
 )
-

@@ -67,4 +67,3 @@ func BuildSubmitMessageTx(topicID string, payload any, transactionMemo string) (
 	}
 	return transaction, nil
 }
-

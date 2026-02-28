@@ -95,13 +95,13 @@ func (c *Client) CreateOutboundTopic(ctx context.Context, options CreateTopicOpt
 // CreateConnectionTopic creates the requested resource.
 func (c *Client) CreateConnectionTopic(ctx context.Context, options CreateTopicOptions) (string, hedera.TransactionReceipt, error) {
 	return c.createTopic(ctx, CreateTopicTxParams{
-		TopicType:     TopicTypeConnection,
-		TTL:           options.TTL,
+		TopicType:      TopicTypeConnection,
+		TTL:            options.TTL,
 		InboundTopicID: options.InboundTopicID,
-		ConnectionID:  options.ConnectionID,
-		AdminKey:      c.resolvePublicKey(options.AdminKey, options.UseOperatorAsAdmin),
-		SubmitKey:     c.resolvePublicKey(options.SubmitKey, options.UseOperatorAsSubmit),
-		MemoOverride:  options.MemoOverride,
+		ConnectionID:   options.ConnectionID,
+		AdminKey:       c.resolvePublicKey(options.AdminKey, options.UseOperatorAsAdmin),
+		SubmitKey:      c.resolvePublicKey(options.SubmitKey, options.UseOperatorAsSubmit),
+		MemoOverride:   options.MemoOverride,
 	}, options.TransactionMemo)
 }
 
@@ -119,7 +119,7 @@ func (c *Client) CreateRegistryTopic(ctx context.Context, options CreateTopicOpt
 		return CreateRegistryTopicResult{
 			Success: false,
 			Error:   err.Error(),
-		}, nil
+		}, err
 	}
 	_ = receipt
 	return CreateRegistryTopicResult{
@@ -321,4 +321,3 @@ func (c *Client) resolvePublicKey(raw string, useOperator bool) hedera.Key {
 	}
 	return publicKey
 }
-

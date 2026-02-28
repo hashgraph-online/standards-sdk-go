@@ -83,4 +83,3 @@ func ValidateDeclaration(declaration AdapterDeclaration) error {
 
 	return nil
 }
-

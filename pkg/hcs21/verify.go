@@ -1,7 +1,7 @@
 package hcs21
 
 import (
-	"crypto/sha384"
+	"crypto/sha512"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -63,13 +63,13 @@ func VerifyDeclarationSignature(declaration AdapterDeclaration, publisherPublicK
 	}
 
 	unsigned := map[string]any{
-		"p":         declaration.P,
-		"op":        declaration.Op,
+		"p":          declaration.P,
+		"op":         declaration.Op,
 		"adapter_id": declaration.AdapterID,
-		"entity":    declaration.Entity,
-		"package":   declaration.Package,
-		"manifest":  declaration.Manifest,
-		"config":    declaration.Config,
+		"entity":     declaration.Entity,
+		"package":    declaration.Package,
+		"manifest":   declaration.Manifest,
+		"config":     declaration.Config,
 	}
 	if declaration.ManifestSequence > 0 {
 		unsigned["manifest_sequence"] = declaration.ManifestSequence
@@ -112,10 +112,9 @@ func normalizeDigest(value string) string {
 
 // VerifyArtifactDigest performs the requested operation.
 func VerifyArtifactDigest(artifact []byte, expectedDigest string) bool {
-	sum := sha384.Sum384(artifact)
+	sum := sha512.Sum384(artifact)
 	hexDigest := strings.ToLower(hex.EncodeToString(sum[:]))
 	base64Digest := strings.ToLower(base64.StdEncoding.EncodeToString(sum[:]))
 	expected := normalizeDigest(expectedDigest)
 	return expected == hexDigest || expected == base64Digest
 }
-

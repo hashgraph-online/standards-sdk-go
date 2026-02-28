@@ -11,4 +11,3 @@ func TestNewClientMissingOperatorID(t *testing.T) {
 		t.Fatalf("expected error for missing operator account ID")
 	}
 }
-

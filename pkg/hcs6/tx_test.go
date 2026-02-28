@@ -2,7 +2,7 @@ package hcs6
 
 import "testing"
 
-func TestBuildCreateRegistryTx(t *testing.T) {
+func TestBuildCreateRegistryTxPrimary(t *testing.T) {
 	transaction := BuildCreateRegistryTx(CreateRegistryTxParams{
 		TTL: 3600,
 	})
@@ -11,7 +11,7 @@ func TestBuildCreateRegistryTx(t *testing.T) {
 	}
 }
 
-func TestBuildRegisterEntryTx(t *testing.T) {
+func TestBuildRegisterEntryTxPrimary(t *testing.T) {
 	transaction, err := BuildRegisterEntryTx(RegisterEntryTxParams{
 		RegistryTopicID: "0.0.123",
 		TargetTopicID:   "0.0.456",
@@ -23,4 +23,3 @@ func TestBuildRegisterEntryTx(t *testing.T) {
 		t.Fatalf("expected transaction")
 	}
 }
-

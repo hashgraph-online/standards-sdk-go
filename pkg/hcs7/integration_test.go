@@ -84,4 +84,3 @@ func TestHCS7Integration_CreateRegisterResolve(t *testing.T) {
 		t.Fatalf("expected at least one entry")
 	}
 }
-

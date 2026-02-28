@@ -36,8 +36,8 @@ func TestHCS18Integration_DiscoveryFlow(t *testing.T) {
 	defer cancel()
 
 	topicID, _, err := client.CreateDiscoveryTopic(ctx, CreateDiscoveryTopicOptions{
-		TTLSeconds:         3600,
-		UseOperatorAsAdmin: true,
+		TTLSeconds:          3600,
+		UseOperatorAsAdmin:  true,
 		UseOperatorAsSubmit: true,
 	})
 	if err != nil {
@@ -90,4 +90,3 @@ func TestHCS18Integration_DiscoveryFlow(t *testing.T) {
 		t.Fatalf("expected at least 2 discovery messages, got %d", len(records))
 	}
 }
-

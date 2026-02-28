@@ -124,4 +124,3 @@ func BuildRegistryDeleteMessage(uid string, memo string) Message {
 		Memo: strings.TrimSpace(memo),
 	}
 }
-
