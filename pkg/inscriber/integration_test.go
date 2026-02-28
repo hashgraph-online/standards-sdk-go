@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashgraph-online/go-sdk/pkg/shared"
+	"github.com/hashgraph-online/standards-sdk-go/pkg/shared"
 	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 

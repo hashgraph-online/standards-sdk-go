@@ -1,15 +1,20 @@
 # Hashgraph Online HCS SDK (Go)
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/hashgraph-online/go-sdk.svg)](https://pkg.go.dev/github.com/hashgraph-online/go-sdk)
-[![Go Report Card](https://goreportcard.com/badge/github.com/hashgraph-online/go-sdk)](https://goreportcard.com/report/github.com/hashgraph-online/go-sdk)
+[![Go Reference](https://pkg.go.dev/badge/github.com/hashgraph-online/standards-sdk-go.svg)](https://pkg.go.dev/github.com/hashgraph-online/standards-sdk-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/hashgraph-online/standards-sdk-go)](https://goreportcard.com/report/github.com/hashgraph-online/standards-sdk-go)
+[![Go CI](https://github.com/hashgraph-online/standards-sdk-go/actions/workflows/go-module-release.yml/badge.svg)](https://github.com/hashgraph-online/standards-sdk-go/actions/workflows/go-module-release.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/hashgraph-online/standards-sdk-go)](https://github.com/hashgraph-online/standards-sdk-go/releases)
+[![License](https://img.shields.io/github/license/hashgraph-online/standards-sdk-go)](./LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/hashgraph-online/standards-sdk-go?style=social)](https://github.com/hashgraph-online/standards-sdk-go/stargazers)
+[![CodeSandbox Examples](https://img.shields.io/badge/CodeSandbox-Examples-151515?logo=codesandbox&logoColor=white)](https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples)
 
-| ![](./Hashgraph-Online.png) | Go reference implementation of the Hiero Consensus Specifications (HCS) and Registry Broker utilities, built on `github.com/hashgraph/hedera-sdk-go/v2`.<br><br>[📚 Standards SDK Documentation](https://hol.org/docs/libraries/standards-sdk/)<br>[📖 Hiero Consensus Specifications Documentation](https://hol.org/docs/standards) |
+| ![](./Hashgraph-Online.png) | Go reference implementation of the Hiero Consensus Specifications (HCS) and Registry Broker utilities.<br><br>[📚 Standards SDK Documentation](https://hol.org/docs/libraries/standards-sdk/)<br>[📖 Hiero Consensus Specifications Documentation](https://hol.org/docs/standards) |
 | :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 ## Quick Start
 
 ```bash
-cd go-sdk
+cd standards-sdk-go
 go mod tidy
 go test ./...
 ```
@@ -17,8 +22,16 @@ go test ./...
 ## Install
 
 ```bash
-go get github.com/hashgraph-online/go-sdk@latest
+go get github.com/hashgraph-online/standards-sdk-go@latest
 ```
+
+## CodeSandbox Examples
+
+- [Examples index](./examples/README.md)
+- [HCS-2 create registry](https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs2-create-registry)
+- [HCS-14 parse UAID](https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs14-parse-uaid)
+- [HCS-27 publish checkpoint](https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs27-publish-checkpoint)
+- [Inscriber authenticate + client](https://codesandbox.io/p/github/hashgraph-online/standards-sdk-go/tree/main/examples/inscriber-auth-client)
 
 ## Supported Packages
 
@@ -232,15 +245,15 @@ go test -v ./pkg/registrybroker
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](../standards-sdk/CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](../standards-sdk/CODE_OF_CONDUCT.md) before contributing.
+Please read [CONTRIBUTING.md](./CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) before contributing.
 
 ## Security
 
-For security concerns, see [SECURITY.md](../standards-sdk/SECURITY.md).
+For security concerns, see [SECURITY.md](./SECURITY.md).
 
 ## Maintainers
 
-See [MAINTAINERS.md](../standards-sdk/MAINTAINERS.md).
+See [MAINTAINERS.md](./MAINTAINERS.md).
 
 ## Resources
 

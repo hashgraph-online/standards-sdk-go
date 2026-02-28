@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashgraph-online/go-sdk/pkg/shared"
+	"github.com/hashgraph-online/standards-sdk-go/pkg/shared"
 )
 
 func TestHCS11Integration_FetchProfileByAccountID(t *testing.T) {
