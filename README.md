@@ -37,6 +37,7 @@ go get github.com/hashgraph-online/standards-sdk-go@latest
 - [HCS-15 build account transaction](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs15-build-account-tx)
 - [HCS-16 build flora topic transaction](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs16-build-flora-topic-tx)
 - [HCS-17 build state hash message](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs17-build-state-message)
+- [HCS-20 deploy points](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs20-deploy-points)
 - [HCS-27 publish checkpoint](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs27-publish-checkpoint)
 - [Inscriber authenticate + client](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/inscriber-auth-client)
 
@@ -49,6 +50,7 @@ go get github.com/hashgraph-online/standards-sdk-go@latest
 - `pkg/hcs15`: HCS-15 base/petal account creation, tx builders, and petal/base key verification helpers.
 - `pkg/hcs16`: HCS-16 flora account + topic management, message builders/senders, and threshold-member key assembly helpers.
 - `pkg/hcs17`: HCS-17 state-hash topic/message support, deterministic state hash calculators, and verification helpers.
+- `pkg/hcs20`: HCS-20 auditable points validation, transaction builders, SDK client flows, and mirror-driven state indexing.
 - `pkg/hcs27`: HCS-27 checkpoint topic creation, publish/retrieval, validation, Merkle/proof helpers.
 - `pkg/inscriber`: Kiloscribe auth flow, websocket-first high-level inscription utilities, quote generation, bulk-files support, registry-broker quote/job helpers, and skill inscription helpers.
 - `pkg/registrybroker`: Full Registry Broker client (search, adapters, agents, credits, verification, ledger auth, chat/encryption, feedback, skills).
@@ -103,6 +105,22 @@ result, _ := client.Resolve(
 	context.Background(),
 	"uaid:aid:ans-godaddy-ote;uid=ans://v1.0.1.ote.agent.cs3p.com;registry=ans;proto=a2a;nativeId=ote.agent.cs3p.com;version=1.0.1",
 )
+```
+
+### HCS-20
+
+```go
+client, _ := hcs20.NewClient(hcs20.ClientConfig{
+	OperatorAccountID:  "0.0.1234",
+	OperatorPrivateKey: "<private-key>",
+	Network:            "testnet",
+})
+
+pointsInfo, _ := client.DeployPoints(context.Background(), hcs20.DeployPointsOptions{
+	Name: "Loyalty Points",
+	Tick: "loyal",
+	Max:  "1000000",
+})
 ```
 
 ### Inscriber
@@ -197,6 +215,13 @@ Live HCS-17 integration (compute + publish state hash):
 ```bash
 RUN_INTEGRATION=1 \
 go test -v ./pkg/hcs17 -run TestHCS17Integration_ComputeAndPublishStateHash
+```
+
+Live HCS-20 integration (deploy + register + mint/transfer/burn + indexing):
+
+```bash
+RUN_INTEGRATION=1 \
+go test -v ./pkg/hcs20 -run TestHCS20Integration_EndToEnd
 ```
 
 Live high-level inscriber utilities (websocket default + bulk-files quote):

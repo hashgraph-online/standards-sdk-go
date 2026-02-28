@@ -1,0 +1,449 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>hcs15: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/hashgraph-online/standards-sdk-go/pkg/hcs15/client.go (59.6%)</option>
+				
+				<option value="file1">github.com/hashgraph-online/standards-sdk-go/pkg/hcs15/tx.go (92.3%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package hcs15
+
+import (
+        "context"
+        "fmt"
+        "strings"
+
+        "github.com/hashgraph-online/standards-sdk-go/pkg/mirror"
+        "github.com/hashgraph-online/standards-sdk-go/pkg/shared"
+        hedera "github.com/hashgraph/hedera-sdk-go/v2"
+)
+
+type Client struct {
+        hederaClient *hedera.Client
+        mirrorClient *mirror.Client
+}
+
+// NewClient creates a new Client.
+func NewClient(config ClientConfig) (*Client, error) <span class="cov8" title="1">{
+        network, err := shared.NormalizeNetwork(config.Network)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">operatorID := strings.TrimSpace(config.OperatorAccountID)
+        if operatorID == "" </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("operator account ID is required")
+        }</span>
+        <span class="cov8" title="1">operatorKey := strings.TrimSpace(config.OperatorPrivateKey)
+        if operatorKey == "" </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("operator private key is required")
+        }</span>
+
+        <span class="cov8" title="1">parsedOperatorID, err := hedera.AccountIDFromString(operatorID)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("invalid operator account ID: %w", err)
+        }</span>
+        <span class="cov8" title="1">parsedOperatorKey, err := shared.ParsePrivateKey(operatorKey)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">hederaClient, err := shared.NewHederaClient(network)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">hederaClient.SetOperator(parsedOperatorID, parsedOperatorKey)
+
+        mirrorClient, err := mirror.NewClient(mirror.Config{
+                Network: network,
+                BaseURL: config.MirrorBaseURL,
+                APIKey:  config.MirrorAPIKey,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return &amp;Client{
+                hederaClient: hederaClient,
+                mirrorClient: mirrorClient,
+        }, nil</span>
+}
+
+// HederaClient returns the configured Hedera SDK client.
+func (c *Client) HederaClient() *hedera.Client <span class="cov8" title="1">{
+        return c.hederaClient
+}</span>
+
+// MirrorClient returns the configured mirror node client.
+func (c *Client) MirrorClient() *mirror.Client <span class="cov8" title="1">{
+        return c.mirrorClient
+}</span>
+
+// CreateBaseAccount creates the requested resource.
+func (c *Client) CreateBaseAccount(
+        ctx context.Context,
+        options BaseAccountCreateOptions,
+) (BaseAccountCreateResult, error) <span class="cov0" title="0">{
+        _ = ctx
+
+        privateKey, err := hedera.PrivateKeyGenerateEcdsa()
+        if err != nil </span><span class="cov0" title="0">{
+                return BaseAccountCreateResult{}, fmt.Errorf("failed to generate ecdsa private key: %w", err)
+        }</span>
+        <span class="cov0" title="0">publicKey := privateKey.PublicKey()
+
+        initialBalance := options.InitialBalanceHbar
+        if initialBalance &lt;= 0 </span><span class="cov0" title="0">{
+                initialBalance = 10
+        }</span>
+
+        <span class="cov0" title="0">transaction, err := BuildBaseAccountCreateTx(BaseAccountCreateTxParams{
+                PublicKey:                     publicKey,
+                InitialBalanceHbar:            initialBalance,
+                MaxAutomaticTokenAssociations: options.MaxAutomaticTokenAssociations,
+                AccountMemo:                   options.AccountMemo,
+                TransactionMemo:               options.TransactionMemo,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return BaseAccountCreateResult{}, err
+        }</span>
+
+        <span class="cov0" title="0">response, err := transaction.Execute(c.hederaClient)
+        if err != nil </span><span class="cov0" title="0">{
+                return BaseAccountCreateResult{}, fmt.Errorf("failed to execute base account create transaction: %w", err)
+        }</span>
+        <span class="cov0" title="0">receipt, err := response.GetReceipt(c.hederaClient)
+        if err != nil </span><span class="cov0" title="0">{
+                return BaseAccountCreateResult{}, fmt.Errorf("failed to retrieve base account create receipt: %w", err)
+        }</span>
+        <span class="cov0" title="0">if receipt.AccountID == nil </span><span class="cov0" title="0">{
+                return BaseAccountCreateResult{}, fmt.Errorf("HCS-15 BASE_ACCOUNT_CREATE_FAILED")
+        }</span>
+
+        <span class="cov0" title="0">return BaseAccountCreateResult{
+                AccountID:     receipt.AccountID.String(),
+                PrivateKey:    privateKey,
+                PrivateKeyRaw: privateKey.StringRaw(),
+                PublicKey:     publicKey,
+                EVMAddress:    normalizeEVMAddress(publicKey.ToEvmAddress()),
+                Receipt:       receipt,
+        }, nil</span>
+}
+
+// CreatePetalAccount creates the requested resource.
+func (c *Client) CreatePetalAccount(
+        ctx context.Context,
+        options PetalAccountCreateOptions,
+) (PetalAccountCreateResult, error) <span class="cov8" title="1">{
+        _ = ctx
+
+        basePrivateKey := strings.TrimSpace(options.BasePrivateKey)
+        if basePrivateKey == "" </span><span class="cov8" title="1">{
+                return PetalAccountCreateResult{}, fmt.Errorf("base private key is required")
+        }</span>
+
+        <span class="cov0" title="0">parsedBaseKey, err := hedera.PrivateKeyFromStringECDSA(basePrivateKey)
+        if err != nil </span><span class="cov0" title="0">{
+                return PetalAccountCreateResult{}, fmt.Errorf("invalid base private key: %w", err)
+        }</span>
+        <span class="cov0" title="0">publicKey := parsedBaseKey.PublicKey()
+
+        initialBalance := options.InitialBalanceHbar
+        if initialBalance &lt;= 0 </span><span class="cov0" title="0">{
+                initialBalance = 1
+        }</span>
+
+        <span class="cov0" title="0">transaction, err := BuildPetalAccountCreateTx(PetalAccountCreateTxParams{
+                PublicKey:                     publicKey,
+                InitialBalanceHbar:            initialBalance,
+                MaxAutomaticTokenAssociations: options.MaxAutomaticTokenAssociations,
+                AccountMemo:                   options.AccountMemo,
+                TransactionMemo:               options.TransactionMemo,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return PetalAccountCreateResult{}, err
+        }</span>
+
+        <span class="cov0" title="0">response, err := transaction.Execute(c.hederaClient)
+        if err != nil </span><span class="cov0" title="0">{
+                return PetalAccountCreateResult{}, fmt.Errorf("failed to execute petal account create transaction: %w", err)
+        }</span>
+        <span class="cov0" title="0">receipt, err := response.GetReceipt(c.hederaClient)
+        if err != nil </span><span class="cov0" title="0">{
+                return PetalAccountCreateResult{}, fmt.Errorf("failed to retrieve petal account create receipt: %w", err)
+        }</span>
+        <span class="cov0" title="0">if receipt.AccountID == nil </span><span class="cov0" title="0">{
+                return PetalAccountCreateResult{}, fmt.Errorf("HCS-15 PETAL_ACCOUNT_CREATE_FAILED")
+        }</span>
+
+        <span class="cov0" title="0">return PetalAccountCreateResult{
+                AccountID: receipt.AccountID.String(),
+                Receipt:   receipt,
+        }, nil</span>
+}
+
+// VerifyPetalAccount performs the requested operation.
+func (c *Client) VerifyPetalAccount(
+        ctx context.Context,
+        petalAccountID string,
+        baseAccountID string,
+) (bool, error) <span class="cov8" title="1">{
+        if strings.TrimSpace(petalAccountID) == "" </span><span class="cov8" title="1">{
+                return false, fmt.Errorf("petal account ID is required")
+        }</span>
+        <span class="cov8" title="1">if strings.TrimSpace(baseAccountID) == "" </span><span class="cov8" title="1">{
+                return false, fmt.Errorf("base account ID is required")
+        }</span>
+
+        <span class="cov8" title="1">petalInfo, err := c.mirrorClient.GetAccount(ctx, petalAccountID)
+        if err != nil </span><span class="cov0" title="0">{
+                return false, err
+        }</span>
+        <span class="cov8" title="1">baseInfo, err := c.mirrorClient.GetAccount(ctx, baseAccountID)
+        if err != nil </span><span class="cov0" title="0">{
+                return false, err
+        }</span>
+
+        <span class="cov8" title="1">petalKey := extractMirrorKey(petalInfo.Key)
+        baseKey := extractMirrorKey(baseInfo.Key)
+        if petalKey == "" || baseKey == "" </span><span class="cov8" title="1">{
+                return false, nil
+        }</span>
+
+        <span class="cov8" title="1">return petalKey == baseKey, nil</span>
+}
+
+func normalizeEVMAddress(value string) string <span class="cov8" title="1">{
+        trimmed := strings.TrimSpace(value)
+        if trimmed == "" </span><span class="cov8" title="1">{
+                return trimmed
+        }</span>
+        <span class="cov8" title="1">if strings.HasPrefix(trimmed, "0x") || strings.HasPrefix(trimmed, "0X") </span><span class="cov8" title="1">{
+                return trimmed
+        }</span>
+        <span class="cov8" title="1">return "0x" + trimmed</span>
+}
+
+func extractMirrorKey(raw map[string]any) string <span class="cov8" title="1">{
+        if raw == nil </span><span class="cov8" title="1">{
+                return ""
+        }</span>
+        <span class="cov8" title="1">return extractKeyCandidate(raw)</span>
+}
+
+func extractKeyCandidate(value any) string <span class="cov8" title="1">{
+        switch typed := value.(type) </span>{
+        case string:<span class="cov8" title="1">
+                return strings.TrimSpace(typed)</span>
+        case map[string]any:<span class="cov8" title="1">
+                for _, key := range []string{"key", "ECDSA_secp256k1", "ed25519"} </span><span class="cov8" title="1">{
+                        if nested, ok := typed[key]; ok </span><span class="cov8" title="1">{
+                                candidate := extractKeyCandidate(nested)
+                                if candidate != "" </span><span class="cov8" title="1">{
+                                        return candidate
+                                }</span>
+                        }
+                }
+                <span class="cov8" title="1">for _, nested := range typed </span><span class="cov8" title="1">{
+                        switch nested.(type) </span>{
+                        case map[string]any, []any:<span class="cov8" title="1">
+                                candidate := extractKeyCandidate(nested)
+                                if candidate != "" </span><span class="cov8" title="1">{
+                                        return candidate
+                                }</span>
+                        }
+                }
+        case []any:<span class="cov8" title="1">
+                for _, nested := range typed </span><span class="cov8" title="1">{
+                        candidate := extractKeyCandidate(nested)
+                        if candidate != "" </span><span class="cov8" title="1">{
+                                return candidate
+                        }</span>
+                }
+        }
+        <span class="cov8" title="1">return ""</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package hcs15
+
+import (
+        "fmt"
+        "strings"
+
+        hedera "github.com/hashgraph/hedera-sdk-go/v2"
+)
+
+// BuildBaseAccountCreateTx builds and returns the configured value.
+func BuildBaseAccountCreateTx(params BaseAccountCreateTxParams) (*hedera.AccountCreateTransaction, error) <span class="cov8" title="1">{
+        if params.PublicKey.String() == "" </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("public key is required")
+        }</span>
+
+        <span class="cov8" title="1">initialBalance := params.InitialBalanceHbar
+        if initialBalance &lt;= 0 </span><span class="cov8" title="1">{
+                initialBalance = 1
+        }</span>
+
+        <span class="cov8" title="1">transaction := hedera.NewAccountCreateTransaction().
+                SetKey(params.PublicKey).
+                SetAlias(params.PublicKey.ToEvmAddress()).
+                SetInitialBalance(hedera.NewHbar(initialBalance)).
+                SetTransactionMemo(normalizeMemo(params.TransactionMemo, HCS15BaseAccountCreateTransactionMemo))
+
+        if params.MaxAutomaticTokenAssociations != nil </span><span class="cov8" title="1">{
+                transaction.SetMaxAutomaticTokenAssociations(*params.MaxAutomaticTokenAssociations)
+        }</span>
+        <span class="cov8" title="1">if strings.TrimSpace(params.AccountMemo) != "" </span><span class="cov8" title="1">{
+                transaction.SetAccountMemo(strings.TrimSpace(params.AccountMemo))
+        }</span>
+
+        <span class="cov8" title="1">return transaction, nil</span>
+}
+
+// BuildPetalAccountCreateTx builds and returns the configured value.
+func BuildPetalAccountCreateTx(params PetalAccountCreateTxParams) (*hedera.AccountCreateTransaction, error) <span class="cov8" title="1">{
+        if params.PublicKey.String() == "" </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("public key is required")
+        }</span>
+
+        <span class="cov8" title="1">initialBalance := params.InitialBalanceHbar
+        if initialBalance &lt;= 0 </span><span class="cov8" title="1">{
+                initialBalance = 1
+        }</span>
+
+        <span class="cov8" title="1">transaction := hedera.NewAccountCreateTransaction().
+                SetKey(params.PublicKey).
+                SetInitialBalance(hedera.NewHbar(initialBalance)).
+                SetTransactionMemo(normalizeMemo(params.TransactionMemo, HCS15PetalAccountCreateTransactionMemo))
+
+        if params.MaxAutomaticTokenAssociations != nil </span><span class="cov8" title="1">{
+                transaction.SetMaxAutomaticTokenAssociations(*params.MaxAutomaticTokenAssociations)
+        }</span>
+        <span class="cov8" title="1">if strings.TrimSpace(params.AccountMemo) != "" </span><span class="cov8" title="1">{
+                transaction.SetAccountMemo(strings.TrimSpace(params.AccountMemo))
+        }</span>
+
+        <span class="cov8" title="1">return transaction, nil</span>
+}
+
+type BaseAccountCreateTxParams struct {
+        PublicKey                     hedera.PublicKey
+        InitialBalanceHbar            float64
+        MaxAutomaticTokenAssociations *int32
+        AccountMemo                   string
+        TransactionMemo               string
+}
+
+type PetalAccountCreateTxParams struct {
+        PublicKey                     hedera.PublicKey
+        InitialBalanceHbar            float64
+        MaxAutomaticTokenAssociations *int32
+        AccountMemo                   string
+        TransactionMemo               string
+}
+
+func normalizeMemo(value string, fallback string) string <span class="cov8" title="1">{
+        trimmed := strings.TrimSpace(value)
+        if trimmed == "" </span><span class="cov8" title="1">{
+                return fallback
+        }</span>
+        <span class="cov8" title="1">return trimmed</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
