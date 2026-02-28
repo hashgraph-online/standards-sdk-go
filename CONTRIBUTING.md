@@ -4,8 +4,8 @@ Thank you for your interest in contributing to the Go SDK for the Hiero Consensu
 
 ## Issues and Requests
 
-- Bug reports: [GitHub Issues](https://github.com/hashgraph-online/go-sdk/issues)
-- Feature requests: [GitHub Issues](https://github.com/hashgraph-online/go-sdk/issues)
+- Bug reports: [GitHub Issues](https://github.com/hashgraph-online/standards-sdk-go/issues)
+- Feature requests: [GitHub Issues](https://github.com/hashgraph-online/standards-sdk-go/issues)
 
 Before opening a new issue, search existing issues first to avoid duplicates.
 

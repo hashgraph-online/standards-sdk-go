@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashgraph-online/go-sdk/pkg/shared"
+	"github.com/hashgraph-online/standards-sdk-go/pkg/shared"
 )
 
 type Config struct {

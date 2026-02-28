@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/hashgraph-online/go-sdk/pkg/hcs14"
+	"github.com/hashgraph-online/standards-sdk-go/pkg/hcs14"
 )
 
 func main() {

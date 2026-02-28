@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashgraph-online/go-sdk/pkg/shared"
+	"github.com/hashgraph-online/standards-sdk-go/pkg/shared"
 )
 
 func TestHCS15Integration_CreateBaseAndPetalAccounts(t *testing.T) {

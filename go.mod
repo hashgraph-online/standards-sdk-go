@@ -1,4 +1,4 @@
-module github.com/hashgraph-online/go-sdk
+module github.com/hashgraph-online/standards-sdk-go
 
 go 1.24.0
 
