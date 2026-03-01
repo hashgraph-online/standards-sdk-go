@@ -62,14 +62,16 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Gosec SARIF
-        if: always()
+        if: always() && hashFiles('results.sarif') != ''
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
           category: gosec
 
       - name: Upload Trivy SARIF
-        if: always()
+        if: always() && hashFiles('trivy-results.sarif') != ''
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
