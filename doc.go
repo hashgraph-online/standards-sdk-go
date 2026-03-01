@@ -1,8 +1,8 @@
-// The Hashgraph Online Standards SDK for Go is the official Go implementation
+// The HOL Standards SDK for Go is the official Go implementation
 // of the Hiero Consensus Specifications (HCS). It provides a comprehensive
 // set of packages for interacting with the Hedera Consensus Service,
 // inscribing data to the Hedera public ledger, and integrating with the
-// Hashgraph Online Registry Broker.
+// HOL Registry Broker.
 //
 // # Standards Implemented
 //
@@ -23,7 +23,7 @@
 //
 // Hiero Consensus Specifications: https://hol.org/docs/standards
 //
-// Hashgraph Online ecosystem: https://hol.org
+// HOL ecosystem: https://hol.org
 //
 // # Installation
 //

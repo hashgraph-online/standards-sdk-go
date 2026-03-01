@@ -1,4 +1,4 @@
-# Hashgraph Online LangChainGo Tools
+# HOL LangChainGo Tools
 
 This package provides a suite of tools for the [LangChainGo](https://github.com/tmc/langchaingo) AI agent framework, enabling AI agents to interact directly with the [Hiero Consensus Specifications](https://hol.org/docs/standards) on the Hedera public ledger.
 
@@ -51,6 +51,6 @@ fmt.Println(response)
 ```
 
 ## Learn More
-- [Hashgraph Online](https://hol.org)
+- [HOL](https://hol.org)
 - [Standards SDK Documentation](https://hol.org/docs/libraries/standards-sdk/)
 - [HCS Specifications](https://hol.org/docs/standards)

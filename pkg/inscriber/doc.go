@@ -1,5 +1,5 @@
 // Package inscriber provides the Kiloscribe authentication flow and high-level
-// inscription utilities for the Hashgraph Online ecosystem. It supports
+// inscription utilities for the HOL ecosystem. It supports
 // websocket-first inscription, quote generation, bulk-files support,
 // Registry Broker quote and job helpers, and skill inscription helpers.
 //
@@ -27,6 +27,6 @@
 //
 // Learn more about inscriptions: https://hol.org/docs/standards/hcs-1
 //
-// This package is part of the Hashgraph Online Standards SDK for Go.
-// See https://hol.org for more information about the Hashgraph Online ecosystem.
+// This package is part of the HOL Standards SDK for Go.
+// See https://hol.org for more information about the HOL ecosystem.
 package inscriber

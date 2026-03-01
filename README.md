@@ -1,4 +1,4 @@
-# Hashgraph Online HCS SDK (Go)
+# HOL HCS SDK (Go)
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/hashgraph-online/standards-sdk-go.svg)](https://pkg.go.dev/github.com/hashgraph-online/standards-sdk-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hashgraph-online/standards-sdk-go)](https://goreportcard.com/report/github.com/hashgraph-online/standards-sdk-go)

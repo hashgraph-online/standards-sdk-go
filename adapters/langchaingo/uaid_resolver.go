@@ -11,7 +11,7 @@ import (
 )
 
 // UAIDResolverTool is a langchaingo compatible Tool that allows an agent
-// to resolve a Hashgraph Online Universal Agent ID (UAID) to its profile.
+// to resolve a HOL Universal Agent ID (UAID) to its profile.
 type UAIDResolverTool struct {
 	client    *hcs14.Client
 	Callbacks callbacks.Handler
@@ -39,7 +39,7 @@ func (t *UAIDResolverTool) Name() string {
 // Description returns a description of the tool to help the language model
 // decide when to use it.
 func (t *UAIDResolverTool) Description() string {
-	return `Resolves a Hashgraph Online Universal Agent ID (UAID) string (e.g., uaid:aid:...) into its detailed JSON profile. 
+	return `Resolves a HOL Universal Agent ID (UAID) string (e.g., uaid:aid:...) into its detailed JSON profile. 
 Use this tool when you need to look up information, authentication details, or endpoints for an AI agent given its UAID.`
 }
 

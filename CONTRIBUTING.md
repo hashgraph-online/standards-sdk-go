@@ -1,4 +1,4 @@
-# Contributing to Hashgraph Online HCS SDK (Go)
+# Contributing to HOL HCS SDK (Go)
 
 Thank you for your interest in contributing to the Go SDK for the Hiero Consensus Specifications (HCS).
 

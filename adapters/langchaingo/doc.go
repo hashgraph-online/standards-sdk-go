@@ -1,8 +1,8 @@
-// Package langchaingo provides Hashgraph Online tools and integrations for the
+// Package langchaingo provides HOL tools and integrations for the
 // tmc/langchaingo AI agent framework.
 //
 // These tools allow Langchain-powered agents to interact seamlessly with
-// decentralized Hashgraph Online services, such as resolving Universal Agent
+// decentralized HOL services, such as resolving Universal Agent
 // IDs (UAID) to locate and securely communicate with other AI agents.
 //
 // # Available Tools

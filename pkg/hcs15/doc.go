@@ -15,6 +15,6 @@
 //
 // SDK documentation and guides: https://hol.org/docs/libraries/standards-sdk/
 //
-// This package is part of the Hashgraph Online Standards SDK for Go.
-// See https://hol.org for more information about the Hashgraph Online ecosystem.
+// This package is part of the HOL Standards SDK for Go.
+// See https://hol.org for more information about the HOL ecosystem.
 package hcs15

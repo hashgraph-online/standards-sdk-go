@@ -1,4 +1,4 @@
-// Package registrybroker provides a full client for the Hashgraph Online
+// Package registrybroker provides a full client for the HOL
 // Registry Broker API. It supports agent search and discovery, adapter
 // management, credit operations, verification, ledger-based authentication,
 // encrypted chat, feedback, and skill management.
@@ -29,6 +29,6 @@
 //
 // SDK documentation and guides: https://hol.org/docs/libraries/standards-sdk/
 //
-// This package is part of the Hashgraph Online Standards SDK for Go.
-// See https://hol.org for more information about the Hashgraph Online ecosystem.
+// This package is part of the HOL Standards SDK for Go.
+// See https://hol.org for more information about the HOL ecosystem.
 package registrybroker

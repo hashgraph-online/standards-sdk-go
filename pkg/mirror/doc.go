@@ -1,5 +1,5 @@
 // Package mirror provides a Hedera Mirror Node client used by the HCS and
-// inscriber packages in the Hashgraph Online Standards SDK. It handles
+// inscriber packages in the HOL Standards SDK. It handles
 // topic info lookups, message retrieval, and consensus data queries against
 // the Hedera mirror node REST API.
 //
@@ -15,6 +15,6 @@
 //
 // Learn more about Hedera: https://docs.hedera.com
 //
-// This package is part of the Hashgraph Online Standards SDK for Go.
-// See https://hol.org for more information about the Hashgraph Online ecosystem.
+// This package is part of the HOL Standards SDK for Go.
+// See https://hol.org for more information about the HOL ecosystem.
 package mirror

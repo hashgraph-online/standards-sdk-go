@@ -14,7 +14,7 @@ Maintainers are assigned the following scopes in this repository:
 
 | Name           | GitHub ID    | Scope | LFID | Discord ID | Email | Company Affiliation |
 | -------------- | ------------ | ----- | ---- | ---------- | ----- | ------------------- |
-| Michael Kantor | kantorcodes  |       |      |            |       | Hashgraph Online    |
+| Michael Kantor | kantorcodes  |       |      |            |       | HOL    |
 | May Chan       | rocketmay    |       |      |            |       | HashPack            |
 | HGraphPunks    | hgraphpunks  |       |      |            |       | Turtlemoon          |
 
