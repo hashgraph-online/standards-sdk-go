@@ -36,4 +36,3 @@ func main() {
 
 	fmt.Printf("created hcs6 registry topic %s (%s)\n", result.TopicID, result.TransactionID)
 }
-

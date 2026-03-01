@@ -141,14 +141,22 @@ func (c *Client) RegisterAction(
 	transactionMemo string,
 ) (SubmitMessageResult, error) {
 	payload := map[string]any{
-		"p":           "hcs-12",
-		"op":          "register",
-		"name":        registration.Name,
-		"version":     registration.Version,
-		"description": registration.Description,
-		"author":      registration.Author,
-		"tags":        registration.Tags,
-		"t_id":        registration.TID,
+		"p":       "hcs-12",
+		"op":      "register",
+		"name":    registration.Name,
+		"version": registration.Version,
+	}
+	if registration.Description != "" {
+		payload["description"] = registration.Description
+	}
+	if registration.Author != "" {
+		payload["author"] = registration.Author
+	}
+	if len(registration.Tags) > 0 {
+		payload["tags"] = registration.Tags
+	}
+	if registration.TID != "" {
+		payload["t_id"] = registration.TID
 	}
 	return c.SubmitMessage(ctx, topicID, payload, transactionMemo)
 }

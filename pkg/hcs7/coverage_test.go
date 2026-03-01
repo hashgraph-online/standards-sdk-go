@@ -77,10 +77,9 @@ func TestCovBuildConfigMessage(t *testing.T) {
 
 	evmCfg := &EvmConfigPayload{
 		ContractAddress: "0x1234567890abcdef1234567890abcdef12345678",
-		Abi: AbiDefinition{Name: "transfer", Inputs: []AbiIO{{Name: "to", Type: "address"}}, Outputs: []AbiIO{}, StateMutability: "nonpayable", Type: "function"},
+		Abi:             AbiDefinition{Name: "transfer", Inputs: []AbiIO{{Name: "to", Type: "address"}}, Outputs: []AbiIO{}, StateMutability: "nonpayable", Type: "function"},
 	}
 	_, err = client.buildConfigMessage(RegisterConfigOptions{Type: ConfigTypeEVM, EVM: evmCfg})
-	// EVM config may still fail validation, that's ok; what matters is the code path was hit
 
 	_, err = client.buildConfigMessage(RegisterConfigOptions{Type: ConfigTypeWASM})
 	if err == nil {

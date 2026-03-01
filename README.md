@@ -32,12 +32,19 @@ go get github.com/hashgraph-online/standards-sdk-go@latest
 - [Examples index](./examples/README.md)
 - [HCS-2 create registry](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs2-create-registry)
 - [HCS-5 build mint transaction](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs5-build-mint)
+- [HCS-6 create dynamic registry](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs6-create-registry)
+- [HCS-7 register metadata](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs7-register-metadata)
+- [HCS-10 build connection message](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs10-build-message)
 - [HCS-11 build agent profile](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs11-build-agent-profile)
+- [HCS-12 build register payload](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs12-build-register)
 - [HCS-14 parse UAID](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs14-parse-uaid)
 - [HCS-15 build account transaction](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs15-build-account-tx)
 - [HCS-16 build flora topic transaction](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs16-build-flora-topic-tx)
 - [HCS-17 build state hash message](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs17-build-state-message)
+- [HCS-18 build announce message](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs18-build-announce)
 - [HCS-20 deploy points](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs20-deploy-points)
+- [HCS-21 build adapter declaration](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs21-build-declaration)
+- [HCS-26 parse memos](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs26-parse-memos)
 - [HCS-27 publish checkpoint](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs27-publish-checkpoint)
 - [Inscriber authenticate + client](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/inscriber-auth-client)
 
@@ -45,12 +52,19 @@ go get github.com/hashgraph-online/standards-sdk-go@latest
 
 - `pkg/hcs2`: HCS-2 registry topic creation, tx builders, indexed entry operations, memo helpers, mirror reads.
 - `pkg/hcs5`: HCS-5 Hashinal minting helpers and end-to-end inscribe+mint workflow.
+- `pkg/hcs6`: HCS-6 dynamic hashinal non-indexed registry creation, register operations, memo helpers, mirror reads.
+- `pkg/hcs7`: HCS-7 indexed registry creation with EVM/WASM config and metadata registration helpers.
+- `pkg/hcs10`: HCS-10 topic/message builders, connection operations, registry operations, and message stream reads.
 - `pkg/hcs11`: HCS-11 profile models/builders, validation, inscription, account memo updates, and profile resolution.
+- `pkg/hcs12`: HCS-12 action/assembly/hashlinks registry topic creation, submit helpers, and mirror entry reads.
 - `pkg/hcs14`: HCS-14 UAID generation/parsing plus profile resolution (`_uaid`, `_agent`, ANS `_ans`, and `uaid:did` base DID reconstruction).
 - `pkg/hcs15`: HCS-15 base/petal account creation, tx builders, and petal/base key verification helpers.
 - `pkg/hcs16`: HCS-16 flora account + topic management, message builders/senders, and threshold-member key assembly helpers.
 - `pkg/hcs17`: HCS-17 state-hash topic/message support, deterministic state hash calculators, and verification helpers.
+- `pkg/hcs18`: HCS-18 flora discovery topic creation, discovery message operations, and proposal readiness checks.
 - `pkg/hcs20`: HCS-20 auditable points validation, transaction builders, SDK client flows, and mirror-driven state indexing.
+- `pkg/hcs21`: HCS-21 adapter registry/declaration publish flows, topic helpers, and signature/digest verification utilities.
+- `pkg/hcs26`: HCS-26 memo helpers and resolver flows for discovery, version, and manifest reconstruction.
 - `pkg/hcs27`: HCS-27 checkpoint topic creation, publish/retrieval, validation, Merkle/proof helpers.
 - `pkg/inscriber`: Kiloscribe auth flow, websocket-first high-level inscription utilities, quote generation, bulk-files support, registry-broker quote/job helpers, and skill inscription helpers.
 - `pkg/registrybroker`: Full Registry Broker client (search, adapters, agents, credits, verification, ledger auth, chat/encryption, feedback, skills).
