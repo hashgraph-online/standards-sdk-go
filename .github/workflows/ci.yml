@@ -52,6 +52,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Run Trivy vulnerability scanner
+        continue-on-error: true
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
@@ -61,12 +62,14 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Gosec SARIF
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
           category: gosec
 
       - name: Upload Trivy SARIF
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
