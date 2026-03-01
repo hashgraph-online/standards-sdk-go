@@ -26,6 +26,16 @@ type Message struct {
 	TTL      int64     `json:"ttl,omitempty"`
 }
 
+// OverflowMessage is a compact wrapper sent when the original HCS-2 message
+// exceeds 1024 bytes. The full payload is inscribed via HCS-1 and referenced
+// by data_ref (an HRL) with a SHA-256 integrity digest.
+type OverflowMessage struct {
+	P             string    `json:"p"`
+	Op            Operation `json:"op"`
+	DataRef       string    `json:"data_ref"`
+	DataRefDigest string    `json:"data_ref_digest"`
+}
+
 type CreateRegistryOptions struct {
 	RegistryType        RegistryType
 	TTL                 int64

@@ -2,6 +2,8 @@ package hcs2
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -377,6 +379,25 @@ func (c *Client) submitMessage(
 		return OperationResult{}, fmt.Errorf("failed to marshal HCS-2 message: %w", err)
 	}
 
+	// If payload exceeds 1024 bytes, inscribe via HCS-1 and submit a reference.
+	if len(payload) > 1024 {
+		hrl, digest, inscribeErr := c.inscribeHCS1(payload)
+		if inscribeErr != nil {
+			return OperationResult{}, fmt.Errorf("failed to inscribe overflow payload via HCS-1: %w", inscribeErr)
+		}
+
+		wrapper := OverflowMessage{
+			P:              message.P,
+			Op:             message.Op,
+			DataRef:        hrl,
+			DataRefDigest:  digest,
+		}
+		payload, err = json.Marshal(wrapper)
+		if err != nil {
+			return OperationResult{}, fmt.Errorf("failed to marshal overflow wrapper: %w", err)
+		}
+	}
+
 	transaction := hedera.NewTopicMessageSubmitTransaction().
 		SetTopicID(topicID).
 		SetMessage(payload)
@@ -400,6 +421,40 @@ func (c *Client) submitMessage(
 		TransactionID:  response.TransactionID.String(),
 		SequenceNumber: int64(receipt.TopicSequenceNumber),
 	}, nil
+}
+
+// inscribeHCS1 creates an HCS-1 topic, publishes the payload, and returns an HRL + SHA-256 digest.
+func (c *Client) inscribeHCS1(payload []byte) (string, string, error) {
+	createResp, err := hedera.NewTopicCreateTransaction().
+		SetTopicMemo("hcs-1:0:0").
+		SetAdminKey(c.operatorKey.PublicKey()).
+		SetSubmitKey(c.operatorKey.PublicKey()).
+		Execute(c.hederaClient)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to create HCS-1 overflow topic: %w", err)
+	}
+	createReceipt, err := createResp.GetReceipt(c.hederaClient)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to get HCS-1 overflow topic receipt: %w", err)
+	}
+	if createReceipt.TopicID == nil {
+		return "", "", fmt.Errorf("HCS-1 overflow topic receipt missing topic ID")
+	}
+	dataTopic := *createReceipt.TopicID
+
+	_, err = hedera.NewTopicMessageSubmitTransaction().
+		SetTopicID(dataTopic).
+		SetMessage(payload).
+		Execute(c.hederaClient)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to publish HCS-1 overflow payload: %w", err)
+	}
+
+	hrl := fmt.Sprintf("hcs://1/%s", dataTopic.String())
+	sum := sha256.Sum256(payload)
+	digest := base64.RawURLEncoding.EncodeToString(sum[:])
+
+	return hrl, digest, nil
 }
 
 func (c *Client) resolveRegistryType(

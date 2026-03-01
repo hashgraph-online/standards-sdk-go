@@ -2,6 +2,7 @@ package hcs2
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -496,5 +497,56 @@ func TestResolveRegistryFailures(t *testing.T) {
 	_, err = client.resolvePublicKey("invalid-topic", false)
 	if err == nil {
 		t.Fatal("expected get topic info fail in resolvePublicKey")
+	}
+}
+
+func TestOverflowMessageSerialization(t *testing.T) {
+	msg := OverflowMessage{
+		P:             "hcs-2",
+		Op:            OperationRegister,
+		DataRef:       "hcs://1/0.0.99999",
+		DataRefDigest: "abc123digest",
+	}
+	data, err := json.Marshal(msg)
+	if err != nil {
+		t.Fatalf("failed to marshal overflow message: %v", err)
+	}
+	s := string(data)
+	if !strings.Contains(s, `"data_ref"`) {
+		t.Fatal("expected data_ref field in serialized overflow message")
+	}
+	if !strings.Contains(s, `"data_ref_digest"`) {
+		t.Fatal("expected data_ref_digest field in serialized overflow message")
+	}
+	if strings.Contains(s, `"t_id"`) {
+		t.Fatal("overflow message should not contain t_id")
+	}
+}
+
+func TestSubmitMessageOverflowTriggersInscription(t *testing.T) {
+	pk, _ := hedera.PrivateKeyGenerateEcdsa()
+	client, _ := NewClient(ClientConfig{
+		Network:            "testnet",
+		OperatorAccountID:  "0.0.123",
+		OperatorPrivateKey: pk.String(),
+	})
+
+	// Build a message with a huge metadata field that will exceed 1024 bytes
+	bigMeta := strings.Repeat("x", 2000)
+	msg := Message{
+		P:        "hcs-2",
+		Op:       OperationRegister,
+		TopicID:  "0.0.12345",
+		Metadata: bigMeta,
+	}
+
+	// This will fail Hedera execution (testnet + fake operator), but the
+	// error should indicate the overflow HCS-1 inscription path was attempted.
+	_, err := client.submitMessage("0.0.999999", msg, "")
+	if err == nil {
+		t.Fatal("expected error from Hedera execution")
+	}
+	if !strings.Contains(err.Error(), "HCS-1") {
+		t.Fatalf("expected HCS-1 overflow error, got: %v", err)
 	}
 }
