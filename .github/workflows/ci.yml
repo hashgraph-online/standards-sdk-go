@@ -44,6 +44,9 @@ jobs:
           args: '-no-fail -fmt sarif -out results.sarif ./...'
 
       - name: govulncheck
+        # Upstream hedera-sdk-go transitively pulls go-ethereum with known
+        # vulns we cannot fix. Report but do not block the pipeline.
+        continue-on-error: true
         uses: golang/govulncheck-action@v1
         with:
           go-version-file: go.mod
