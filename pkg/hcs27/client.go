@@ -37,6 +37,12 @@ type metadataPublisherFunc func(
 	metadataBytes []byte,
 ) (string, *MetadataDigest, error)
 
+const (
+	inscriberWaitMaxAttempts = 120
+	inscriberWaitIntervalMs  = 2000
+	dataURLPartCount         = 2
+)
+
 type CreateTopicOptions struct {
 	TTLSeconds          int64
 	UseOperatorAsAdmin  bool
@@ -303,8 +309,8 @@ func (c *Client) publishMetadataHCS1(
 			Network:             network,
 			ConnectionMode:      inscriber.ConnectionModeWebSocket,
 			WaitForConfirmation: &waitForConfirmation,
-			WaitMaxAttempts:     120,
-			WaitInterval:        2000,
+			WaitMaxAttempts:     inscriberWaitMaxAttempts,
+			WaitInterval:        inscriberWaitIntervalMs,
 		},
 		inscriberClient,
 	)
@@ -536,18 +542,16 @@ func normalizeHCS1Payload(payload []byte) ([]byte, error) {
 	if len(trimmed) == 0 || trimmed[0] != '{' {
 		return payload, nil
 	}
-
-	var wrapped struct {
-		Content string `json:"c"`
-	}
-	if err := json.Unmarshal(trimmed, &wrapped); err != nil {
-		return payload, nil
-	}
-	if strings.TrimSpace(wrapped.Content) == "" {
+	if !bytes.Contains(trimmed, []byte(`"c"`)) {
 		return payload, nil
 	}
 
-	decodedContent, err := decodeDataURLPayload(wrapped.Content)
+	wrappedContent := parseWrappedContent(trimmed)
+	if wrappedContent == "" {
+		return payload, nil
+	}
+
+	decodedContent, err := decodeDataURLPayload(wrappedContent)
 	if err != nil {
 		return nil, err
 	}
@@ -561,14 +565,24 @@ func normalizeHCS1Payload(payload []byte) ([]byte, error) {
 	return decodedContent, nil
 }
 
+func parseWrappedContent(payload []byte) string {
+	var wrapped struct {
+		Content string `json:"c"`
+	}
+	if err := json.Unmarshal(payload, &wrapped); err != nil {
+		return ""
+	}
+	return strings.TrimSpace(wrapped.Content)
+}
+
 func decodeDataURLPayload(input string) ([]byte, error) {
 	trimmed := strings.TrimSpace(input)
 	if !strings.HasPrefix(trimmed, "data:") {
 		return nil, fmt.Errorf("unsupported wrapped HCS-1 payload format")
 	}
 
-	parts := strings.SplitN(trimmed, ",", 2)
-	if len(parts) != 2 {
+	parts := strings.SplitN(trimmed, ",", dataURLPartCount)
+	if len(parts) != dataURLPartCount {
 		return nil, fmt.Errorf("invalid wrapped HCS-1 data URL")
 	}
 

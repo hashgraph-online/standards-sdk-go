@@ -71,7 +71,7 @@ func TestPrepareCheckpointPayload_MetadataOverflowUsesHCS1Reference(t *testing.T
 
 	client := &Client{
 		publishMetadataOverride: func(ctx context.Context, payload []byte) (string, *MetadataDigest, error) {
-			if string(payload) != string(metadataBytes) {
+			if !bytes.Equal(payload, metadataBytes) {
 				t.Fatalf("published metadata payload mismatch")
 			}
 			return expectedReference, &MetadataDigest{
@@ -95,7 +95,7 @@ func TestPrepareCheckpointPayload_MetadataOverflowUsesHCS1Reference(t *testing.T
 	if preparedMessage.MetadataDigest == nil {
 		t.Fatalf("expected metadata_digest to be set for overflow payload")
 	}
-	if string(resolvedMetadata) != string(metadataBytes) {
+	if !bytes.Equal(resolvedMetadata, metadataBytes) {
 		t.Fatalf("resolved metadata bytes mismatch for overflow payload")
 	}
 
@@ -215,7 +215,7 @@ func TestNormalizeHCS1PayloadWrappedBrotliDataURL(t *testing.T) {
 	if err != nil {
 		t.Fatalf("normalizeHCS1Payload returned error: %v", err)
 	}
-	if string(normalized) != string(original) {
+	if !bytes.Equal(normalized, original) {
 		t.Fatalf("normalized payload mismatch: got %s", string(normalized))
 	}
 }
@@ -235,7 +235,7 @@ func TestNormalizeHCS1PayloadWrappedPlainDataURL(t *testing.T) {
 	if err != nil {
 		t.Fatalf("normalizeHCS1Payload returned error: %v", err)
 	}
-	if string(normalized) != string(original) {
+	if !bytes.Equal(normalized, original) {
 		t.Fatalf("normalized payload mismatch: got %s", string(normalized))
 	}
 }
