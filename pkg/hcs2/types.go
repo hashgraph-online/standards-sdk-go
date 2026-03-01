@@ -9,6 +9,8 @@ const (
 	OperationMigrate  Operation = "migrate"
 )
 
+const defaultProtocol = "hcs-2"
+
 type RegistryType int
 
 const (
@@ -78,9 +80,10 @@ type MigrateRegistryOptions struct {
 }
 
 type QueryRegistryOptions struct {
-	Limit int
-	Order string
-	Skip  int64
+	Limit           int
+	Order           string
+	Skip            int64
+	ResolveOverflow bool // When true, overflow messages with data_ref are resolved.
 }
 
 type RegistryEntry struct {
@@ -121,4 +124,6 @@ type ClientConfig struct {
 	Network            string
 	MirrorBaseURL      string
 	MirrorAPIKey       string
+	InscriberAuthURL   string
+	InscriberAPIURL    string
 }

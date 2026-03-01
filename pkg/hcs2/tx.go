@@ -85,7 +85,7 @@ func BuildHCS2CreateRegistryTx(params CreateRegistryTxParams) *hedera.TopicCreat
 func BuildHCS2RegisterTx(params RegisterTxParams) (*hedera.TopicMessageSubmitTransaction, error) {
 	protocol := strings.TrimSpace(params.Protocol)
 	if protocol == "" {
-		protocol = "hcs-2"
+		protocol = defaultProtocol
 	}
 
 	message := Message{
@@ -102,7 +102,7 @@ func BuildHCS2RegisterTx(params RegisterTxParams) (*hedera.TopicMessageSubmitTra
 func BuildHCS2UpdateTx(params UpdateTxParams) (*hedera.TopicMessageSubmitTransaction, error) {
 	protocol := strings.TrimSpace(params.Protocol)
 	if protocol == "" {
-		protocol = "hcs-2"
+		protocol = defaultProtocol
 	}
 
 	message := Message{
@@ -120,7 +120,7 @@ func BuildHCS2UpdateTx(params UpdateTxParams) (*hedera.TopicMessageSubmitTransac
 func BuildHCS2DeleteTx(params DeleteTxParams) (*hedera.TopicMessageSubmitTransaction, error) {
 	protocol := strings.TrimSpace(params.Protocol)
 	if protocol == "" {
-		protocol = "hcs-2"
+		protocol = defaultProtocol
 	}
 
 	message := Message{
@@ -136,7 +136,7 @@ func BuildHCS2DeleteTx(params DeleteTxParams) (*hedera.TopicMessageSubmitTransac
 func BuildHCS2MigrateTx(params MigrateTxParams) (*hedera.TopicMessageSubmitTransaction, error) {
 	protocol := strings.TrimSpace(params.Protocol)
 	if protocol == "" {
-		protocol = "hcs-2"
+		protocol = defaultProtocol
 	}
 
 	message := Message{

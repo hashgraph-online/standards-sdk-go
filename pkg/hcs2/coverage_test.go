@@ -540,13 +540,14 @@ func TestSubmitMessageOverflowTriggersInscription(t *testing.T) {
 		Metadata: bigMeta,
 	}
 
-	// This will fail Hedera execution (testnet + fake operator), but the
+	// This will fail at the inscriber auth step (testnet + fake operator), but the
 	// error should indicate the overflow HCS-1 inscription path was attempted.
-	_, err := client.submitMessage("0.0.999999", msg, "")
+	_, err := client.submitMessage(context.Background(), "0.0.999999", msg, "")
 	if err == nil {
-		t.Fatal("expected error from Hedera execution")
+		t.Fatal("expected error from inscription attempt")
 	}
-	if !strings.Contains(err.Error(), "HCS-1") {
-		t.Fatalf("expected HCS-1 overflow error, got: %v", err)
+	// The error should come from the inscriber (auth or execution) since payload > 1024 bytes.
+	if !strings.Contains(err.Error(), "overflow") && !strings.Contains(err.Error(), "inscrib") {
+		t.Fatalf("expected overflow/inscriber error, got: %v", err)
 	}
 }

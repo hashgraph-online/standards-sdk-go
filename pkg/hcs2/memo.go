@@ -13,7 +13,7 @@ type TopicMemo struct {
 
 // BuildTopicMemo builds and returns the configured value.
 func BuildTopicMemo(registryType RegistryType, ttl int64) string {
-	return fmt.Sprintf("hcs-2:%d:%d", registryType, ttl)
+	return fmt.Sprintf("%s:%d:%d", defaultProtocol, registryType, ttl)
 }
 
 // ParseTopicMemo parses the provided input value.
@@ -22,7 +22,7 @@ func ParseTopicMemo(memo string) (*TopicMemo, bool) {
 	if len(parts) != 3 {
 		return nil, false
 	}
-	if parts[0] != "hcs-2" {
+	if parts[0] != defaultProtocol {
 		return nil, false
 	}
 
@@ -56,5 +56,5 @@ func BuildTransactionMemo(operation Operation, registryType RegistryType) string
 	}
 
 	code := operationCode[operation]
-	return fmt.Sprintf("hcs-2:op:%d:%d", code, registryType)
+	return fmt.Sprintf("%s:op:%d:%d", defaultProtocol, code, registryType)
 }

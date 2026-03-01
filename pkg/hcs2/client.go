@@ -5,22 +5,46 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"sync"
+	"time"
 
+	"github.com/hashgraph-online/standards-sdk-go/pkg/inscriber"
 	"github.com/hashgraph-online/standards-sdk-go/pkg/mirror"
 	"github.com/hashgraph-online/standards-sdk-go/pkg/shared"
 	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 
+// maxPayloadBytes is the maximum HCS message payload size before overflow.
+const maxPayloadBytes = 1024
+
+// inscriberWaitMaxAttempts is the max number of polling attempts while waiting
+// for an overflow inscription to complete.
+const inscriberWaitMaxAttempts = 120
+
+// inscriberWaitInterval is the polling interval between inscription status checks.
+const inscriberWaitInterval = 2 * time.Second
+
+// hcs1ReferencePattern matches an HCS-1 HRL like "hcs://1/0.0.12345".
+var hcs1ReferencePattern = regexp.MustCompile(`^hcs://1/(\d+\.\d+\.\d+)$`)
+
+// errNoPublicKey is returned when no public key is provided and the operator key is not used.
+var errNoPublicKey = errors.New("no public key provided")
+
+// Client is the HCS-2 SDK client.
 type Client struct {
-	hederaClient    *hedera.Client
-	mirrorClient    *mirror.Client
-	operatorID      hedera.AccountID
-	operatorKey     hedera.PrivateKey
-	registryTypeMap map[string]RegistryType
-	mutex           sync.RWMutex
+	hederaClient     *hedera.Client
+	mirrorClient     *mirror.Client
+	operatorID       hedera.AccountID
+	operatorKey      hedera.PrivateKey
+	network          string
+	inscriberAuthURL string
+	inscriberAPIURL  string
+	registryTypeMap  map[string]RegistryType
+	mutex            sync.RWMutex
 }
 
 // NewClient creates a new Client.
@@ -63,11 +87,14 @@ func NewClient(config ClientConfig) (*Client, error) {
 	}
 
 	return &Client{
-		hederaClient:    hederaClient,
-		mirrorClient:    mirrorClient,
-		operatorID:      operatorID,
-		operatorKey:     operatorKey,
-		registryTypeMap: map[string]RegistryType{},
+		hederaClient:     hederaClient,
+		mirrorClient:     mirrorClient,
+		operatorID:       operatorID,
+		operatorKey:      operatorKey,
+		network:          network,
+		inscriberAuthURL: strings.TrimSpace(config.InscriberAuthURL),
+		inscriberAPIURL:  strings.TrimSpace(config.InscriberAPIURL),
+		registryTypeMap:  map[string]RegistryType{},
 	}, nil
 }
 
@@ -93,7 +120,7 @@ func (c *Client) CreateRegistry(
 	transaction := hedera.NewTopicCreateTransaction().SetTopicMemo(BuildTopicMemo(registryType, ttl))
 
 	adminKey, err := c.resolvePublicKey(options.AdminKey, options.UseOperatorAsAdmin)
-	if err != nil {
+	if err != nil && !errors.Is(err, errNoPublicKey) {
 		return CreateRegistryResult{}, err
 	}
 	if adminKey != nil {
@@ -101,7 +128,7 @@ func (c *Client) CreateRegistry(
 	}
 
 	submitKey, err := c.resolvePublicKey(options.SubmitKey, options.UseOperatorAsSubmit)
-	if err != nil {
+	if err != nil && !errors.Is(err, errNoPublicKey) {
 		return CreateRegistryResult{}, err
 	}
 	if submitKey != nil {
@@ -141,7 +168,7 @@ func (c *Client) RegisterEntry(
 	protocol string,
 ) (OperationResult, error) {
 	if protocol == "" {
-		protocol = "hcs-2"
+		protocol = defaultProtocol
 	}
 	message := Message{
 		P:        protocol,
@@ -164,7 +191,7 @@ func (c *Client) RegisterEntry(
 		analyticsMemo = BuildTransactionMemo(OperationRegister, registryType)
 	}
 
-	return c.submitMessage(registryTopicID, message, analyticsMemo)
+	return c.submitMessage(ctx, registryTopicID, message, analyticsMemo)
 }
 
 // UpdateEntry updates the requested resource.
@@ -182,7 +209,7 @@ func (c *Client) UpdateEntry(
 	}
 
 	message := Message{
-		P:        "hcs-2",
+		P:        defaultProtocol,
 		Op:       OperationUpdate,
 		TopicID:  options.TargetTopicID,
 		UID:      options.UID,
@@ -198,7 +225,7 @@ func (c *Client) UpdateEntry(
 		analyticsMemo = BuildTransactionMemo(OperationUpdate, registryType)
 	}
 
-	return c.submitMessage(registryTopicID, message, analyticsMemo)
+	return c.submitMessage(ctx, registryTopicID, message, analyticsMemo)
 }
 
 // DeleteEntry deletes the requested resource.
@@ -216,7 +243,7 @@ func (c *Client) DeleteEntry(
 	}
 
 	message := Message{
-		P:    "hcs-2",
+		P:    defaultProtocol,
 		Op:   OperationDelete,
 		UID:  options.UID,
 		Memo: options.Memo,
@@ -230,7 +257,7 @@ func (c *Client) DeleteEntry(
 		analyticsMemo = BuildTransactionMemo(OperationDelete, registryType)
 	}
 
-	return c.submitMessage(registryTopicID, message, analyticsMemo)
+	return c.submitMessage(ctx, registryTopicID, message, analyticsMemo)
 }
 
 // MigrateRegistry performs the requested operation.
@@ -245,7 +272,7 @@ func (c *Client) MigrateRegistry(
 	}
 
 	message := Message{
-		P:        "hcs-2",
+		P:        defaultProtocol,
 		Op:       OperationMigrate,
 		TopicID:  options.TargetTopicID,
 		Metadata: options.Metadata,
@@ -260,7 +287,7 @@ func (c *Client) MigrateRegistry(
 		analyticsMemo = BuildTransactionMemo(OperationMigrate, registryType)
 	}
 
-	return c.submitMessage(registryTopicID, message, analyticsMemo)
+	return c.submitMessage(ctx, registryTopicID, message, analyticsMemo)
 }
 
 // GetRegistry returns the requested value.
@@ -302,8 +329,8 @@ func (c *Client) GetRegistry(
 	var latestEntry *RegistryEntry
 
 	for _, item := range messages {
-		var message Message
-		if err := mirror.DecodeMessageJSON(item, &message); err != nil {
+		message, decodeErr := c.decodeRegistryMessage(ctx, item, options.ResolveOverflow)
+		if decodeErr != nil {
 			continue
 		}
 		if err := ValidateMessage(message); err != nil {
@@ -360,11 +387,46 @@ func (c *Client) SubmitMessage(
 	payload Message,
 	transactionMemo string,
 ) (OperationResult, error) {
-	_ = ctx
-	return c.submitMessage(registryTopicID, payload, transactionMemo)
+	return c.submitMessage(ctx, registryTopicID, payload, transactionMemo)
+}
+
+// decodeRegistryMessage decodes a mirror node message into an HCS-2 Message.
+// If the message is an overflow wrapper (contains data_ref), it optionally
+// resolves the HCS-1 reference when resolveOverflow is true.
+func (c *Client) decodeRegistryMessage(
+	ctx context.Context,
+	item mirror.TopicMessage,
+	resolveOverflow bool,
+) (Message, error) {
+	var message Message
+	if err := mirror.DecodeMessageJSON(item, &message); err == nil {
+		return message, nil
+	}
+
+	// Try to decode as an overflow message.
+	var overflow OverflowMessage
+	if err := mirror.DecodeMessageJSON(item, &overflow); err != nil || overflow.DataRef == "" {
+		return Message{}, fmt.Errorf("unable to decode message")
+	}
+
+	if !resolveOverflow {
+		return Message{P: overflow.P, Op: overflow.Op}, nil
+	}
+
+	resolvedBytes, err := c.ResolveHCS1Reference(ctx, overflow.DataRef)
+	if err != nil {
+		return Message{}, fmt.Errorf("failed to resolve overflow: %w", err)
+	}
+
+	if err := json.Unmarshal(resolvedBytes, &message); err != nil {
+		return Message{}, fmt.Errorf("failed to unmarshal resolved overflow: %w", err)
+	}
+
+	return message, nil
 }
 
 func (c *Client) submitMessage(
+	ctx context.Context,
 	registryTopicID string,
 	message Message,
 	transactionMemo string,
@@ -379,18 +441,18 @@ func (c *Client) submitMessage(
 		return OperationResult{}, fmt.Errorf("failed to marshal HCS-2 message: %w", err)
 	}
 
-	// If payload exceeds 1024 bytes, inscribe via HCS-1 and submit a reference.
-	if len(payload) > 1024 {
-		hrl, digest, inscribeErr := c.inscribeHCS1(payload)
+	// If payload exceeds maxPayloadBytes, inscribe via HCS-1 and submit a reference.
+	if len(payload) > maxPayloadBytes {
+		hrl, digest, inscribeErr := c.inscribeOverflow(ctx, payload)
 		if inscribeErr != nil {
 			return OperationResult{}, fmt.Errorf("failed to inscribe overflow payload via HCS-1: %w", inscribeErr)
 		}
 
 		wrapper := OverflowMessage{
-			P:              message.P,
-			Op:             message.Op,
-			DataRef:        hrl,
-			DataRefDigest:  digest,
+			P:             message.P,
+			Op:            message.Op,
+			DataRef:       hrl,
+			DataRefDigest: digest,
 		}
 		payload, err = json.Marshal(wrapper)
 		if err != nil {
@@ -419,42 +481,117 @@ func (c *Client) submitMessage(
 	return OperationResult{
 		Success:        true,
 		TransactionID:  response.TransactionID.String(),
-		SequenceNumber: int64(receipt.TopicSequenceNumber),
+		SequenceNumber: int64(receipt.TopicSequenceNumber), //nolint:gosec // overflow won't occur in practice
 	}, nil
 }
 
-// inscribeHCS1 creates an HCS-1 topic, publishes the payload, and returns an HRL + SHA-256 digest.
-func (c *Client) inscribeHCS1(payload []byte) (string, string, error) {
-	createResp, err := hedera.NewTopicCreateTransaction().
-		SetTopicMemo("hcs-1:0:0").
-		SetAdminKey(c.operatorKey.PublicKey()).
-		SetSubmitKey(c.operatorKey.PublicKey()).
-		Execute(c.hederaClient)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to create HCS-1 overflow topic: %w", err)
-	}
-	createReceipt, err := createResp.GetReceipt(c.hederaClient)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to get HCS-1 overflow topic receipt: %w", err)
-	}
-	if createReceipt.TopicID == nil {
-		return "", "", fmt.Errorf("HCS-1 overflow topic receipt missing topic ID")
-	}
-	dataTopic := *createReceipt.TopicID
-
-	_, err = hedera.NewTopicMessageSubmitTransaction().
-		SetTopicID(dataTopic).
-		SetMessage(payload).
-		Execute(c.hederaClient)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to publish HCS-1 overflow payload: %w", err)
+// inscribeOverflow inscribes the payload via the Kiloscribe inscriber API and
+// returns an HRL reference and SHA-256 base64url digest.
+func (c *Client) inscribeOverflow(ctx context.Context, payload []byte) (hrl, digest string, err error) {
+	network := inscriber.NetworkTestnet
+	if strings.EqualFold(c.network, shared.NetworkMainnet) {
+		network = inscriber.NetworkMainnet
 	}
 
-	hrl := fmt.Sprintf("hcs://1/%s", dataTopic.String())
+	authClient := inscriber.NewAuthClient(c.inscriberAuthURL)
+	authResult, authErr := authClient.Authenticate(
+		ctx,
+		c.operatorID.String(),
+		c.operatorKey.String(),
+		network,
+	)
+	if authErr != nil {
+		return "", "", fmt.Errorf("failed to authenticate inscriber client: %w", authErr)
+	}
+
+	inscriberClient, clientErr := inscriber.NewClient(inscriber.Config{
+		APIKey:  authResult.APIKey,
+		Network: network,
+		BaseURL: c.inscriberAPIURL,
+	})
+	if clientErr != nil {
+		return "", "", fmt.Errorf("failed to create inscriber client: %w", clientErr)
+	}
+
+	job, startErr := inscriberClient.StartInscription(ctx, inscriber.StartInscriptionRequest{
+		HolderID:     c.operatorID.String(),
+		Mode:         inscriber.ModeFile,
+		Network:      network,
+		FileStandard: "hcs-1",
+		File: inscriber.FileInput{
+			Type:     "base64",
+			Base64:   base64.StdEncoding.EncodeToString(payload),
+			FileName: fmt.Sprintf("hcs2-overflow-%d.json", time.Now().UnixNano()),
+			MimeType: "application/json",
+		},
+	})
+	if startErr != nil {
+		return "", "", fmt.Errorf("failed to start HCS-1 overflow inscription: %w", startErr)
+	}
+	if strings.TrimSpace(job.TransactionBytes) == "" {
+		return "", "", fmt.Errorf("inscriber response did not include transaction bytes")
+	}
+
+	executedTxID, execErr := inscriber.ExecuteTransaction(
+		ctx,
+		job.TransactionBytes,
+		inscriber.HederaClientConfig{
+			AccountID:  c.operatorID.String(),
+			PrivateKey: c.operatorKey.String(),
+			Network:    network,
+		},
+	)
+	if execErr != nil {
+		return "", "", fmt.Errorf("failed to execute overflow inscription transaction: %w", execErr)
+	}
+
+	waited, waitErr := inscriberClient.WaitForInscription(ctx, executedTxID, inscriber.WaitOptions{
+		MaxAttempts: inscriberWaitMaxAttempts,
+		Interval:    inscriberWaitInterval,
+	})
+	if waitErr != nil {
+		return "", "", fmt.Errorf("failed to wait for overflow inscription: %w", waitErr)
+	}
+	if !waited.Completed && !strings.EqualFold(waited.Status, "completed") {
+		return "", "", fmt.Errorf("overflow inscription did not complete successfully")
+	}
+
+	inscribedTopicID := strings.TrimSpace(waited.TopicID)
+	if inscribedTopicID == "" {
+		inscribedTopicID = strings.TrimSpace(job.TopicID)
+	}
+	if inscribedTopicID == "" {
+		return "", "", fmt.Errorf("overflow inscription did not return a topic ID")
+	}
+
+	hrl = fmt.Sprintf("hcs://1/%s", inscribedTopicID)
 	sum := sha256.Sum256(payload)
-	digest := base64.RawURLEncoding.EncodeToString(sum[:])
+	digest = base64.RawURLEncoding.EncodeToString(sum[:])
 
 	return hrl, digest, nil
+}
+
+// ResolveHCS1Reference resolves an HCS-1 HRL (e.g. "hcs://1/0.0.12345") to the
+// raw payload bytes stored on that topic.
+func (c *Client) ResolveHCS1Reference(ctx context.Context, hcs1Reference string) ([]byte, error) {
+	matches := hcs1ReferencePattern.FindStringSubmatch(strings.TrimSpace(hcs1Reference))
+	if len(matches) != 2 { //nolint:mnd // regex capture group count
+		return nil, fmt.Errorf("invalid HCS-1 reference %q", hcs1Reference)
+	}
+	topicID := matches[1]
+
+	messages, err := c.mirrorClient.GetTopicMessages(ctx, topicID, mirror.MessageQueryOptions{
+		Order: "asc",
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch HCS-1 payload from %s: %w", hcs1Reference, err)
+	}
+	if len(messages) == 0 {
+		return nil, fmt.Errorf("no HCS-1 payload found at %s", hcs1Reference)
+	}
+
+	// HCS-1 stores the payload as the message content of the first message.
+	return base64.StdEncoding.DecodeString(messages[0].Message)
 }
 
 func (c *Client) resolveRegistryType(
@@ -496,7 +633,7 @@ func (c *Client) resolvePublicKey(rawKey string, useOperator bool) (*hedera.Publ
 	}
 
 	if strings.TrimSpace(rawKey) == "" {
-		return nil, nil
+		return nil, errNoPublicKey
 	}
 
 	publicKey, pubErr := hedera.PublicKeyFromString(rawKey)
@@ -506,7 +643,7 @@ func (c *Client) resolvePublicKey(rawKey string, useOperator bool) (*hedera.Publ
 
 	privateKey, prvErr := shared.ParsePrivateKey(rawKey)
 	if prvErr != nil {
-		return nil, fmt.Errorf("failed to parse key as public (%v) or private (%v)", pubErr, prvErr)
+		return nil, fmt.Errorf("failed to parse key as public (%w) or private (%w)", pubErr, prvErr)
 	}
 
 	derivedPublicKey := privateKey.PublicKey()
