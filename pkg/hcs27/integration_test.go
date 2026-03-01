@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashgraph-online/standards-sdk-go/pkg/mirror"
 	"github.com/hashgraph-online/standards-sdk-go/pkg/shared"
 )
 
@@ -120,15 +121,7 @@ func TestHCS27Integration_CheckpointChain(t *testing.T) {
 	}
 	t.Logf("published second checkpoint seq=%d tx=%s", secondResult.SequenceNumber, secondResult.TransactionID)
 
-	time.Sleep(10 * time.Second)
-
-	records, err := client.GetCheckpoints(ctx, topicID, nil)
-	if err != nil {
-		t.Fatalf("failed to load checkpoints: %v", err)
-	}
-	if len(records) < 2 {
-		t.Fatalf("expected at least 2 checkpoint records, got %d", len(records))
-	}
+	records := waitForCheckpointRecords(t, ctx, client, topicID, 2, 30, 3*time.Second)
 
 	if err := ValidateCheckpointChain(records); err != nil {
 		t.Fatalf("checkpoint chain validation failed: %v", err)
@@ -218,19 +211,18 @@ func TestHCS27Integration_MetadataOverflowUsesHRL(t *testing.T) {
 	}
 	t.Logf("published overflow checkpoint seq=%d tx=%s", result.SequenceNumber, result.TransactionID)
 
-	time.Sleep(10 * time.Second)
-
-	records, err := client.GetCheckpoints(ctx, topicID, nil)
-	if err != nil {
-		t.Fatalf("failed to load checkpoints: %v", err)
-	}
-	if len(records) != 1 {
-		t.Fatalf("expected 1 checkpoint record, got %d", len(records))
+	messages := waitForTopicMessages(t, ctx, client, topicID, 1, 40, 3*time.Second)
+	if len(messages) != 1 {
+		t.Fatalf("expected exactly 1 checkpoint message, got %d", len(messages))
 	}
 
-	record := records[0]
+	var checkpointMessage CheckpointMessage
+	if err := mirror.DecodeMessageJSON(messages[0], &checkpointMessage); err != nil {
+		t.Fatalf("failed to decode checkpoint message payload: %v", err)
+	}
+
 	var metadataReference string
-	if err := json.Unmarshal(record.Message.Metadata, &metadataReference); err != nil {
+	if err := json.Unmarshal(checkpointMessage.Metadata, &metadataReference); err != nil {
 		t.Fatalf("expected metadata to be HCS-1 reference string, got: %v", err)
 	}
 	if !strings.HasPrefix(metadataReference, "hcs://1/") {
@@ -240,14 +232,11 @@ func TestHCS27Integration_MetadataOverflowUsesHRL(t *testing.T) {
 		t.Fatalf("metadata reference must be HRL topic form (no sequence suffix): %s", metadataReference)
 	}
 	t.Logf("resolved overflow metadata reference %s", metadataReference)
-	if record.Message.MetadataDigest == nil {
+	if checkpointMessage.MetadataDigest == nil {
 		t.Fatalf("expected metadata_digest to be present for overflow message")
 	}
 
-	resolvedBytes, err := client.ResolveHCS1Reference(ctx, metadataReference)
-	if err != nil {
-		t.Fatalf("failed to resolve metadata reference %s: %v", metadataReference, err)
-	}
+	resolvedBytes := waitForResolvedMetadata(t, ctx, client, metadataReference, 40, 3*time.Second)
 	var resolvedMetadata CheckpointMetadata
 	if err := json.Unmarshal(resolvedBytes, &resolvedMetadata); err != nil {
 		t.Fatalf("resolved metadata is not valid checkpoint JSON: %v", err)
@@ -260,4 +249,95 @@ func TestHCS27Integration_MetadataOverflowUsesHRL(t *testing.T) {
 func hashB64URL(input string) string {
 	hash := sha256.Sum256([]byte(input))
 	return base64.RawURLEncoding.EncodeToString(hash[:])
+}
+
+func waitForCheckpointRecords(
+	t *testing.T,
+	ctx context.Context,
+	client *Client,
+	topicID string,
+	minCount int,
+	maxAttempts int,
+	interval time.Duration,
+) []CheckpointRecord {
+	t.Helper()
+
+	var (
+		records []CheckpointRecord
+		err     error
+	)
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		records, err = client.GetCheckpoints(ctx, topicID, nil)
+		if err == nil && len(records) >= minCount {
+			return records
+		}
+		time.Sleep(interval)
+	}
+
+	if err != nil {
+		t.Fatalf("failed to load checkpoints after retries: %v", err)
+	}
+	t.Fatalf("expected at least %d checkpoint records after retries, got %d", minCount, len(records))
+	return nil
+}
+
+func waitForTopicMessages(
+	t *testing.T,
+	ctx context.Context,
+	client *Client,
+	topicID string,
+	minCount int,
+	maxAttempts int,
+	interval time.Duration,
+) []mirror.TopicMessage {
+	t.Helper()
+
+	var (
+		messages []mirror.TopicMessage
+		err      error
+	)
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		messages, err = client.mirrorClient.GetTopicMessages(ctx, topicID, mirror.MessageQueryOptions{
+			Order: "asc",
+		})
+		if err == nil && len(messages) >= minCount {
+			return messages
+		}
+		time.Sleep(interval)
+	}
+
+	if err != nil {
+		t.Fatalf("failed to load topic messages after retries: %v", err)
+	}
+	t.Fatalf("expected at least %d topic messages after retries, got %d", minCount, len(messages))
+	return nil
+}
+
+func waitForResolvedMetadata(
+	t *testing.T,
+	ctx context.Context,
+	client *Client,
+	reference string,
+	maxAttempts int,
+	interval time.Duration,
+) []byte {
+	t.Helper()
+
+	var (
+		resolved []byte
+		err      error
+	)
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		resolved, err = client.ResolveHCS1Reference(ctx, reference)
+		if err == nil && len(resolved) > 0 {
+			return resolved
+		}
+		time.Sleep(interval)
+	}
+
+	if err != nil {
+		t.Fatalf("failed to resolve metadata reference %s after retries: %v", reference, err)
+	}
+	t.Fatalf("resolved metadata reference %s returned empty payload after retries", reference)
+	return nil
 }

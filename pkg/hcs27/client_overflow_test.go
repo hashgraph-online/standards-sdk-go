@@ -1,12 +1,15 @@
 package hcs27
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/andybalholm/brotli"
 )
 
 func TestPrepareCheckpointPayload_InlineMetadata(t *testing.T) {
@@ -184,5 +187,55 @@ func TestExtractChunkTransactionID(t *testing.T) {
 				t.Fatalf("extractChunkTransactionID mismatch: got %q want %q", got, testCase.want)
 			}
 		})
+	}
+}
+
+func TestNormalizeHCS1PayloadWrappedBrotliDataURL(t *testing.T) {
+	original := []byte(`{"type":"ans-checkpoint-v1","stream":{"registry":"ans","log_id":"overflow"}}`)
+
+	var compressed bytes.Buffer
+	writer := brotli.NewWriter(&compressed)
+	if _, err := writer.Write(original); err != nil {
+		t.Fatalf("failed to brotli-compress payload: %v", err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatalf("failed to finalize brotli payload: %v", err)
+	}
+
+	wrapped := map[string]any{
+		"o": 0,
+		"c": "data:application/json;base64," + base64.StdEncoding.EncodeToString(compressed.Bytes()),
+	}
+	wrappedBytes, err := json.Marshal(wrapped)
+	if err != nil {
+		t.Fatalf("failed to marshal wrapped payload: %v", err)
+	}
+
+	normalized, err := normalizeHCS1Payload(wrappedBytes)
+	if err != nil {
+		t.Fatalf("normalizeHCS1Payload returned error: %v", err)
+	}
+	if string(normalized) != string(original) {
+		t.Fatalf("normalized payload mismatch: got %s", string(normalized))
+	}
+}
+
+func TestNormalizeHCS1PayloadWrappedPlainDataURL(t *testing.T) {
+	original := []byte(`{"type":"ans-checkpoint-v1"}`)
+	wrapped := map[string]any{
+		"o": 0,
+		"c": "data:application/json;base64," + base64.StdEncoding.EncodeToString(original),
+	}
+	wrappedBytes, err := json.Marshal(wrapped)
+	if err != nil {
+		t.Fatalf("failed to marshal wrapped payload: %v", err)
+	}
+
+	normalized, err := normalizeHCS1Payload(wrappedBytes)
+	if err != nil {
+		t.Fatalf("normalizeHCS1Payload returned error: %v", err)
+	}
+	if string(normalized) != string(original) {
+		t.Fatalf("normalized payload mismatch: got %s", string(normalized))
 	}
 }

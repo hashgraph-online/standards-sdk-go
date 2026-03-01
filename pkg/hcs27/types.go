@@ -91,6 +91,8 @@ type ClientConfig struct {
 	Network            string
 	MirrorBaseURL      string
 	MirrorAPIKey       string
+	InscriberAuthURL   string
+	InscriberAPIURL    string
 }
 
 type PublishResult struct {

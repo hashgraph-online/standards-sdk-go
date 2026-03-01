@@ -5,6 +5,7 @@ go 1.24.0
 require github.com/hashgraph/hedera-sdk-go/v2 v2.49.0
 
 require (
+	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect

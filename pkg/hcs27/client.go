@@ -1,15 +1,21 @@
 package hcs27
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
+	"github.com/andybalholm/brotli"
+	"github.com/hashgraph-online/standards-sdk-go/pkg/inscriber"
 	"github.com/hashgraph-online/standards-sdk-go/pkg/mirror"
 	"github.com/hashgraph-online/standards-sdk-go/pkg/shared"
 	hedera "github.com/hashgraph/hedera-sdk-go/v2"
@@ -20,6 +26,9 @@ type Client struct {
 	mirrorClient            *mirror.Client
 	operatorID              hedera.AccountID
 	operatorKey             hedera.PrivateKey
+	network                 string
+	inscriberAuthURL        string
+	inscriberAPIURL         string
 	publishMetadataOverride metadataPublisherFunc
 }
 
@@ -74,10 +83,13 @@ func NewClient(config ClientConfig) (*Client, error) {
 	}
 
 	return &Client{
-		hederaClient: hederaClient,
-		mirrorClient: mirrorClient,
-		operatorID:   operatorID,
-		operatorKey:  operatorKey,
+		hederaClient:     hederaClient,
+		mirrorClient:     mirrorClient,
+		operatorID:       operatorID,
+		operatorKey:      operatorKey,
+		network:          network,
+		inscriberAuthURL: strings.TrimSpace(config.InscriberAuthURL),
+		inscriberAPIURL:  strings.TrimSpace(config.InscriberAPIURL),
 	}, nil
 }
 
@@ -246,41 +258,77 @@ func (c *Client) publishMetadataHCS1(
 	ctx context.Context,
 	metadataBytes []byte,
 ) (string, *MetadataDigest, error) {
-	createTopicResponse, err := hedera.NewTopicCreateTransaction().
-		SetTopicMemo("hcs-1:0:0").
-		SetAdminKey(c.operatorKey.PublicKey()).
-		SetSubmitKey(c.operatorKey.PublicKey()).
-		Execute(c.hederaClient)
-	if err != nil {
-		return "", nil, fmt.Errorf("failed to create HCS-1 metadata topic: %w", err)
-	}
-	createTopicReceipt, err := createTopicResponse.GetReceipt(c.hederaClient)
-	if err != nil {
-		return "", nil, fmt.Errorf("failed to get HCS-1 metadata topic receipt: %w", err)
-	}
-	if createTopicReceipt.TopicID == nil {
-		return "", nil, fmt.Errorf("HCS-1 metadata topic receipt did not include topic ID")
-	}
-	topic := *createTopicReceipt.TopicID
-
-	response, err := hedera.NewTopicMessageSubmitTransaction().
-		SetTopicID(topic).
-		SetMessage(metadataBytes).
-		Execute(c.hederaClient)
-	if err != nil {
-		return "", nil, fmt.Errorf("failed to publish HCS-1 metadata payload: %w", err)
+	network := inscriber.NetworkTestnet
+	if strings.EqualFold(c.network, shared.NetworkMainnet) {
+		network = inscriber.NetworkMainnet
 	}
 
-	receipt, err := response.GetReceipt(c.hederaClient)
+	authClient := inscriber.NewAuthClient(c.inscriberAuthURL)
+	authResult, err := authClient.Authenticate(
+		ctx,
+		c.operatorID.String(),
+		c.operatorKey.String(),
+		network,
+	)
 	if err != nil {
-		return "", nil, fmt.Errorf("failed to get HCS-1 metadata receipt: %w", err)
+		return "", nil, fmt.Errorf("failed to authenticate inscriber client: %w", err)
 	}
 
-	if receipt.TopicSequenceNumber <= 0 {
-		return "", nil, fmt.Errorf("HCS-1 metadata receipt did not include a valid sequence number")
+	inscriberClient, err := inscriber.NewClient(inscriber.Config{
+		APIKey:  authResult.APIKey,
+		Network: network,
+		BaseURL: c.inscriberAPIURL,
+	})
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to create inscriber client: %w", err)
 	}
 
-	reference := fmt.Sprintf("hcs://1/%s", topic.String())
+	waitForConfirmation := true
+	inscriptionResponse, err := inscriber.Inscribe(
+		ctx,
+		inscriber.InscriptionInput{
+			Type:     inscriber.InscriptionInputTypeBuffer,
+			Buffer:   metadataBytes,
+			FileName: fmt.Sprintf("hcs27-checkpoint-%d.json", time.Now().UnixNano()),
+			MimeType: "application/json",
+		},
+		inscriber.HederaClientConfig{
+			AccountID:  c.operatorID.String(),
+			PrivateKey: c.operatorKey.String(),
+			Network:    network,
+		},
+		inscriber.InscriptionOptions{
+			Mode:                inscriber.ModeFile,
+			FileStandard:        "hcs-1",
+			Network:             network,
+			ConnectionMode:      inscriber.ConnectionModeWebSocket,
+			WaitForConfirmation: &waitForConfirmation,
+			WaitMaxAttempts:     120,
+			WaitInterval:        2000,
+		},
+		inscriberClient,
+	)
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to inscribe HCS-1 metadata: %w", err)
+	}
+	if !inscriptionResponse.Confirmed {
+		return "", nil, fmt.Errorf("metadata inscription did not complete successfully")
+	}
+
+	inscriptionResult, ok := inscriptionResponse.Result.(inscriber.InscriptionResult)
+	if !ok {
+		return "", nil, fmt.Errorf("unexpected inscription result type %T", inscriptionResponse.Result)
+	}
+
+	inscribedTopicID := strings.TrimSpace(inscriptionResult.TopicID)
+	if inscribedTopicID == "" && inscriptionResponse.Inscription != nil {
+		inscribedTopicID = strings.TrimSpace(inscriptionResponse.Inscription.TopicID)
+	}
+	if inscribedTopicID == "" {
+		return "", nil, fmt.Errorf("metadata inscription did not include topic ID")
+	}
+
+	reference := fmt.Sprintf("hcs://1/%s", inscribedTopicID)
 	sum := sha256.Sum256(metadataBytes)
 	digest := base64.RawURLEncoding.EncodeToString(sum[:])
 
@@ -421,7 +469,7 @@ func decodeHCS1PayloadFromMessage(
 	}
 
 	if message.ChunkInfo == nil || message.ChunkInfo.Total <= 1 {
-		return payload, nil
+		return normalizeHCS1Payload(payload)
 	}
 
 	chunkTransactionID := extractChunkTransactionID(message.ChunkInfo.InitialTransactionID)
@@ -480,7 +528,65 @@ func decodeHCS1PayloadFromMessage(
 		combined = append(combined, chunks[expected]...)
 	}
 
-	return combined, nil
+	return normalizeHCS1Payload(combined)
+}
+
+func normalizeHCS1Payload(payload []byte) ([]byte, error) {
+	trimmed := bytes.TrimSpace(payload)
+	if len(trimmed) == 0 || trimmed[0] != '{' {
+		return payload, nil
+	}
+
+	var wrapped struct {
+		Content string `json:"c"`
+	}
+	if err := json.Unmarshal(trimmed, &wrapped); err != nil {
+		return payload, nil
+	}
+	if strings.TrimSpace(wrapped.Content) == "" {
+		return payload, nil
+	}
+
+	decodedContent, err := decodeDataURLPayload(wrapped.Content)
+	if err != nil {
+		return nil, err
+	}
+
+	brotliReader := brotli.NewReader(bytes.NewReader(decodedContent))
+	decompressed, err := io.ReadAll(brotliReader)
+	if err == nil && len(decompressed) > 0 {
+		return decompressed, nil
+	}
+
+	return decodedContent, nil
+}
+
+func decodeDataURLPayload(input string) ([]byte, error) {
+	trimmed := strings.TrimSpace(input)
+	if !strings.HasPrefix(trimmed, "data:") {
+		return nil, fmt.Errorf("unsupported wrapped HCS-1 payload format")
+	}
+
+	parts := strings.SplitN(trimmed, ",", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid wrapped HCS-1 data URL")
+	}
+
+	header := strings.ToLower(parts[0])
+	dataPart := parts[1]
+	if strings.Contains(header, ";base64") {
+		decoded, err := base64.StdEncoding.DecodeString(dataPart)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode wrapped HCS-1 base64 payload: %w", err)
+		}
+		return decoded, nil
+	}
+
+	unescaped, err := url.QueryUnescape(dataPart)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode wrapped HCS-1 payload: %w", err)
+	}
+	return []byte(unescaped), nil
 }
 
 func extractChunkTransactionID(initialTransactionID any) string {
