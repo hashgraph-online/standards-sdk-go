@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/hashgraph-online/standards-sdk-go.svg)](https://pkg.go.dev/github.com/hashgraph-online/standards-sdk-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hashgraph-online/standards-sdk-go)](https://goreportcard.com/report/github.com/hashgraph-online/standards-sdk-go)
-[![Go CI](https://github.com/hashgraph-online/standards-sdk-go/actions/workflows/go-module-release.yml/badge.svg)](https://github.com/hashgraph-online/standards-sdk-go/actions/workflows/go-module-release.yml)
+[![Go CI](https://github.com/hashgraph-online/standards-sdk-go/actions/workflows/ci.yml/badge.svg)](https://github.com/hashgraph-online/standards-sdk-go/actions/workflows/ci.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/hashgraph-online/standards-sdk-go)](https://github.com/hashgraph-online/standards-sdk-go/releases)
 [![License](https://img.shields.io/github/license/hashgraph-online/standards-sdk-go)](./LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/hashgraph-online/standards-sdk-go?style=social)](https://github.com/hashgraph-online/standards-sdk-go/stargazers)
