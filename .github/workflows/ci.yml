@@ -173,6 +173,8 @@ jobs:
             --target "${GITHUB_SHA}"
 
       - name: Wait for pkg.go.dev index
+        id: pkg_index
+        continue-on-error: true
         env:
           RELEASE_TAG: ${{ steps.release_tag.outputs.tag }}
         shell: bash
@@ -212,3 +214,12 @@ jobs:
               f"Timed out waiting for pkg.go.dev to index {module_path}@{release_tag}"
           )
           PY
+
+      - name: Report pkg.go.dev indexing delay
+        if: steps.pkg_index.outcome == 'failure'
+        env:
+          RELEASE_TAG: ${{ steps.release_tag.outputs.tag }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          echo "::warning::pkg.go.dev indexing timed out for ${MODULE_PATH}@${RELEASE_TAG}. Release was published; recheck later. Run: ${GITHUB_RUN_URL}"
