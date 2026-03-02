@@ -28,4 +28,4 @@
 // # Installation
 //
 //	go get github.com/hashgraph-online/standards-sdk-go@latest
-package standards_sdk_go
+package standardssdkgo

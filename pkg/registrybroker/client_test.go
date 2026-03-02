@@ -296,9 +296,9 @@ func TestVerificationDNSMethods(t *testing.T) {
 	}
 
 	persist := true
-	verifyResponse, err := client.VerifyUaidDnsTXT(
+	verifyResponse, err := client.VerifyUaidDNSTXT(
 		context.Background(),
-		VerificationDnsVerifyRequest{
+		VerificationDNSVerifyRequest{
 			UAID:    "uaid:aid:test;uid=1;proto=a2a;nativeId=agent.hol.org",
 			Persist: &persist,
 		},
@@ -315,7 +315,7 @@ func TestVerificationDNSMethods(t *testing.T) {
 	statusResponse, err := client.GetVerificationDNSStatus(
 		context.Background(),
 		"uaid:aid:test;uid=1;proto=a2a;nativeId=agent.hol.org",
-		VerificationDnsStatusQuery{
+		VerificationDNSStatusQuery{
 			Refresh: &refresh,
 			Persist: &persistFalse,
 		},

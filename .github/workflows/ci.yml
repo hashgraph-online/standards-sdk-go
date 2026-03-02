@@ -103,3 +103,9 @@ jobs:
           go-version-file: go.mod
       - name: Verify Build
         run: go build -v ./...
+      - name: Verify go.mod / go.sum are tidy
+        run: |
+          go mod tidy
+          git diff --exit-code go.mod go.sum
+      - name: Run go vet
+        run: go vet ./...

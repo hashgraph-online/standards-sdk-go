@@ -42,7 +42,7 @@ func TestCoverageAllEndpoints(t *testing.T) {
 	_, _ = client.SearchStatus(ctx)
 	_, _ = client.WebsocketStats(ctx)
 	_, _ = client.MetricsSummary(ctx)
-	// `client.Facets` takes (ctx, registry string) or similar based on the error "cannot use SearchParams{} as string" 
+	// `client.Facets` takes (ctx, registry string) or similar based on the error "cannot use SearchParams{} as string"
 	_, _ = client.Facets(ctx, "ans")
 
 	// skills
@@ -71,8 +71,8 @@ func TestCoverageAllEndpoints(t *testing.T) {
 	_, _ = client.VerifyVerificationChallenge(ctx, VerifyVerificationChallengeRequest{})
 	_, _ = client.GetVerificationOwnership(ctx, "target")
 	_, _ = client.VerifySenderOwnership(ctx, "uaid")
-	_, _ = client.VerifyUaidDnsTXT(ctx, VerificationDnsVerifyRequest{UAID: "uaid:aid:test"})
-	_, _ = client.GetVerificationDNSStatus(ctx, "uaid:aid:test", VerificationDnsStatusQuery{})
+	_, _ = client.VerifyUaidDNSTXT(ctx, VerificationDNSVerifyRequest{UAID: "uaid:aid:test"})
+	_, _ = client.GetVerificationDNSStatus(ctx, "uaid:aid:test", VerificationDNSStatusQuery{})
 
 	// credits
 	_, _ = client.PurchaseCreditsWithX402(ctx, PurchaseCreditsWithX402Params{})

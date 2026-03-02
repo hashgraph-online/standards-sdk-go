@@ -449,11 +449,11 @@ type SkillVerificationDomainProofVerifyRequest struct {
 	ChallengeToken string `json:"challengeToken"`
 }
 type VerifyVerificationChallengeRequest = JSONObject
-type VerificationDnsVerifyRequest struct {
+type VerificationDNSVerifyRequest struct {
 	UAID    string `json:"uaid"`
 	Persist *bool  `json:"persist,omitempty"`
 }
-type VerificationDnsStatusQuery struct {
+type VerificationDNSStatusQuery struct {
 	Refresh *bool
 	Persist *bool
 }

@@ -3,7 +3,7 @@
 This example proves the UAID DNS TXT verification flow end to end with the Go `RegistryBrokerClient`:
 
 1. Ledger-authenticate against Registry Broker.
-2. Call `VerifyUaidDnsTXT` for a target UAID.
+2. Call `VerifyUaidDNSTXT` for a target UAID.
 3. Read stored status with `GetVerificationDNSStatus(..., refresh=false)`.
 4. Force a live refresh with `GetVerificationDNSStatus(..., refresh=true)`.
 

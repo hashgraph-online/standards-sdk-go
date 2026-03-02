@@ -1,5 +1,5 @@
-// Package standardssdk is a root-level discovery package for the
-// standards-sdk-go module on pkg.go.dev search.
+// Package standardssdk exposes module metadata for the
+// standards-sdk-go SDK.
 //
 // Import path:
 // github.com/hashgraph-online/standards-sdk-go/standards-sdk

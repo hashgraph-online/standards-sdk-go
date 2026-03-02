@@ -56,9 +56,9 @@ func run() error {
 		fmt.Println("using provided API key authentication")
 	}
 
-	verifyResponse, err := client.VerifyUaidDnsTXT(
+	verifyResponse, err := client.VerifyUaidDNSTXT(
 		context.Background(),
-		registrybroker.VerificationDnsVerifyRequest{
+		registrybroker.VerificationDNSVerifyRequest{
 			UAID:    cfg.UAID,
 			Persist: boolPtr(cfg.Persist),
 		},
@@ -71,7 +71,7 @@ func run() error {
 	statusStored, err := client.GetVerificationDNSStatus(
 		context.Background(),
 		cfg.UAID,
-		registrybroker.VerificationDnsStatusQuery{
+		registrybroker.VerificationDNSStatusQuery{
 			Refresh: boolPtr(false),
 			Persist: boolPtr(false),
 		},
@@ -84,7 +84,7 @@ func run() error {
 	statusLive, err := client.GetVerificationDNSStatus(
 		context.Background(),
 		cfg.UAID,
-		registrybroker.VerificationDnsStatusQuery{
+		registrybroker.VerificationDNSStatusQuery{
 			Refresh: boolPtr(true),
 			Persist: boolPtr(false),
 		},

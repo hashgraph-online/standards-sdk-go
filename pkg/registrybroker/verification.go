@@ -102,10 +102,10 @@ func (c *RegistryBrokerClient) VerifySenderOwnership(
 	)
 }
 
-// VerifyUaidDnsTXT performs DNS TXT verification for the provided UAID.
-func (c *RegistryBrokerClient) VerifyUaidDnsTXT(
+// VerifyUaidDNSTXT performs DNS TXT verification for the provided UAID.
+func (c *RegistryBrokerClient) VerifyUaidDNSTXT(
 	ctx context.Context,
-	payload VerificationDnsVerifyRequest,
+	payload VerificationDNSVerifyRequest,
 ) (JSONObject, error) {
 	if err := ensureNonEmpty(payload.UAID, "uaid"); err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func (c *RegistryBrokerClient) VerifyUaidDnsTXT(
 func (c *RegistryBrokerClient) GetVerificationDNSStatus(
 	ctx context.Context,
 	uaid string,
-	query VerificationDnsStatusQuery,
+	query VerificationDNSStatusQuery,
 ) (JSONObject, error) {
 	if err := ensureNonEmpty(uaid, "uaid"); err != nil {
 		return nil, err

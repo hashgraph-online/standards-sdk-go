@@ -1,3 +1,7 @@
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
 linters-settings:
   errcheck:
     check-type-assertions: true
@@ -28,7 +32,7 @@ linters-settings:
       - name: exported
         severity: warning
   goimports:
-    local-prefixes: github.com/hashgraph/standards-sdk-go
+    local-prefixes: github.com/hashgraph-online/standards-sdk-go
 
 linters:
   disable-all: true
@@ -74,7 +78,6 @@ linters:
     - tparallel
     - unconvert
     - unparam
-    - whitespace
 
 issues:
   exclude-rules:

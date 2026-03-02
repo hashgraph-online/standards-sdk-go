@@ -19,6 +19,13 @@
 cd standards-sdk-go
 go mod tidy
 go test ./...
+go vet ./...
+```
+
+Lint:
+
+```bash
+golangci-lint run
 ```
 
 ## Install

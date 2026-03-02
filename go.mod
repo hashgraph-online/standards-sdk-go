@@ -2,12 +2,15 @@ module github.com/hashgraph-online/standards-sdk-go
 
 go 1.24.0
 
-require github.com/hashgraph/hedera-sdk-go/v2 v2.49.0
+require (
+	github.com/andybalholm/brotli v1.1.1
+	github.com/btcsuite/btcd/btcec/v2 v2.3.4
+	github.com/hashgraph/hedera-sdk-go/v2 v2.49.0
+	github.com/zhouhui8915/go-socket.io-client v0.0.0-20200925034401-83ee73793ba4
+)
 
 require (
-	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/bits-and-blooms/bitset v1.13.0 // indirect
-	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/consensys/bavard v0.1.13 // indirect
 	github.com/consensys/gnark-crypto v0.12.1 // indirect
@@ -17,7 +20,6 @@ require (
 	github.com/ethereum/go-ethereum v1.13.15 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/holiman/uint256 v1.2.4 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -27,11 +29,11 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rs/zerolog v1.33.0 // indirect
+	github.com/smartystreets/goconvey v1.8.1 // indirect
 	github.com/supranational/blst v0.3.11 // indirect
 	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	github.com/zhouhui8915/engine.io-go v0.0.0-20150910083302-02ea08f0971f // indirect
-	github.com/zhouhui8915/go-socket.io-client v0.0.0-20200925034401-83ee73793ba4 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/net v0.25.0 // indirect
