@@ -23,7 +23,7 @@ type BrokerClient struct {
 func NewBrokerClient(baseURL string, apiKey string) (*BrokerClient, error) {
 	normalizedURL := strings.TrimSpace(baseURL)
 	if normalizedURL == "" {
-		normalizedURL = "https://registry.hashgraphonline.com/api/v1"
+		normalizedURL = "https://hol.org/registry/api/v1"
 	}
 	normalizedURL = strings.TrimRight(normalizedURL, "/")
 

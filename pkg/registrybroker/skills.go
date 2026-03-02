@@ -56,8 +56,14 @@ func (c *RegistryBrokerClient) ListSkills(
 	query := url.Values{}
 	addQueryString(query, "name", options.Name)
 	addQueryString(query, "version", options.Version)
+	addQueryString(query, "q", options.Q)
+	addQueryString(query, "tag", options.Tag)
+	addQueryString(query, "category", options.Category)
+	addQueryString(query, "view", options.View)
 	addQueryString(query, "cursor", options.Cursor)
 	addQueryString(query, "accountId", options.AccountID)
+	addQueryBool(query, "featured", options.Featured)
+	addQueryBool(query, "verified", options.Verified)
 	if options.Limit != nil {
 		query.Set("limit", strconv.Itoa(*options.Limit))
 	}
@@ -260,6 +266,72 @@ func (c *RegistryBrokerClient) SetSkillDeprecation(
 	)
 }
 
+// GetSkillBadge returns the requested value.
+func (c *RegistryBrokerClient) GetSkillBadge(
+	ctx context.Context,
+	options SkillBadgeOptions,
+) (JSONObject, error) {
+	if err := ensureNonEmpty(options.Name, "name"); err != nil {
+		return nil, err
+	}
+	query := url.Values{}
+	query.Set("name", strings.TrimSpace(options.Name))
+	addQueryString(query, "metric", options.Metric)
+	addQueryString(query, "label", options.Label)
+	addQueryString(query, "style", options.Style)
+	return c.requestJSON(
+		ctx,
+		http.MethodGet,
+		pathWithQuery("/skills/badge", query),
+		nil,
+		nil,
+	)
+}
+
+// ListSkillTags returns the requested value.
+func (c *RegistryBrokerClient) ListSkillTags(
+	ctx context.Context,
+) (JSONObject, error) {
+	return c.requestJSON(ctx, http.MethodGet, "/skills/tags", nil, nil)
+}
+
+// ListSkillCategories returns the requested value.
+func (c *RegistryBrokerClient) ListSkillCategories(
+	ctx context.Context,
+) (JSONObject, error) {
+	return c.requestJSON(ctx, http.MethodGet, "/skills/categories", nil, nil)
+}
+
+// ResolveSkillMarkdown returns the SKILL.md payload for a skill reference.
+func (c *RegistryBrokerClient) ResolveSkillMarkdown(
+	ctx context.Context,
+	skillRef string,
+) (string, error) {
+	if err := ensureNonEmpty(skillRef, "skillRef"); err != nil {
+		return "", err
+	}
+	path := "/skills/" + percentPath(skillRef) + "/SKILL.md"
+	body, _, err := c.request(ctx, http.MethodGet, path, nil, map[string]string{
+		"accept": "text/markdown, text/plain;q=0.9, */*;q=0.8",
+	})
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
+}
+
+// ResolveSkillManifest returns the SKILL.json manifest for a skill reference.
+func (c *RegistryBrokerClient) ResolveSkillManifest(
+	ctx context.Context,
+	skillRef string,
+) (JSONObject, error) {
+	if err := ensureNonEmpty(skillRef, "skillRef"); err != nil {
+		return nil, err
+	}
+	path := "/skills/" + percentPath(skillRef) + "/manifest"
+	return c.requestJSON(ctx, http.MethodGet, path, nil, nil)
+}
+
 // GetSkillVoteStatus returns the requested value.
 func (c *RegistryBrokerClient) GetSkillVoteStatus(
 	ctx context.Context,
@@ -312,16 +384,58 @@ func (c *RegistryBrokerClient) GetSkillVerificationStatus(
 	ctx context.Context,
 	name string,
 ) (JSONObject, error) {
+	return c.GetSkillVerificationStatusWithOptions(
+		ctx,
+		name,
+		SkillVerificationStatusOptions{},
+	)
+}
+
+// GetSkillVerificationStatusWithOptions returns the requested value.
+func (c *RegistryBrokerClient) GetSkillVerificationStatusWithOptions(
+	ctx context.Context,
+	name string,
+	options SkillVerificationStatusOptions,
+) (JSONObject, error) {
 	if err := ensureNonEmpty(name, "name"); err != nil {
 		return nil, err
 	}
 	query := url.Values{}
 	query.Set("name", strings.TrimSpace(name))
+	addQueryString(query, "version", options.Version)
 	return c.requestJSON(
 		ctx,
 		http.MethodGet,
 		pathWithQuery("/skills/verification/status", query),
 		nil,
 		nil,
+	)
+}
+
+// CreateSkillDomainProofChallenge creates a DNS TXT verification challenge.
+func (c *RegistryBrokerClient) CreateSkillDomainProofChallenge(
+	ctx context.Context,
+	payload SkillVerificationDomainProofChallengeRequest,
+) (JSONObject, error) {
+	return c.requestJSON(
+		ctx,
+		http.MethodPost,
+		"/skills/verification/domain/challenge",
+		payload,
+		map[string]string{"content-type": "application/json"},
+	)
+}
+
+// VerifySkillDomainProof validates the DNS TXT challenge response.
+func (c *RegistryBrokerClient) VerifySkillDomainProof(
+	ctx context.Context,
+	payload SkillVerificationDomainProofVerifyRequest,
+) (JSONObject, error) {
+	return c.requestJSON(
+		ctx,
+		http.MethodPost,
+		"/skills/verification/domain/verify",
+		payload,
+		map[string]string{"content-type": "application/json"},
 	)
 }

@@ -13,7 +13,7 @@ func TestNewBrokerClient(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if client.baseURL != "https://registry.hashgraphonline.com/api/v1" {
+	if client.baseURL != "https://hol.org/registry/api/v1" {
 		t.Fatal("expected default URL")
 	}
 

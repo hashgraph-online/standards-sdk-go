@@ -299,6 +299,12 @@ type SkillCatalogOptions struct {
 type ListSkillsOptions struct {
 	Name         string
 	Version      string
+	Q            string
+	Tag          string
+	Category     string
+	Featured     *bool
+	Verified     *bool
+	View         string
 	Limit        *int
 	Cursor       string
 	IncludeFiles *bool
@@ -317,6 +323,17 @@ type MySkillsListOptions struct {
 
 type SkillPublishJobOptions struct {
 	AccountID string
+}
+
+type SkillVerificationStatusOptions struct {
+	Version string
+}
+
+type SkillBadgeOptions struct {
+	Name   string
+	Metric string
+	Label  string
+	Style  string
 }
 
 type PurchaseCreditsWithHbarParams struct {
@@ -420,7 +437,26 @@ type SkillRecommendedVersionSetRequest = JSONObject
 type SkillDeprecationSetRequest = JSONObject
 type SkillRegistryVoteRequest = JSONObject
 type SkillVerificationRequestCreateRequest = JSONObject
+type SkillVerificationDomainProofChallengeRequest struct {
+	Name    string `json:"name"`
+	Version string `json:"version,omitempty"`
+	Domain  string `json:"domain,omitempty"`
+}
+type SkillVerificationDomainProofVerifyRequest struct {
+	Name           string `json:"name"`
+	Version        string `json:"version,omitempty"`
+	Domain         string `json:"domain,omitempty"`
+	ChallengeToken string `json:"challengeToken"`
+}
 type VerifyVerificationChallengeRequest = JSONObject
+type VerificationDnsVerifyRequest struct {
+	UAID    string `json:"uaid"`
+	Persist *bool  `json:"persist,omitempty"`
+}
+type VerificationDnsStatusQuery struct {
+	Refresh *bool
+	Persist *bool
+}
 
 type InitializeAgentClientOptions struct {
 	RegistryBrokerClientOptions

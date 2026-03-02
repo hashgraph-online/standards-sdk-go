@@ -160,6 +160,40 @@ client, _ := registrybroker.NewRegistryBrokerClient(registrybroker.RegistryBroke
 _, _ = client.Stats(context.Background())
 ```
 
+### Registry Broker skill domain proof
+
+```go
+status, _ := client.GetSkillVerificationStatusWithOptions(
+	context.Background(),
+	"demo-skill",
+	registrybroker.SkillVerificationStatusOptions{Version: "1.0.0"},
+)
+
+challenge, _ := client.CreateSkillDomainProofChallenge(
+	context.Background(),
+	registrybroker.SkillVerificationDomainProofChallengeRequest{
+		Name:    "demo-skill",
+		Version: "1.0.0",
+		Domain:  "example.com",
+	},
+)
+
+_, _ = client.VerifySkillDomainProof(
+	context.Background(),
+	registrybroker.SkillVerificationDomainProofVerifyRequest{
+		Name:           "demo-skill",
+		Version:        "1.0.0",
+		Domain:         "example.com",
+		ChallengeToken: "<token-from-dns-txt-record>",
+	},
+)
+
+_ = status
+_ = challenge
+```
+
+Runnable example: `go run ./examples/registry-broker-skill-domain-proof`.
+
 ## Environment Variables
 
 Common:

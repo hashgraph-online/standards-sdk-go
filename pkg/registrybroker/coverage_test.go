@@ -71,6 +71,8 @@ func TestCoverageAllEndpoints(t *testing.T) {
 	_, _ = client.VerifyVerificationChallenge(ctx, VerifyVerificationChallengeRequest{})
 	_, _ = client.GetVerificationOwnership(ctx, "target")
 	_, _ = client.VerifySenderOwnership(ctx, "uaid")
+	_, _ = client.VerifyUaidDnsTXT(ctx, VerificationDnsVerifyRequest{UAID: "uaid:aid:test"})
+	_, _ = client.GetVerificationDNSStatus(ctx, "uaid:aid:test", VerificationDnsStatusQuery{})
 
 	// credits
 	_, _ = client.PurchaseCreditsWithX402(ctx, PurchaseCreditsWithX402Params{})

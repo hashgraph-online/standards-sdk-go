@@ -257,6 +257,77 @@ func TestLedgerAuthenticateFlow(t *testing.T) {
 	}
 }
 
+func TestVerificationDNSMethods(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("content-type", "application/json")
+		switch {
+		case strings.HasSuffix(request.URL.Path, "/verification/dns/verify"):
+			if request.Method != http.MethodPost {
+				t.Fatalf("expected POST, got %s", request.Method)
+			}
+			_, _ = writer.Write([]byte(`{"uaid":"uaid:aid:test;uid=1;proto=a2a;nativeId=agent.hol.org","verified":true,"profileId":"hcs-14.profile.uaid-dns-web","checkedAt":"2026-03-02T00:00:00.000Z","source":"live","persisted":true}`))
+		case strings.Contains(request.URL.Path, "/verification/dns/status/"):
+			if request.Method != http.MethodGet {
+				t.Fatalf("expected GET, got %s", request.Method)
+			}
+			query := request.URL.Query()
+			if query.Get("refresh") != "true" {
+				t.Fatalf("expected refresh=true, got %s", query.Get("refresh"))
+			}
+			if query.Get("persist") != "false" {
+				t.Fatalf("expected persist=false, got %s", query.Get("persist"))
+			}
+			_, _ = writer.Write([]byte(`{"uaid":"uaid:aid:test;uid=1;proto=a2a;nativeId=agent.hol.org","verified":false,"profileId":"hcs-14.profile.uaid-dns-web","checkedAt":"2026-03-02T00:00:00.000Z","source":"live","persisted":false}`))
+		default:
+			writer.WriteHeader(http.StatusNotFound)
+			_, _ = writer.Write([]byte(`{"error":"not found"}`))
+		}
+	}))
+	defer server.Close()
+
+	client, err := NewRegistryBrokerClient(RegistryBrokerClientOptions{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+	})
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
+
+	persist := true
+	verifyResponse, err := client.VerifyUaidDnsTXT(
+		context.Background(),
+		VerificationDnsVerifyRequest{
+			UAID:    "uaid:aid:test;uid=1;proto=a2a;nativeId=agent.hol.org",
+			Persist: &persist,
+		},
+	)
+	if err != nil {
+		t.Fatalf("verify dns failed: %v", err)
+	}
+	if verifyResponse["verified"] != true {
+		t.Fatalf("expected verified=true, got %#v", verifyResponse)
+	}
+
+	refresh := true
+	persistFalse := false
+	statusResponse, err := client.GetVerificationDNSStatus(
+		context.Background(),
+		"uaid:aid:test;uid=1;proto=a2a;nativeId=agent.hol.org",
+		VerificationDnsStatusQuery{
+			Refresh: &refresh,
+			Persist: &persistFalse,
+		},
+	)
+	if err != nil {
+		t.Fatalf("get verification dns status failed: %v", err)
+	}
+	if statusResponse["verified"] != false {
+		t.Fatalf("expected verified=false, got %#v", statusResponse)
+	}
+}
+
 func intPointer(value int) *int {
 	return &value
 }

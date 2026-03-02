@@ -3,6 +3,8 @@ package registrybroker
 import (
 	"context"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -98,4 +100,50 @@ func (c *RegistryBrokerClient) VerifySenderOwnership(
 		body,
 		map[string]string{"content-type": "application/json"},
 	)
+}
+
+// VerifyUaidDnsTXT performs DNS TXT verification for the provided UAID.
+func (c *RegistryBrokerClient) VerifyUaidDnsTXT(
+	ctx context.Context,
+	payload VerificationDnsVerifyRequest,
+) (JSONObject, error) {
+	if err := ensureNonEmpty(payload.UAID, "uaid"); err != nil {
+		return nil, err
+	}
+	body := JSONObject{
+		"uaid": strings.TrimSpace(payload.UAID),
+	}
+	if payload.Persist != nil {
+		body["persist"] = *payload.Persist
+	}
+	return c.requestJSON(
+		ctx,
+		http.MethodPost,
+		"/verification/dns/verify",
+		body,
+		map[string]string{"content-type": "application/json"},
+	)
+}
+
+// GetVerificationDNSStatus returns stored or live DNS TXT verification status for a UAID.
+func (c *RegistryBrokerClient) GetVerificationDNSStatus(
+	ctx context.Context,
+	uaid string,
+	query VerificationDnsStatusQuery,
+) (JSONObject, error) {
+	if err := ensureNonEmpty(uaid, "uaid"); err != nil {
+		return nil, err
+	}
+	path := "/verification/dns/status/" + percentPath(uaid)
+	params := url.Values{}
+	if query.Refresh != nil {
+		params.Set("refresh", strconv.FormatBool(*query.Refresh))
+	}
+	if query.Persist != nil {
+		params.Set("persist", strconv.FormatBool(*query.Persist))
+	}
+	if encoded := params.Encode(); encoded != "" {
+		path = path + "?" + encoded
+	}
+	return c.requestJSON(ctx, http.MethodGet, path, nil, nil)
 }

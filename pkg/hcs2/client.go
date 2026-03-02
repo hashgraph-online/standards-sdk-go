@@ -2,7 +2,6 @@ package hcs2
 
 import (
 	"context"
-	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -391,35 +390,31 @@ func (c *Client) SubmitMessage(
 }
 
 // decodeRegistryMessage decodes a mirror node message into an HCS-2 Message.
-// If the message is an overflow wrapper (contains data_ref), it optionally
-// resolves the HCS-1 reference when resolveOverflow is true.
+// If the message metadata is an HCS-1 HRL (overflow), it optionally resolves
+// the reference when resolveOverflow is true.
 func (c *Client) decodeRegistryMessage(
 	ctx context.Context,
 	item mirror.TopicMessage,
 	resolveOverflow bool,
 ) (Message, error) {
 	var message Message
-	if err := mirror.DecodeMessageJSON(item, &message); err == nil {
-		return message, nil
+	if err := mirror.DecodeMessageJSON(item, &message); err != nil {
+		return Message{}, fmt.Errorf("unable to decode message: %w", err)
 	}
 
-	// Try to decode as an overflow message.
-	var overflow OverflowMessage
-	if err := mirror.DecodeMessageJSON(item, &overflow); err != nil || overflow.DataRef == "" {
-		return Message{}, fmt.Errorf("unable to decode message")
-	}
+	// Check if metadata is an HCS-1 HRL (overflow reference).
+	if resolveOverflow && hcs1ReferencePattern.MatchString(message.Metadata) {
+		resolvedBytes, err := c.ResolveHCS1Reference(ctx, message.Metadata)
+		if err != nil {
+			return Message{}, fmt.Errorf("failed to resolve overflow: %w", err)
+		}
 
-	if !resolveOverflow {
-		return Message{P: overflow.P, Op: overflow.Op}, nil
-	}
+		var resolved Message
+		if err := json.Unmarshal(resolvedBytes, &resolved); err != nil {
+			return Message{}, fmt.Errorf("failed to unmarshal resolved overflow: %w", err)
+		}
 
-	resolvedBytes, err := c.ResolveHCS1Reference(ctx, overflow.DataRef)
-	if err != nil {
-		return Message{}, fmt.Errorf("failed to resolve overflow: %w", err)
-	}
-
-	if err := json.Unmarshal(resolvedBytes, &message); err != nil {
-		return Message{}, fmt.Errorf("failed to unmarshal resolved overflow: %w", err)
+		return resolved, nil
 	}
 
 	return message, nil
@@ -443,20 +438,17 @@ func (c *Client) submitMessage(
 
 	// If payload exceeds maxPayloadBytes, inscribe via HCS-1 and submit a reference.
 	if len(payload) > maxPayloadBytes {
-		hrl, digest, inscribeErr := c.inscribeOverflow(ctx, payload)
+		hrl, inscribeErr := c.inscribeOverflow(ctx, payload)
 		if inscribeErr != nil {
 			return OperationResult{}, fmt.Errorf("failed to inscribe overflow payload via HCS-1: %w", inscribeErr)
 		}
 
-		wrapper := OverflowMessage{
-			P:             message.P,
-			Op:            message.Op,
-			DataRef:       hrl,
-			DataRefDigest: digest,
-		}
-		payload, err = json.Marshal(wrapper)
+		// Build a standard HCS-2 message with metadata set to the HRL.
+		overflowMsg := message
+		overflowMsg.Metadata = hrl
+		payload, err = json.Marshal(overflowMsg)
 		if err != nil {
-			return OperationResult{}, fmt.Errorf("failed to marshal overflow wrapper: %w", err)
+			return OperationResult{}, fmt.Errorf("failed to marshal overflow message: %w", err)
 		}
 	}
 
@@ -486,8 +478,8 @@ func (c *Client) submitMessage(
 }
 
 // inscribeOverflow inscribes the payload via the Kiloscribe inscriber API and
-// returns an HRL reference and SHA-256 base64url digest.
-func (c *Client) inscribeOverflow(ctx context.Context, payload []byte) (hrl, digest string, err error) {
+// returns an HRL reference (e.g. "hcs://1/0.0.12345").
+func (c *Client) inscribeOverflow(ctx context.Context, payload []byte) (string, error) {
 	network := inscriber.NetworkTestnet
 	if strings.EqualFold(c.network, shared.NetworkMainnet) {
 		network = inscriber.NetworkMainnet
@@ -501,7 +493,7 @@ func (c *Client) inscribeOverflow(ctx context.Context, payload []byte) (hrl, dig
 		network,
 	)
 	if authErr != nil {
-		return "", "", fmt.Errorf("failed to authenticate inscriber client: %w", authErr)
+		return "", fmt.Errorf("failed to authenticate inscriber client: %w", authErr)
 	}
 
 	inscriberClient, clientErr := inscriber.NewClient(inscriber.Config{
@@ -510,7 +502,7 @@ func (c *Client) inscribeOverflow(ctx context.Context, payload []byte) (hrl, dig
 		BaseURL: c.inscriberAPIURL,
 	})
 	if clientErr != nil {
-		return "", "", fmt.Errorf("failed to create inscriber client: %w", clientErr)
+		return "", fmt.Errorf("failed to create inscriber client: %w", clientErr)
 	}
 
 	job, startErr := inscriberClient.StartInscription(ctx, inscriber.StartInscriptionRequest{
@@ -526,10 +518,10 @@ func (c *Client) inscribeOverflow(ctx context.Context, payload []byte) (hrl, dig
 		},
 	})
 	if startErr != nil {
-		return "", "", fmt.Errorf("failed to start HCS-1 overflow inscription: %w", startErr)
+		return "", fmt.Errorf("failed to start HCS-1 overflow inscription: %w", startErr)
 	}
 	if strings.TrimSpace(job.TransactionBytes) == "" {
-		return "", "", fmt.Errorf("inscriber response did not include transaction bytes")
+		return "", fmt.Errorf("inscriber response did not include transaction bytes")
 	}
 
 	executedTxID, execErr := inscriber.ExecuteTransaction(
@@ -542,7 +534,7 @@ func (c *Client) inscribeOverflow(ctx context.Context, payload []byte) (hrl, dig
 		},
 	)
 	if execErr != nil {
-		return "", "", fmt.Errorf("failed to execute overflow inscription transaction: %w", execErr)
+		return "", fmt.Errorf("failed to execute overflow inscription transaction: %w", execErr)
 	}
 
 	waited, waitErr := inscriberClient.WaitForInscription(ctx, executedTxID, inscriber.WaitOptions{
@@ -550,10 +542,10 @@ func (c *Client) inscribeOverflow(ctx context.Context, payload []byte) (hrl, dig
 		Interval:    inscriberWaitInterval,
 	})
 	if waitErr != nil {
-		return "", "", fmt.Errorf("failed to wait for overflow inscription: %w", waitErr)
+		return "", fmt.Errorf("failed to wait for overflow inscription: %w", waitErr)
 	}
 	if !waited.Completed && !strings.EqualFold(waited.Status, "completed") {
-		return "", "", fmt.Errorf("overflow inscription did not complete successfully")
+		return "", fmt.Errorf("overflow inscription did not complete successfully")
 	}
 
 	inscribedTopicID := strings.TrimSpace(waited.TopicID)
@@ -561,14 +553,10 @@ func (c *Client) inscribeOverflow(ctx context.Context, payload []byte) (hrl, dig
 		inscribedTopicID = strings.TrimSpace(job.TopicID)
 	}
 	if inscribedTopicID == "" {
-		return "", "", fmt.Errorf("overflow inscription did not return a topic ID")
+		return "", fmt.Errorf("overflow inscription did not return a topic ID")
 	}
 
-	hrl = fmt.Sprintf("hcs://1/%s", inscribedTopicID)
-	sum := sha256.Sum256(payload)
-	digest = base64.RawURLEncoding.EncodeToString(sum[:])
-
-	return hrl, digest, nil
+	return fmt.Sprintf("hcs://1/%s", inscribedTopicID), nil
 }
 
 // ResolveHCS1Reference resolves an HCS-1 HRL (e.g. "hcs://1/0.0.12345") to the

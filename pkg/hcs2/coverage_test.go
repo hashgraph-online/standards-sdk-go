@@ -501,22 +501,21 @@ func TestResolveRegistryFailures(t *testing.T) {
 }
 
 func TestOverflowMessageSerialization(t *testing.T) {
-	msg := OverflowMessage{
-		P:             "hcs-2",
-		Op:            OperationRegister,
-		DataRef:       "hcs://1/0.0.99999",
-		DataRefDigest: "abc123digest",
+	msg := Message{
+		P:        "hcs-2",
+		Op:       OperationRegister,
+		Metadata: "hcs://1/0.0.99999",
 	}
 	data, err := json.Marshal(msg)
 	if err != nil {
 		t.Fatalf("failed to marshal overflow message: %v", err)
 	}
 	s := string(data)
-	if !strings.Contains(s, `"data_ref"`) {
-		t.Fatal("expected data_ref field in serialized overflow message")
+	if !strings.Contains(s, `"metadata"`) {
+		t.Fatal("expected metadata field in serialized overflow message")
 	}
-	if !strings.Contains(s, `"data_ref_digest"`) {
-		t.Fatal("expected data_ref_digest field in serialized overflow message")
+	if strings.Contains(s, `"data_ref"`) {
+		t.Fatal("did not expect data_ref field in serialized overflow message")
 	}
 	if strings.Contains(s, `"t_id"`) {
 		t.Fatal("overflow message should not contain t_id")
