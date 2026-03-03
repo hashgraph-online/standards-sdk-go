@@ -12,6 +12,11 @@ import (
 	"strings"
 )
 
+var (
+	leafDomainPrefix = [1]byte{0x00}
+	nodeDomainPrefix = [1]byte{0x01}
+)
+
 // EmptyRoot performs the requested operation.
 func EmptyRoot() []byte {
 	sum := sha256.Sum256([]byte{})
@@ -20,21 +25,19 @@ func EmptyRoot() []byte {
 
 // HashLeaf performs the requested operation.
 func HashLeaf(canonicalEntry []byte) []byte {
-	payload := make([]byte, 1+len(canonicalEntry))
-	payload[0] = 0x00
-	copy(payload[1:], canonicalEntry)
-	sum := sha256.Sum256(payload)
-	return sum[:]
+	hasher := sha256.New()
+	_, _ = hasher.Write(leafDomainPrefix[:])
+	_, _ = hasher.Write(canonicalEntry)
+	return hasher.Sum(nil)
 }
 
 // HashNode performs the requested operation.
 func HashNode(left, right []byte) []byte {
-	payload := make([]byte, 1+len(left)+len(right))
-	payload[0] = 0x01
-	copy(payload[1:], left)
-	copy(payload[1+len(left):], right)
-	sum := sha256.Sum256(payload)
-	return sum[:]
+	hasher := sha256.New()
+	_, _ = hasher.Write(nodeDomainPrefix[:])
+	_, _ = hasher.Write(left)
+	_, _ = hasher.Write(right)
+	return hasher.Sum(nil)
 }
 
 // MerkleRootFromCanonicalEntries performs the requested operation.
