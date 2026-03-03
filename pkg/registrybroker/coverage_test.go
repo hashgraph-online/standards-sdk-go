@@ -48,6 +48,7 @@ func TestCoverageAllEndpoints(t *testing.T) {
 	// skills
 	_, _ = client.GetSkillsCatalog(ctx, SkillCatalogOptions{})
 	_, _ = client.ListSkills(ctx, ListSkillsOptions{})
+	_, _ = client.GetSkillSecurityBreakdown(ctx, SkillSecurityBreakdownOptions{JobID: "job-1"})
 	_, _ = client.ListSkillVersions(ctx, "skill-id")
 	_, _ = client.ListMySkills(ctx, ListMySkillsOptions{})
 	_, _ = client.GetMySkillsList(ctx, MySkillsListOptions{})
