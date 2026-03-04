@@ -15,9 +15,38 @@ jobs:
     name: DCO Signed-Off
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Get PR commits
+        uses: actions/github-script@v6
         with:
-          fetch-depth: 0
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const query = `query($owner:String!, $repo:String!, $pull_number:Int!) {
+              repository(owner:$owner, name:$repo) {
+                pullRequest(number:$pull_number) {
+                  commits(first:100) {
+                    nodes {
+                      commit {
+                        oid
+                        message
+                      }
+                    }
+                  }
+                }
+              }
+            }`;
 
-      - name: Check DCO sign-off
-        uses: tim-actions/dco@master
+            const variables = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            };
+
+            const result = await github.graphql(query, variables);
+            const commits = result.repository.pullRequest.commits.nodes.map(node => node.commit);
+            const unsigned = commits.filter(commit => !commit.message.includes('Signed-off-by:'));
+
+            if (unsigned.length > 0) {
+              core.setFailed(`The following commits are not signed with DCO:\n${unsigned.map(c => c.oid).join('\n')}\n\nPlease sign your commits using 'git commit -s'.`);
+            } else {
+              console.log('All commits are signed with DCO!');
+            }

@@ -79,6 +79,26 @@ func (c *RegistryBrokerClient) ListSkills(
 	)
 }
 
+// GetSkillSecurityBreakdown returns scanner summary and findings for a skill release.
+func (c *RegistryBrokerClient) GetSkillSecurityBreakdown(
+	ctx context.Context,
+	options SkillSecurityBreakdownOptions,
+) (JSONObject, error) {
+	if err := ensureNonEmpty(options.JobID, "jobID"); err != nil {
+		return nil, err
+	}
+
+	path := "/skills/" + percentPath(options.JobID) + "/security-breakdown"
+
+	return c.requestJSON(
+		ctx,
+		http.MethodGet,
+		path,
+		nil,
+		nil,
+	)
+}
+
 // ListSkillVersions performs the requested operation.
 func (c *RegistryBrokerClient) ListSkillVersions(
 	ctx context.Context,

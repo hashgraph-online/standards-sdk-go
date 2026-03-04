@@ -311,6 +311,10 @@ type ListSkillsOptions struct {
 	AccountID    string
 }
 
+type SkillSecurityBreakdownOptions struct {
+	JobID string
+}
+
 type ListMySkillsOptions struct {
 	Limit *int
 }
