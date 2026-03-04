@@ -61,6 +61,32 @@ jobs:
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
 
+      - name: Run OSV vulnerability scanner
+        continue-on-error: true
+        uses: google/osv-scanner-action/osv-scanner-action@v2.3.3
+        with:
+          scan-args: |-
+            --recursive
+            --format=json
+            --output=osv-results.json
+            ./
+
+      - name: Build OSV SARIF report
+        continue-on-error: true
+        uses: google/osv-scanner-action/osv-reporter-action@v2.3.3
+        with:
+          scan-args: |-
+            --output=osv-results.sarif
+            --new=osv-results.json
+            --gh-annotations=false
+            --fail-on-vuln=false
+
+      - name: Run TruffleHog secret scanner
+        continue-on-error: true
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+
       - name: Upload Gosec SARIF
         if: always() && hashFiles('results.sarif') != ''
         continue-on-error: true
@@ -68,6 +94,14 @@ jobs:
         with:
           sarif_file: results.sarif
           category: gosec
+
+      - name: Upload OSV SARIF
+        if: always() && hashFiles('osv-results.sarif') != ''
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: osv-results.sarif
+          category: osv-scanner
 
       - name: Upload Trivy SARIF
         if: always() && hashFiles('trivy-results.sarif') != ''
