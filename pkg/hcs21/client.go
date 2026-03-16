@@ -42,11 +42,14 @@ func NewClient(config ClientConfig) (*Client, error) {
 		return nil, err
 	}
 
-	hederaClient, err := shared.NewHederaClient(network)
-	if err != nil {
-		return nil, err
+	hederaClient := config.HederaClient
+	if hederaClient == nil {
+		hederaClient, err = shared.NewHederaClient(network)
+		if err != nil {
+			return nil, err
+		}
+		hederaClient.SetOperator(operatorID, operatorKey)
 	}
-	hederaClient.SetOperator(operatorID, operatorKey)
 
 	mirrorClient, err := mirror.NewClient(mirror.Config{
 		Network: network,
@@ -377,6 +380,7 @@ func (c *Client) ResolveLatestVersionPointer(
 		OperatorPrivateKey: c.operatorKey.String(),
 		Network:            networkStr,
 		MirrorBaseURL:      c.mirrorClient.BaseURL(),
+		HederaClient:       c.hederaClient,
 	})
 	if err != nil {
 		return "", 0, "", err

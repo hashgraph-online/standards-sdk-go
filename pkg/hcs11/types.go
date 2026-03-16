@@ -1,5 +1,7 @@
 package hcs11
 
+import hedera "github.com/hashgraph/hedera-sdk-go/v2"
+
 type ProfileType int
 
 const (
@@ -182,6 +184,7 @@ type ClientConfig struct {
 	KiloScribeBaseURL string
 	InscriberAuthURL  string
 	InscriberAPIURL   string
+	HederaClient      *hedera.Client
 }
 
 type ValidationResult struct {

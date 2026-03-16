@@ -1,5 +1,7 @@
 package hcs2
 
+import hedera "github.com/hashgraph/hedera-sdk-go/v2"
+
 type Operation string
 
 const (
@@ -27,7 +29,6 @@ type Message struct {
 	Memo     string    `json:"m,omitempty"`
 	TTL      int64     `json:"ttl,omitempty"`
 }
-
 
 type CreateRegistryOptions struct {
 	RegistryType        RegistryType
@@ -117,4 +118,5 @@ type ClientConfig struct {
 	MirrorAPIKey       string
 	InscriberAuthURL   string
 	InscriberAPIURL    string
+	HederaClient       *hedera.Client
 }

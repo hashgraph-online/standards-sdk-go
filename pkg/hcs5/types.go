@@ -1,6 +1,9 @@
 package hcs5
 
-import "github.com/hashgraph-online/standards-sdk-go/pkg/inscriber"
+import (
+	"github.com/hashgraph-online/standards-sdk-go/pkg/inscriber"
+	hedera "github.com/hashgraph/hedera-sdk-go/v2"
+)
 
 type ClientConfig struct {
 	OperatorAccountID  string
@@ -8,6 +11,7 @@ type ClientConfig struct {
 	Network            string
 	InscriberAuthURL   string
 	InscriberAPIURL    string
+	HederaClient       *hedera.Client
 }
 
 type MintOptions struct {

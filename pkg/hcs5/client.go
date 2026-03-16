@@ -43,11 +43,14 @@ func NewClient(config ClientConfig) (*Client, error) {
 		return nil, err
 	}
 
-	hederaClient, err := shared.NewHederaClient(network)
-	if err != nil {
-		return nil, err
+	hederaClient := config.HederaClient
+	if hederaClient == nil {
+		hederaClient, err = shared.NewHederaClient(network)
+		if err != nil {
+			return nil, err
+		}
+		hederaClient.SetOperator(accountID, privateKey)
 	}
-	hederaClient.SetOperator(accountID, privateKey)
 
 	return &Client{
 		hederaClient:       hederaClient,

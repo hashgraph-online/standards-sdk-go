@@ -85,6 +85,7 @@ type ClientConfig struct {
 	Network            string
 	MirrorBaseURL      string
 	MirrorAPIKey       string
+	HederaClient       *hedera.Client
 }
 
 type CreateRegistryOptions struct {

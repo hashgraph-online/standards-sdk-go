@@ -1,5 +1,7 @@
 package hcs6
 
+import hedera "github.com/hashgraph/hedera-sdk-go/v2"
+
 type Operation string
 
 const (
@@ -31,6 +33,7 @@ type ClientConfig struct {
 	Network            string
 	MirrorBaseURL      string
 	MirrorAPIKey       string
+	HederaClient       *hedera.Client
 }
 
 type CreateRegistryOptions struct {

@@ -48,11 +48,14 @@ func NewClient(config ClientConfig) (*Client, error) {
 		return nil, err
 	}
 
-	hederaClient, err := shared.NewHederaClient(network)
-	if err != nil {
-		return nil, err
+	hederaClient := config.HederaClient
+	if hederaClient == nil {
+		hederaClient, err = shared.NewHederaClient(network)
+		if err != nil {
+			return nil, err
+		}
+		hederaClient.SetOperator(operatorID, operatorKey)
 	}
-	hederaClient.SetOperator(operatorID, operatorKey)
 
 	mirrorClient, err := mirror.NewClient(mirror.Config{
 		Network: network,
@@ -141,6 +144,7 @@ func (client *Client) CreateRegistryTopic(
 		OperatorPrivateKey: client.operatorKey.String(),
 		Network:            client.network,
 		MirrorBaseURL:      client.mirrorClient.BaseURL(),
+		HederaClient:       client.hederaClient,
 	})
 	if err != nil {
 		return "", "", err
