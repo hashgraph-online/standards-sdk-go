@@ -30,31 +30,14 @@ func NewClient(config ClientConfig) (*Client, error) {
 		return nil, err
 	}
 
-	operatorID := strings.TrimSpace(config.OperatorAccountID)
-	if operatorID == "" {
-		return nil, fmt.Errorf("operator account ID is required")
-	}
-	operatorKey := strings.TrimSpace(config.OperatorPrivateKey)
-	if operatorKey == "" {
-		return nil, fmt.Errorf("operator private key is required")
-	}
-
-	parsedOperatorID, err := hedera.AccountIDFromString(operatorID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid operator account ID: %w", err)
-	}
-	parsedOperatorKey, err := shared.ParsePrivateKey(operatorKey)
+	hederaClient, operator, err := shared.ResolveHederaClientAndOperator(
+		network,
+		config.HederaClient,
+		config.OperatorAccountID,
+		config.OperatorPrivateKey,
+	)
 	if err != nil {
 		return nil, err
-	}
-
-	hederaClient := config.HederaClient
-	if hederaClient == nil {
-		hederaClient, err = shared.NewHederaClient(network)
-		if err != nil {
-			return nil, err
-		}
-		hederaClient.SetOperator(parsedOperatorID, parsedOperatorKey)
 	}
 
 	mirrorClient, err := mirror.NewClient(mirror.Config{
@@ -69,8 +52,8 @@ func NewClient(config ClientConfig) (*Client, error) {
 	return &Client{
 		hederaClient: hederaClient,
 		mirrorClient: mirrorClient,
-		operatorID:   parsedOperatorID,
-		operatorKey:  parsedOperatorKey,
+		operatorID:   operator.AccountID,
+		operatorKey:  operator.PrivateKey,
 	}, nil
 }
 

@@ -25,7 +25,9 @@ type Client struct {
 	hederaClient            *hedera.Client
 	mirrorClient            *mirror.Client
 	operatorID              hedera.AccountID
+	operatorPublicKey       hedera.PublicKey
 	operatorKey             hedera.PrivateKey
+	operatorKeyRaw          string
 	network                 string
 	inscriberAuthURL        string
 	inscriberAPIURL         string
@@ -57,29 +59,14 @@ func NewClient(config ClientConfig) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	if strings.TrimSpace(config.OperatorAccountID) == "" {
-		return nil, fmt.Errorf("operator account ID is required")
-	}
-	if strings.TrimSpace(config.OperatorPrivateKey) == "" {
-		return nil, fmt.Errorf("operator private key is required")
-	}
-
-	operatorID, err := hedera.AccountIDFromString(config.OperatorAccountID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid operator account ID: %w", err)
-	}
-	operatorKey, err := shared.ParsePrivateKey(config.OperatorPrivateKey)
+	hederaClient, operator, err := shared.ResolveHederaClientAndOperator(
+		network,
+		config.HederaClient,
+		config.OperatorAccountID,
+		config.OperatorPrivateKey,
+	)
 	if err != nil {
 		return nil, err
-	}
-
-	hederaClient := config.HederaClient
-	if hederaClient == nil {
-		hederaClient, err = shared.NewHederaClient(network)
-		if err != nil {
-			return nil, err
-		}
-		hederaClient.SetOperator(operatorID, operatorKey)
 	}
 
 	mirrorClient, err := mirror.NewClient(mirror.Config{
@@ -92,13 +79,15 @@ func NewClient(config ClientConfig) (*Client, error) {
 	}
 
 	return &Client{
-		hederaClient:     hederaClient,
-		mirrorClient:     mirrorClient,
-		operatorID:       operatorID,
-		operatorKey:      operatorKey,
-		network:          network,
-		inscriberAuthURL: strings.TrimSpace(config.InscriberAuthURL),
-		inscriberAPIURL:  strings.TrimSpace(config.InscriberAPIURL),
+		hederaClient:      hederaClient,
+		mirrorClient:      mirrorClient,
+		operatorID:        operator.AccountID,
+		operatorPublicKey: operator.PublicKey,
+		operatorKey:       operator.PrivateKey,
+		operatorKeyRaw:    operator.PrivateKeyRaw,
+		network:           network,
+		inscriberAuthURL:  strings.TrimSpace(config.InscriberAuthURL),
+		inscriberAPIURL:   strings.TrimSpace(config.InscriberAPIURL),
 	}, nil
 }
 
@@ -271,12 +260,15 @@ func (c *Client) publishMetadataHCS1(
 	if strings.EqualFold(c.network, shared.NetworkMainnet) {
 		network = inscriber.NetworkMainnet
 	}
+	if strings.TrimSpace(c.operatorKeyRaw) == "" {
+		return "", nil, fmt.Errorf("operator private key is required for inscriber-backed metadata publication")
+	}
 
 	authClient := inscriber.NewAuthClient(c.inscriberAuthURL)
 	authResult, err := authClient.Authenticate(
 		ctx,
 		c.operatorID.String(),
-		c.operatorKey.String(),
+		c.operatorKeyRaw,
 		network,
 	)
 	if err != nil {
@@ -303,7 +295,7 @@ func (c *Client) publishMetadataHCS1(
 		},
 		inscriber.HederaClientConfig{
 			AccountID:  c.operatorID.String(),
-			PrivateKey: c.operatorKey.String(),
+			PrivateKey: c.operatorKeyRaw,
 			Network:    network,
 		},
 		inscriber.InscriptionOptions{
@@ -635,7 +627,10 @@ func extractChunkTransactionID(initialTransactionID any) string {
 
 func (c *Client) resolvePublicKey(rawKey string, useOperator bool) (*hedera.PublicKey, error) {
 	if useOperator {
-		publicKey := c.operatorKey.PublicKey()
+		if strings.TrimSpace(c.operatorPublicKey.String()) == "" {
+			return nil, fmt.Errorf("operator public key is not configured")
+		}
+		publicKey := c.operatorPublicKey
 		return &publicKey, nil
 	}
 

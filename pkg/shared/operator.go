@@ -18,6 +18,14 @@ type OperatorConfig struct {
 	Network    string
 }
 
+type ResolvedHederaOperator struct {
+	AccountID     hedera.AccountID
+	PublicKey     hedera.PublicKey
+	PrivateKey    hedera.PrivateKey
+	PrivateKeyRaw string
+	HasPrivateKey bool
+}
+
 var dotenvLoadOnce sync.Once
 
 // OperatorConfigFromEnv performs the requested operation.
@@ -193,6 +201,96 @@ func firstNonEmptyEnv(keys ...string) string {
 		}
 	}
 	return ""
+}
+
+// ResolveHederaClientAndOperator returns a Hedera client and resolved operator
+// details. When an injected client is provided it must already include an
+// operator; when no client is injected, operator credentials are required.
+func ResolveHederaClientAndOperator(
+	network string,
+	injectedClient *hedera.Client,
+	operatorAccountID string,
+	operatorPrivateKey string,
+) (*hedera.Client, ResolvedHederaOperator, error) {
+	trimmedOperatorID := strings.TrimSpace(operatorAccountID)
+	trimmedOperatorKey := strings.TrimSpace(operatorPrivateKey)
+
+	if injectedClient == nil {
+		if trimmedOperatorID == "" {
+			return nil, ResolvedHederaOperator{}, fmt.Errorf("operator account ID is required")
+		}
+		if trimmedOperatorKey == "" {
+			return nil, ResolvedHederaOperator{}, fmt.Errorf("operator private key is required")
+		}
+
+		parsedOperatorID, err := hedera.AccountIDFromString(trimmedOperatorID)
+		if err != nil {
+			return nil, ResolvedHederaOperator{}, fmt.Errorf("invalid operator account ID: %w", err)
+		}
+		parsedOperatorKey, err := ParsePrivateKey(trimmedOperatorKey)
+		if err != nil {
+			return nil, ResolvedHederaOperator{}, err
+		}
+
+		createdClient, err := NewHederaClient(network)
+		if err != nil {
+			return nil, ResolvedHederaOperator{}, err
+		}
+		createdClient.SetOperator(parsedOperatorID, parsedOperatorKey)
+
+		return createdClient, ResolvedHederaOperator{
+			AccountID:     parsedOperatorID,
+			PublicKey:     parsedOperatorKey.PublicKey(),
+			PrivateKey:    parsedOperatorKey,
+			PrivateKeyRaw: trimmedOperatorKey,
+			HasPrivateKey: true,
+		}, nil
+	}
+
+	resolvedOperatorID := injectedClient.GetOperatorAccountID()
+	if resolvedOperatorID.IsZero() {
+		return nil, ResolvedHederaOperator{}, fmt.Errorf("injected Hedera client must have an operator configured")
+	}
+	if trimmedOperatorID != "" {
+		parsedOperatorID, err := hedera.AccountIDFromString(trimmedOperatorID)
+		if err != nil {
+			return nil, ResolvedHederaOperator{}, fmt.Errorf("invalid operator account ID: %w", err)
+		}
+		if !parsedOperatorID.Equals(resolvedOperatorID) {
+			return nil, ResolvedHederaOperator{}, fmt.Errorf(
+				"injected Hedera client operator account ID %s does not match provided operator account ID %s",
+				resolvedOperatorID.String(),
+				parsedOperatorID.String(),
+			)
+		}
+	}
+
+	resolvedPublicKey := injectedClient.GetOperatorPublicKey()
+	if strings.TrimSpace(resolvedPublicKey.String()) == "" {
+		return nil, ResolvedHederaOperator{}, fmt.Errorf("injected Hedera client must have an operator public key configured")
+	}
+
+	resolved := ResolvedHederaOperator{
+		AccountID: resolvedOperatorID,
+		PublicKey: resolvedPublicKey,
+	}
+
+	if trimmedOperatorKey != "" {
+		parsedOperatorKey, err := ParsePrivateKey(trimmedOperatorKey)
+		if err != nil {
+			return nil, ResolvedHederaOperator{}, err
+		}
+		if parsedOperatorKey.PublicKey().String() != resolvedPublicKey.String() {
+			return nil, ResolvedHederaOperator{}, fmt.Errorf(
+				"provided operator private key does not match the injected Hedera client operator",
+			)
+		}
+		resolved.PrivateKey = parsedOperatorKey
+		resolved.PrivateKeyRaw = trimmedOperatorKey
+		resolved.HasPrivateKey = true
+	}
+
+	return injectedClient, resolved, nil
 }
 
 // ParsePrivateKey parses the provided input value.

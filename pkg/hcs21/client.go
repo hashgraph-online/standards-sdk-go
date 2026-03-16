@@ -14,10 +14,12 @@ import (
 )
 
 type Client struct {
-	hederaClient *hedera.Client
-	mirrorClient *mirror.Client
-	operatorID   hedera.AccountID
-	operatorKey  hedera.PrivateKey
+	hederaClient      *hedera.Client
+	mirrorClient      *mirror.Client
+	operatorID        hedera.AccountID
+	operatorPublicKey hedera.PublicKey
+	operatorKey       hedera.PrivateKey
+	operatorKeyRaw    string
 }
 
 // NewClient creates a new Client.
@@ -26,29 +28,14 @@ func NewClient(config ClientConfig) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	if strings.TrimSpace(config.OperatorAccountID) == "" {
-		return nil, fmt.Errorf("operator account ID is required")
-	}
-	if strings.TrimSpace(config.OperatorPrivateKey) == "" {
-		return nil, fmt.Errorf("operator private key is required")
-	}
-
-	operatorID, err := hedera.AccountIDFromString(strings.TrimSpace(config.OperatorAccountID))
-	if err != nil {
-		return nil, fmt.Errorf("invalid operator account ID: %w", err)
-	}
-	operatorKey, err := shared.ParsePrivateKey(config.OperatorPrivateKey)
+	hederaClient, operator, err := shared.ResolveHederaClientAndOperator(
+		network,
+		config.HederaClient,
+		config.OperatorAccountID,
+		config.OperatorPrivateKey,
+	)
 	if err != nil {
 		return nil, err
-	}
-
-	hederaClient := config.HederaClient
-	if hederaClient == nil {
-		hederaClient, err = shared.NewHederaClient(network)
-		if err != nil {
-			return nil, err
-		}
-		hederaClient.SetOperator(operatorID, operatorKey)
 	}
 
 	mirrorClient, err := mirror.NewClient(mirror.Config{
@@ -61,10 +48,12 @@ func NewClient(config ClientConfig) (*Client, error) {
 	}
 
 	return &Client{
-		hederaClient: hederaClient,
-		mirrorClient: mirrorClient,
-		operatorID:   operatorID,
-		operatorKey:  operatorKey,
+		hederaClient:      hederaClient,
+		mirrorClient:      mirrorClient,
+		operatorID:        operator.AccountID,
+		operatorPublicKey: operator.PublicKey,
+		operatorKey:       operator.PrivateKey,
+		operatorKeyRaw:    operator.PrivateKeyRaw,
 	}, nil
 }
 
@@ -377,7 +366,7 @@ func (c *Client) ResolveLatestVersionPointer(
 	}
 	registryClient, err := hcs2.NewClient(hcs2.ClientConfig{
 		OperatorAccountID:  c.operatorID.String(),
-		OperatorPrivateKey: c.operatorKey.String(),
+		OperatorPrivateKey: c.operatorKeyRaw,
 		Network:            networkStr,
 		MirrorBaseURL:      c.mirrorClient.BaseURL(),
 		HederaClient:       c.hederaClient,
@@ -469,7 +458,10 @@ func (c *Client) resolvePublicKey(raw string, useOperator bool) hedera.Key {
 		return nil
 	}
 	if useOperator {
-		return c.operatorKey.PublicKey()
+		if strings.TrimSpace(c.operatorPublicKey.String()) == "" {
+			return nil
+		}
+		return c.operatorPublicKey
 	}
 	publicKey, err := hedera.PublicKeyFromString(trimmed)
 	if err != nil {
