@@ -1,8 +1,9 @@
 package hcs5
 
 import (
-	"github.com/hashgraph-online/standards-sdk-go/pkg/inscriber"
 	hedera "github.com/hashgraph/hedera-sdk-go/v2"
+
+	"github.com/hashgraph-online/standards-sdk-go/pkg/inscriber"
 )
 
 type ClientConfig struct {
