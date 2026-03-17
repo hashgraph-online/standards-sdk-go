@@ -9,6 +9,32 @@ import (
 	"github.com/hashgraph/hedera-sdk-go/v2"
 )
 
+func TestNewClientUsesInjectedHederaClient(t *testing.T) {
+	operatorKey, err := hedera.PrivateKeyGenerateEd25519()
+	if err != nil {
+		t.Fatalf("failed to generate operator key: %v", err)
+	}
+	operatorID, err := hedera.AccountIDFromString("0.0.1234")
+	if err != nil {
+		t.Fatalf("failed to parse operator account id: %v", err)
+	}
+	injectedClient := hedera.ClientForTestnet()
+	injectedClient.SetOperator(operatorID, operatorKey)
+
+	client, err := NewClient(ClientConfig{
+		OperatorAccountID:  operatorID.String(),
+		OperatorPrivateKey: operatorKey.String(),
+		Network:            "testnet",
+		HederaClient:       injectedClient,
+	})
+	if err != nil {
+		t.Fatalf("expected client creation to succeed: %v", err)
+	}
+	if client.hederaClient != injectedClient {
+		t.Fatal("expected NewClient to use the injected Hedera client")
+	}
+}
+
 func TestBuildTopicMemoIndexed(t *testing.T) {
 	memo := BuildTopicMemo(RegistryTypeIndexed, 86400)
 	if memo != "hcs-2:0:86400" {

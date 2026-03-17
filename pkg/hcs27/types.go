@@ -3,6 +3,8 @@ package hcs27
 import (
 	"context"
 	"encoding/json"
+
+	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 
 const (
@@ -93,6 +95,7 @@ type ClientConfig struct {
 	MirrorAPIKey       string
 	InscriberAuthURL   string
 	InscriberAPIURL    string
+	HederaClient       *hedera.Client
 }
 
 type PublishResult struct {

@@ -340,6 +340,107 @@ type SkillBadgeOptions struct {
 	Style  string
 }
 
+type SkillPublisherQuickstartCommand struct {
+	ID          string  `json:"id"`
+	Label       string  `json:"label"`
+	Description string  `json:"description"`
+	Command     string  `json:"command"`
+	Href        *string `json:"href"`
+}
+
+type SkillPublisherTemplatePreset struct {
+	PresetID       string `json:"presetId"`
+	Label          string `json:"label"`
+	Description    string `json:"description"`
+	RecommendedFor string `json:"recommendedFor"`
+	Command        string `json:"command"`
+}
+
+type SkillPublisherMetadata struct {
+	CLIPackageURL        string                            `json:"cliPackageUrl"`
+	CLICommand           string                            `json:"cliCommand"`
+	ActionMarketplaceURL string                            `json:"actionMarketplaceUrl"`
+	RepositoryURL        string                            `json:"repositoryUrl"`
+	GuideURL             *string                           `json:"guideUrl"`
+	DocsURL              *string                           `json:"docsUrl"`
+	SubmitURL            *string                           `json:"submitUrl"`
+	SkillsIndexURL       *string                           `json:"skillsIndexUrl"`
+	QuickstartCommands   []SkillPublisherQuickstartCommand `json:"quickstartCommands"`
+	TemplatePresets      []SkillPublisherTemplatePreset    `json:"templatePresets"`
+}
+
+type SkillRegistryConfigResponse struct {
+	Enabled           bool                    `json:"enabled"`
+	DirectoryTopicID  *string                 `json:"directoryTopicId"`
+	MaxFiles          *int                    `json:"maxFiles"`
+	MaxTotalSizeBytes *int                    `json:"maxTotalSizeBytes"`
+	AllowedMimeTypes  []string                `json:"allowedMimeTypes"`
+	Network           *string                 `json:"network"`
+	Publisher         *SkillPublisherMetadata `json:"publisher"`
+}
+
+type SkillInstallArtifactDescriptor struct {
+	URL     string  `json:"url"`
+	Pointer *string `json:"pointer"`
+	SHA256  *string `json:"sha256"`
+}
+
+type SkillInstallResolverDescriptor struct {
+	SkillRef    string `json:"skillRef"`
+	SkillMDURL  string `json:"skillMdUrl"`
+	ManifestURL string `json:"manifestUrl"`
+}
+
+type SkillInstallBadgeDescriptor struct {
+	APIURL   string `json:"apiUrl"`
+	ImageURL string `json:"imageUrl"`
+	Markdown string `json:"markdown"`
+	HTML     string `json:"html"`
+}
+
+type SkillInstallShareDescriptor struct {
+	CanonicalURL *string                      `json:"canonicalUrl"`
+	LatestURL    *string                      `json:"latestUrl"`
+	MarkdownLink *string                      `json:"markdownLink"`
+	HTMLLink     *string                      `json:"htmlLink"`
+	Badge        *SkillInstallBadgeDescriptor `json:"badge"`
+}
+
+type SkillInstallSnippetSet struct {
+	CLI      string `json:"cli"`
+	Claude   string `json:"claude"`
+	Cursor   string `json:"cursor"`
+	Codex    string `json:"codex"`
+	OpenClaw string `json:"openclaw"`
+}
+
+type SkillInstallResponse struct {
+	Name      string  `json:"name"`
+	Version   string  `json:"version"`
+	SkillRef  string  `json:"skillRef"`
+	Network   string  `json:"network"`
+	DetailURL *string `json:"detailUrl"`
+	Artifacts struct {
+		SkillMD  SkillInstallArtifactDescriptor `json:"skillMd"`
+		Manifest SkillInstallArtifactDescriptor `json:"manifest"`
+	} `json:"artifacts"`
+	Resolvers struct {
+		Pinned SkillInstallResolverDescriptor `json:"pinned"`
+		Latest SkillInstallResolverDescriptor `json:"latest"`
+	} `json:"resolvers"`
+	Share    SkillInstallShareDescriptor `json:"share"`
+	Snippets SkillInstallSnippetSet      `json:"snippets"`
+}
+
+type SkillInstallCopyTelemetryRequest struct {
+	Source      string `json:"source,omitempty"`
+	InstallType string `json:"installType,omitempty"`
+}
+
+type SkillInstallCopyTelemetryResponse struct {
+	Accepted bool `json:"accepted"`
+}
+
 type PurchaseCreditsWithHbarParams struct {
 	AccountID  string
 	PrivateKey string

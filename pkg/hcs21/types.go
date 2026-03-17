@@ -1,6 +1,10 @@
 package hcs21
 
-import "regexp"
+import (
+	"regexp"
+
+	hedera "github.com/hashgraph/hedera-sdk-go/v2"
+)
 
 const (
 	Protocol               = "hcs-21"
@@ -78,6 +82,7 @@ type ClientConfig struct {
 	Network            string
 	MirrorBaseURL      string
 	MirrorAPIKey       string
+	HederaClient       *hedera.Client
 }
 
 type CreateRegistryTopicOptions struct {

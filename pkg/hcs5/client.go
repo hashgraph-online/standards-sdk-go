@@ -13,12 +13,13 @@ import (
 )
 
 type Client struct {
-	hederaClient       *hedera.Client
-	operatorAccountID  hedera.AccountID
-	operatorPrivateKey hedera.PrivateKey
-	network            string
-	inscriberAuthURL   string
-	inscriberAPIURL    string
+	hederaClient          *hedera.Client
+	operatorAccountID     hedera.AccountID
+	operatorPrivateKey    hedera.PrivateKey
+	operatorPrivateKeyRaw string
+	network               string
+	inscriberAuthURL      string
+	inscriberAPIURL       string
 }
 
 // NewClient creates a new Client.
@@ -27,35 +28,24 @@ func NewClient(config ClientConfig) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	if strings.TrimSpace(config.OperatorAccountID) == "" {
-		return nil, fmt.Errorf("operator account ID is required")
-	}
-	if strings.TrimSpace(config.OperatorPrivateKey) == "" {
-		return nil, fmt.Errorf("operator private key is required")
-	}
-
-	accountID, err := hedera.AccountIDFromString(config.OperatorAccountID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid operator account ID: %w", err)
-	}
-	privateKey, err := shared.ParsePrivateKey(config.OperatorPrivateKey)
+	hederaClient, operator, err := shared.ResolveHederaClientAndOperator(
+		network,
+		config.HederaClient,
+		config.OperatorAccountID,
+		config.OperatorPrivateKey,
+	)
 	if err != nil {
 		return nil, err
 	}
-
-	hederaClient, err := shared.NewHederaClient(network)
-	if err != nil {
-		return nil, err
-	}
-	hederaClient.SetOperator(accountID, privateKey)
 
 	return &Client{
-		hederaClient:       hederaClient,
-		operatorAccountID:  accountID,
-		operatorPrivateKey: privateKey,
-		network:            network,
-		inscriberAuthURL:   strings.TrimSpace(config.InscriberAuthURL),
-		inscriberAPIURL:    strings.TrimSpace(config.InscriberAPIURL),
+		hederaClient:          hederaClient,
+		operatorAccountID:     operator.AccountID,
+		operatorPrivateKey:    operator.PrivateKey,
+		operatorPrivateKeyRaw: operator.PrivateKeyRaw,
+		network:               network,
+		inscriberAuthURL:      strings.TrimSpace(config.InscriberAuthURL),
+		inscriberAPIURL:       strings.TrimSpace(config.InscriberAPIURL),
 	}, nil
 }
 
@@ -147,10 +137,13 @@ func (c *Client) CreateHashinal(
 	}
 
 	authClient := inscriber.NewAuthClient(authBaseURL)
+	if strings.TrimSpace(c.operatorPrivateKeyRaw) == "" {
+		return MintResponse{}, fmt.Errorf("operator private key is required for inscriber-backed hashinal creation")
+	}
 	authResult, err := authClient.Authenticate(
 		ctx,
 		c.operatorAccountID.String(),
-		c.operatorPrivateKey.String(),
+		c.operatorPrivateKeyRaw,
 		inscriberNetwork,
 	)
 	if err != nil {
@@ -179,7 +172,7 @@ func (c *Client) CreateHashinal(
 		job.TransactionBytes,
 		inscriber.HederaClientConfig{
 			AccountID:  c.operatorAccountID.String(),
-			PrivateKey: c.operatorPrivateKey.String(),
+			PrivateKey: c.operatorPrivateKeyRaw,
 			Network:    inscriberNetwork,
 		},
 	)

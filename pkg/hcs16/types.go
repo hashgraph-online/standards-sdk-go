@@ -30,6 +30,7 @@ type ClientConfig struct {
 	MirrorAPIKey       string
 	InscriberAuthURL   string
 	InscriberAPIURL    string
+	HederaClient       *hedera.Client
 }
 
 type FloraMember struct {

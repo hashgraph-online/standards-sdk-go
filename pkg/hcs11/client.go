@@ -30,14 +30,24 @@ func NewClient(config ClientConfig) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	hederaClient, err := shared.NewHederaClient(network)
-	if err != nil {
-		return nil, err
+	injectedClient := config.HederaClient
+	hederaClient := injectedClient
+	if hederaClient == nil {
+		hederaClient, err = shared.NewHederaClient(network)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	operatorAccountID := strings.TrimSpace(config.Auth.OperatorID)
 	operatorPrivateKey := strings.TrimSpace(config.Auth.PrivateKey)
-	if operatorAccountID != "" && operatorPrivateKey != "" {
+	if operatorAccountID == "" && operatorPrivateKey != "" {
+		return nil, fmt.Errorf("operator account ID is required when private key is provided")
+	}
+	if operatorAccountID != "" && operatorPrivateKey == "" {
+		return nil, fmt.Errorf("operator private key is required when operator account ID is provided")
+	}
+	if injectedClient == nil && operatorAccountID != "" && operatorPrivateKey != "" {
 		accountID, parseErr := hedera.AccountIDFromString(operatorAccountID)
 		if parseErr != nil {
 			return nil, fmt.Errorf("invalid operator account ID: %w", parseErr)
@@ -47,6 +57,32 @@ func NewClient(config ClientConfig) (*Client, error) {
 			return nil, keyErr
 		}
 		hederaClient.SetOperator(accountID, privateKey)
+	}
+
+	if injectedClient != nil {
+		injectedOperatorID := hederaClient.GetOperatorAccountID()
+		if injectedOperatorID.IsZero() {
+			return nil, fmt.Errorf("injected Hedera client must have an operator configured")
+		}
+		injectedOperatorAccountID := injectedOperatorID.String()
+		if operatorAccountID != "" && operatorAccountID != injectedOperatorAccountID {
+			return nil, fmt.Errorf(
+				"injected Hedera client operator account ID %s does not match provided operator account ID %s",
+				injectedOperatorAccountID,
+				operatorAccountID,
+			)
+		}
+		operatorAccountID = injectedOperatorAccountID
+
+		if operatorPrivateKey != "" {
+			parsedKey, keyErr := shared.ParsePrivateKey(operatorPrivateKey)
+			if keyErr != nil {
+				return nil, keyErr
+			}
+			if parsedKey.PublicKey().String() != hederaClient.GetOperatorPublicKey().String() {
+				return nil, fmt.Errorf("provided operator private key does not match the injected Hedera client operator")
+			}
+		}
 	}
 
 	mirrorClient, err := mirror.NewClient(mirror.Config{

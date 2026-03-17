@@ -3,6 +3,8 @@ package hcs20
 import (
 	"regexp"
 	"time"
+
+	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 
 const (
@@ -104,6 +106,7 @@ type ClientConfig struct {
 	MirrorAPIKey       string
 	PublicTopicID      string
 	RegistryTopicID    string
+	HederaClient       *hedera.Client
 }
 
 type CreateTopicOptions struct {
