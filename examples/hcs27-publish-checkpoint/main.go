@@ -47,6 +47,11 @@ func main() {
 		fmt.Printf("using existing checkpoint topic=%s\n", checkpointTopicID)
 	}
 
+	existingRecords, err := client.GetCheckpoints(ctx, checkpointTopicID, nil)
+	if err != nil {
+		existingRecords = nil
+	}
+
 	inlineMetadata := hcs27.CheckpointMetadata{
 		Type: "ans-checkpoint-v1",
 		Stream: hcs27.StreamID{
@@ -113,7 +118,12 @@ func main() {
 		overflowResult.TransactionID,
 	)
 
-	records, err := waitForCheckpoints(ctx, client, checkpointTopicID, 2)
+	records, err := waitForCheckpoints(
+		ctx,
+		client,
+		checkpointTopicID,
+		len(existingRecords)+2,
+	)
 	if err != nil {
 		panic(err)
 	}
