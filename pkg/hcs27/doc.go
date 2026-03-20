@@ -28,7 +28,7 @@
 //	metadata := hcs27.CheckpointMetadata{
 //		Type:   "ans-checkpoint-v1",
 //		Stream: hcs27.StreamID{Registry: "ans", LogID: "default"},
-//		Root:   hcs27.RootCommitment{TreeSize: 100, RootHashB64: "<root>"},
+//		Root:   hcs27.RootCommitment{TreeSize: "100", RootHashB64u: "<root>"},
 //	}
 //
 // This package is part of the HOL Standards SDK for Go.

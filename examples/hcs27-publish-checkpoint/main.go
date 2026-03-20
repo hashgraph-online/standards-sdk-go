@@ -38,15 +38,11 @@ func main() {
 		Log: &hcs27.LogProfile{
 			Algorithm: "sha-256",
 			Leaf:      "sha256(jcs(event))",
-			Merkle:    "rfc6962",
+			Merkle:    "rfc9162",
 		},
 		Root: hcs27.RootCommitment{
-			TreeSize:    1,
-			RootHashB64: root,
-		},
-		BatchRange: hcs27.BatchRange{
-			Start: 1,
-			End:   1,
+			TreeSize:     "1",
+			RootHashB64u: root,
 		},
 	}
 

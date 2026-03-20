@@ -396,8 +396,8 @@ func (c *Client) GetCheckpoints(
 // ValidateCheckpointChain validates the provided input value.
 func ValidateCheckpointChain(records []CheckpointRecord) error {
 	type previousRecord struct {
-		TreeSize    uint64
-		RootHashB64 string
+		TreeSize     uint64
+		RootHashB64u string
 	}
 
 	streams := map[string]previousRecord{}
@@ -409,9 +409,16 @@ func ValidateCheckpointChain(records []CheckpointRecord) error {
 		)
 
 		previous, exists := streams[streamID]
+		currentTreeSize, err := parseCanonicalUint64(
+			"metadata.root.treeSize",
+			record.EffectiveMetadata.Root.TreeSize,
+		)
+		if err != nil {
+			return err
+		}
 		current := previousRecord{
-			TreeSize:    record.EffectiveMetadata.Root.TreeSize,
-			RootHashB64: record.EffectiveMetadata.Root.RootHashB64,
+			TreeSize:     currentTreeSize,
+			RootHashB64u: record.EffectiveMetadata.Root.RootHashB64u,
 		}
 
 		if exists {
@@ -421,10 +428,17 @@ func ValidateCheckpointChain(records []CheckpointRecord) error {
 			if record.EffectiveMetadata.Previous == nil {
 				return fmt.Errorf("missing prev linkage for stream %s", streamID)
 			}
-			if record.EffectiveMetadata.Previous.TreeSize != previous.TreeSize {
+			previousTreeSize, err := parseCanonicalUint64(
+				"metadata.prev.treeSize",
+				record.EffectiveMetadata.Previous.TreeSize,
+			)
+			if err != nil {
+				return err
+			}
+			if previousTreeSize != previous.TreeSize {
 				return fmt.Errorf("prev.treeSize mismatch for stream %s", streamID)
 			}
-			if record.EffectiveMetadata.Previous.RootHashB64 != previous.RootHashB64 {
+			if record.EffectiveMetadata.Previous.RootHashB64u != previous.RootHashB64u {
 				return fmt.Errorf("prev.rootHashB64u mismatch for stream %s", streamID)
 			}
 		}

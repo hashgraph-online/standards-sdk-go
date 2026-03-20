@@ -106,29 +106,27 @@ func validateMetadata(metadata CheckpointMetadata) error {
 	if strings.TrimSpace(metadata.Log.Leaf) == "" {
 		return fmt.Errorf("metadata.log.leaf is required")
 	}
-	if strings.TrimSpace(metadata.Log.Merkle) == "" {
-		return fmt.Errorf("metadata.log.merkle is required")
+	if strings.TrimSpace(metadata.Log.Merkle) != "rfc9162" {
+		return fmt.Errorf("metadata.log.merkle must be rfc9162")
 	}
-	if metadata.Root.TreeSize == 0 && metadata.BatchRange.End > 0 {
-		return fmt.Errorf("metadata.root.treeSize must be >= batch_range.end")
+	rootTreeSize, err := parseCanonicalUint64("metadata.root.treeSize", metadata.Root.TreeSize)
+	if err != nil {
+		return err
 	}
-	if _, err := base64.RawURLEncoding.DecodeString(metadata.Root.RootHashB64); err != nil {
+	if _, err := base64.RawURLEncoding.DecodeString(metadata.Root.RootHashB64u); err != nil {
 		return fmt.Errorf("metadata.root.rootHashB64u must be base64url: %w", err)
 	}
 	if metadata.Previous != nil {
-		if _, err := base64.RawURLEncoding.DecodeString(metadata.Previous.RootHashB64); err != nil {
+		previousTreeSize, err := parseCanonicalUint64("metadata.prev.treeSize", metadata.Previous.TreeSize)
+		if err != nil {
+			return err
+		}
+		if _, err := base64.RawURLEncoding.DecodeString(metadata.Previous.RootHashB64u); err != nil {
 			return fmt.Errorf("metadata.prev.rootHashB64u must be base64url: %w", err)
 		}
-		if metadata.Previous.TreeSize > metadata.Root.TreeSize {
+		if previousTreeSize > rootTreeSize {
 			return fmt.Errorf("metadata.prev.treeSize must be <= metadata.root.treeSize")
 		}
-	}
-
-	if metadata.BatchRange.End < metadata.BatchRange.Start {
-		return fmt.Errorf("metadata.batch_range.end must be >= start")
-	}
-	if metadata.BatchRange.End > metadata.Root.TreeSize {
-		return fmt.Errorf("metadata.batch_range.end must be <= metadata.root.treeSize")
 	}
 
 	if metadata.Signature != nil {

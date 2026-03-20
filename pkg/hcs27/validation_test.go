@@ -130,16 +130,12 @@ func buildValidMetadata() CheckpointMetadata {
 		},
 		Log: &LogProfile{
 			Algorithm: "sha-256",
-			Leaf:      "rfc6962",
-			Merkle:    "rfc6962",
+			Leaf:      "sha256(jcs(event))",
+			Merkle:    "rfc9162",
 		},
 		Root: RootCommitment{
-			TreeSize:    10,
-			RootHashB64: rootHashB64,
-		},
-		BatchRange: BatchRange{
-			Start: 0,
-			End:   10,
+			TreeSize:     canonicalUint64(10),
+			RootHashB64u: rootHashB64,
 		},
 	}
 }
@@ -227,7 +223,7 @@ func TestValidateMetadataLogMerkle(t *testing.T) {
 
 func TestValidateMetadataRootHash(t *testing.T) {
 	metadata := buildValidMetadata()
-	metadata.Root.RootHashB64 = "!invalid!"
+	metadata.Root.RootHashB64u = "!invalid!"
 	err := validateMetadata(metadata)
 	if err == nil {
 		t.Fatal("expected error for invalid root hash")
@@ -238,8 +234,8 @@ func TestValidateMetadataPrevious(t *testing.T) {
 	metadata := buildValidMetadata()
 	prevHash := sha256.Sum256([]byte("prev"))
 	metadata.Previous = &PreviousCommitment{
-		TreeSize:    5,
-		RootHashB64: base64.RawURLEncoding.EncodeToString(prevHash[:]),
+		TreeSize:     canonicalUint64(5),
+		RootHashB64u: base64.RawURLEncoding.EncodeToString(prevHash[:]),
 	}
 	err := validateMetadata(metadata)
 	if err != nil {
@@ -250,8 +246,8 @@ func TestValidateMetadataPrevious(t *testing.T) {
 func TestValidateMetadataPreviousInvalidHash(t *testing.T) {
 	metadata := buildValidMetadata()
 	metadata.Previous = &PreviousCommitment{
-		TreeSize:    5,
-		RootHashB64: "!invalid!",
+		TreeSize:     canonicalUint64(5),
+		RootHashB64u: "!invalid!",
 	}
 	err := validateMetadata(metadata)
 	if err == nil {
@@ -263,31 +259,12 @@ func TestValidateMetadataPreviousTreeSizeTooLarge(t *testing.T) {
 	metadata := buildValidMetadata()
 	prevHash := sha256.Sum256([]byte("prev"))
 	metadata.Previous = &PreviousCommitment{
-		TreeSize:    100,
-		RootHashB64: base64.RawURLEncoding.EncodeToString(prevHash[:]),
+		TreeSize:     canonicalUint64(100),
+		RootHashB64u: base64.RawURLEncoding.EncodeToString(prevHash[:]),
 	}
 	err := validateMetadata(metadata)
 	if err == nil {
 		t.Fatal("expected error for prev.treeSize > root.treeSize")
-	}
-}
-
-func TestValidateMetadataBatchRangeInvalid(t *testing.T) {
-	metadata := buildValidMetadata()
-	metadata.BatchRange.Start = 5
-	metadata.BatchRange.End = 3
-	err := validateMetadata(metadata)
-	if err == nil {
-		t.Fatal("expected error for batch_range.end < start")
-	}
-}
-
-func TestValidateMetadataBatchRangeEndExceedsTreeSize(t *testing.T) {
-	metadata := buildValidMetadata()
-	metadata.BatchRange.End = 100
-	err := validateMetadata(metadata)
-	if err == nil {
-		t.Fatal("expected error for batch_range.end > treeSize")
 	}
 }
 
@@ -357,14 +334,12 @@ func TestValidateMetadataSignatureInvalidB64(t *testing.T) {
 	}
 }
 
-func TestValidateMetadataTreeSizeZeroWithBatch(t *testing.T) {
+func TestValidateMetadataTreeSizeCanonicalDecimal(t *testing.T) {
 	metadata := buildValidMetadata()
-	metadata.Root.TreeSize = 0
-	metadata.BatchRange.Start = 0
-	metadata.BatchRange.End = 5
+	metadata.Root.TreeSize = "001"
 	err := validateMetadata(metadata)
 	if err == nil {
-		t.Fatal("expected error for treeSize=0 with batch_range.end>0")
+		t.Fatal("expected error for non-canonical treeSize")
 	}
 }
 
@@ -531,14 +506,14 @@ func TestValidateCheckpointChain(t *testing.T) {
 		{
 			EffectiveMetadata: CheckpointMetadata{
 				Stream: StreamID{Registry: "0.0.1", LogID: "log-1"},
-				Root:   RootCommitment{TreeSize: 5, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
+				Root:   RootCommitment{TreeSize: canonicalUint64(5), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
 			},
 		},
 		{
 			EffectiveMetadata: CheckpointMetadata{
 				Stream:   StreamID{Registry: "0.0.1", LogID: "log-1"},
-				Root:     RootCommitment{TreeSize: 10, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash2[:])},
-				Previous: &PreviousCommitment{TreeSize: 5, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
+				Root:     RootCommitment{TreeSize: canonicalUint64(10), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash2[:])},
+				Previous: &PreviousCommitment{TreeSize: canonicalUint64(5), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
 			},
 		},
 	}
@@ -557,14 +532,14 @@ func TestValidateCheckpointChainTreeSizeDecreased(t *testing.T) {
 		{
 			EffectiveMetadata: CheckpointMetadata{
 				Stream: StreamID{Registry: "0.0.1", LogID: "log-1"},
-				Root:   RootCommitment{TreeSize: 10, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
+				Root:   RootCommitment{TreeSize: canonicalUint64(10), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
 			},
 		},
 		{
 			EffectiveMetadata: CheckpointMetadata{
 				Stream:   StreamID{Registry: "0.0.1", LogID: "log-1"},
-				Root:     RootCommitment{TreeSize: 5, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash2[:])},
-				Previous: &PreviousCommitment{TreeSize: 10, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
+				Root:     RootCommitment{TreeSize: canonicalUint64(5), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash2[:])},
+				Previous: &PreviousCommitment{TreeSize: canonicalUint64(10), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
 			},
 		},
 	}
@@ -583,13 +558,13 @@ func TestValidateCheckpointChainMissingPrev(t *testing.T) {
 		{
 			EffectiveMetadata: CheckpointMetadata{
 				Stream: StreamID{Registry: "0.0.1", LogID: "log-1"},
-				Root:   RootCommitment{TreeSize: 5, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
+				Root:   RootCommitment{TreeSize: canonicalUint64(5), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
 			},
 		},
 		{
 			EffectiveMetadata: CheckpointMetadata{
 				Stream: StreamID{Registry: "0.0.1", LogID: "log-1"},
-				Root:   RootCommitment{TreeSize: 10, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash2[:])},
+				Root:   RootCommitment{TreeSize: canonicalUint64(10), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash2[:])},
 			},
 		},
 	}
@@ -608,14 +583,14 @@ func TestValidateCheckpointChainPrevTreeSizeMismatch(t *testing.T) {
 		{
 			EffectiveMetadata: CheckpointMetadata{
 				Stream: StreamID{Registry: "0.0.1", LogID: "log-1"},
-				Root:   RootCommitment{TreeSize: 5, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
+				Root:   RootCommitment{TreeSize: canonicalUint64(5), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
 			},
 		},
 		{
 			EffectiveMetadata: CheckpointMetadata{
 				Stream:   StreamID{Registry: "0.0.1", LogID: "log-1"},
-				Root:     RootCommitment{TreeSize: 10, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash2[:])},
-				Previous: &PreviousCommitment{TreeSize: 3, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
+				Root:     RootCommitment{TreeSize: canonicalUint64(10), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash2[:])},
+				Previous: &PreviousCommitment{TreeSize: canonicalUint64(3), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
 			},
 		},
 	}
@@ -635,14 +610,14 @@ func TestValidateCheckpointChainPrevRootHashMismatch(t *testing.T) {
 		{
 			EffectiveMetadata: CheckpointMetadata{
 				Stream: StreamID{Registry: "0.0.1", LogID: "log-1"},
-				Root:   RootCommitment{TreeSize: 5, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
+				Root:   RootCommitment{TreeSize: canonicalUint64(5), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash1[:])},
 			},
 		},
 		{
 			EffectiveMetadata: CheckpointMetadata{
 				Stream:   StreamID{Registry: "0.0.1", LogID: "log-1"},
-				Root:     RootCommitment{TreeSize: 10, RootHashB64: base64.RawURLEncoding.EncodeToString(rootHash2[:])},
-				Previous: &PreviousCommitment{TreeSize: 5, RootHashB64: base64.RawURLEncoding.EncodeToString(wrongHash[:])},
+				Root:     RootCommitment{TreeSize: canonicalUint64(10), RootHashB64u: base64.RawURLEncoding.EncodeToString(rootHash2[:])},
+				Previous: &PreviousCommitment{TreeSize: canonicalUint64(5), RootHashB64u: base64.RawURLEncoding.EncodeToString(wrongHash[:])},
 			},
 		},
 	}
@@ -662,8 +637,8 @@ func TestExtractChunkTransactionIDString(t *testing.T) {
 
 func TestExtractChunkTransactionIDMap(t *testing.T) {
 	result := extractChunkTransactionID(map[string]any{
-		"account_id":                "0.0.1",
-		"transaction_valid_start":   "123.456",
+		"account_id":              "0.0.1",
+		"transaction_valid_start": "123.456",
 	})
 	if result != "0.0.1@123.456" {
 		t.Fatalf("expected '0.0.1@123.456', got %q", result)
@@ -672,8 +647,8 @@ func TestExtractChunkTransactionIDMap(t *testing.T) {
 
 func TestExtractChunkTransactionIDMapFallback(t *testing.T) {
 	result := extractChunkTransactionID(map[string]any{
-		"account_id":             "0.0.1",
-		"valid_start_timestamp":  "789.012",
+		"account_id":            "0.0.1",
+		"valid_start_timestamp": "789.012",
 	})
 	if result != "0.0.1@789.012" {
 		t.Fatalf("expected '0.0.1@789.012', got %q", result)
@@ -682,8 +657,8 @@ func TestExtractChunkTransactionIDMapFallback(t *testing.T) {
 
 func TestExtractChunkTransactionIDMapString(t *testing.T) {
 	result := extractChunkTransactionID(map[string]string{
-		"account_id":               "0.0.2",
-		"transaction_valid_start":  "111.222",
+		"account_id":              "0.0.2",
+		"transaction_valid_start": "111.222",
 	})
 	if result != "0.0.2@111.222" {
 		t.Fatalf("expected '0.0.2@111.222', got %q", result)

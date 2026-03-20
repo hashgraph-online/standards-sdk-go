@@ -111,11 +111,7 @@ client, _ := hcs27.NewClient(hcs27.ClientConfig{
 metadata := hcs27.CheckpointMetadata{
 	Type:   "ans-checkpoint-v1",
 	Stream: hcs27.StreamID{Registry: "ans", LogID: "default"},
-	Root:   hcs27.RootCommitment{TreeSize: 1, RootHashB64: "<base64url-root>"},
-	BatchRange: hcs27.BatchRange{
-		Start: 1,
-		End:   1,
-	},
+	Root:   hcs27.RootCommitment{TreeSize: "1", RootHashB64u: "<base64url-root>"},
 }
 ```
 
