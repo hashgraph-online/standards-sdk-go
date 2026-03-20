@@ -7,15 +7,17 @@ import (
 )
 
 func parseCanonicalUint64(fieldName, value string) (uint64, error) {
-	trimmed := strings.TrimSpace(value)
-	if trimmed == "" {
+	if value == "" {
 		return 0, fmt.Errorf("%s is required", fieldName)
 	}
-	if trimmed != "0" && strings.HasPrefix(trimmed, "0") {
+	if value != strings.TrimSpace(value) {
+		return 0, fmt.Errorf("%s must be a canonical base-10 string", fieldName)
+	}
+	if value != "0" && strings.HasPrefix(value, "0") {
 		return 0, fmt.Errorf("%s must be a canonical base-10 string", fieldName)
 	}
 
-	parsed, err := strconv.ParseUint(trimmed, 10, 64)
+	parsed, err := strconv.ParseUint(value, 10, 64)
 	if err != nil {
 		return 0, fmt.Errorf("%s must be a canonical base-10 string: %w", fieldName, err)
 	}

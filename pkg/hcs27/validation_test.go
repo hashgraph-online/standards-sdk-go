@@ -345,6 +345,24 @@ func TestValidateMetadataTreeSizeCanonicalDecimal(t *testing.T) {
 	}
 }
 
+func TestValidateMetadataTreeSizeZero(t *testing.T) {
+	metadata := buildValidMetadata()
+	metadata.Root.TreeSize = "0"
+	err := validateMetadata(metadata)
+	if err != nil {
+		t.Fatalf("expected zero treeSize to be valid: %v", err)
+	}
+}
+
+func TestValidateMetadataTreeSizeRejectsWhitespace(t *testing.T) {
+	metadata := buildValidMetadata()
+	metadata.Root.TreeSize = " 1 "
+	err := validateMetadata(metadata)
+	if err == nil {
+		t.Fatal("expected error for treeSize with surrounding whitespace")
+	}
+}
+
 func TestValidateCheckpointMessageWithReference(t *testing.T) {
 	metadata := buildValidMetadata()
 	metadataBytes, _ := json.Marshal(metadata)
