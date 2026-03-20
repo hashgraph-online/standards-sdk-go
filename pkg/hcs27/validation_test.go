@@ -9,28 +9,25 @@ import (
 	"testing"
 )
 
-const (
-	expectedTopicMemo = "hcs-27:0:86400:0"
-	testHCS1Reference = "hcs://1/0.0.99999"
-)
+const testHCS1Reference = "hcs://1/0.0.99999"
 
 func TestBuildTopicMemo(t *testing.T) {
 	memo := BuildTopicMemo(86400)
-	if memo != expectedTopicMemo {
+	if memo != "hcs-27:0:86400:0" {
 		t.Fatalf("unexpected memo: %s", memo)
 	}
 }
 
 func TestBuildTopicMemoDefault(t *testing.T) {
 	memo := BuildTopicMemo(0)
-	if memo != expectedTopicMemo {
+	if memo != "hcs-27:0:86400:0" {
 		t.Fatalf("expected default TTL, got: %s", memo)
 	}
 }
 
 func TestBuildTopicMemoNegative(t *testing.T) {
 	memo := BuildTopicMemo(-1)
-	if memo != expectedTopicMemo {
+	if memo != "hcs-27:0:86400:0" {
 		t.Fatalf("expected default TTL for negative, got: %s", memo)
 	}
 }
@@ -43,7 +40,7 @@ func TestBuildTopicMemoCustom(t *testing.T) {
 }
 
 func TestParseTopicMemo(t *testing.T) {
-	parsed, ok := ParseTopicMemo(expectedTopicMemo)
+	parsed, ok := ParseTopicMemo("hcs-27:0:86400:0")
 	if !ok {
 		t.Fatal("expected parse to succeed")
 	}
@@ -226,14 +223,6 @@ func TestValidateMetadataLogMerkle(t *testing.T) {
 	}
 }
 
-func TestValidateMetadataLegacyMerkleAccepted(t *testing.T) {
-	metadata := buildValidMetadata()
-	metadata.Log.Merkle = legacyMerkleProfileRFC6962
-	if err := validateMetadata(metadata); err != nil {
-		t.Fatalf("expected legacy merkle label to be accepted on reads, got: %v", err)
-	}
-}
-
 func TestValidateMetadataRootHash(t *testing.T) {
 	metadata := buildValidMetadata()
 	metadata.Root.RootHashB64u = "!invalid!"
@@ -353,30 +342,6 @@ func TestValidateMetadataTreeSizeCanonicalDecimal(t *testing.T) {
 	err := validateMetadata(metadata)
 	if err == nil {
 		t.Fatal("expected error for non-canonical treeSize")
-	}
-}
-
-func TestValidateCheckpointMessageLegacyNumericTreeSize(t *testing.T) {
-	metadataBytes := []byte(`{
-		"type":"ans-checkpoint-v1",
-		"stream":{"registry":"0.0.12345","log_id":"log-1"},
-		"log":{"alg":"sha-256","leaf":"sha256(jcs(event))","merkle":"rfc6962"},
-		"root":{"treeSize":10,"rootHashB64u":"n4bQgYhMfBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU"}
-	}`)
-
-	result, err := ValidateCheckpointMessage(context.Background(), CheckpointMessage{
-		Protocol:  ProtocolID,
-		Operation: OperationName,
-		Metadata:  metadataBytes,
-	}, nil)
-	if err != nil {
-		t.Fatalf("expected legacy numeric treeSize to validate, got: %v", err)
-	}
-	if result.Root.TreeSize != canonicalUint64(10) {
-		t.Fatalf("expected numeric treeSize to normalize to canonical string, got: %s", result.Root.TreeSize)
-	}
-	if result.Log == nil || result.Log.Merkle != legacyMerkleProfileRFC6962 {
-		t.Fatalf("expected legacy merkle label to round-trip, got %+v", result.Log)
 	}
 }
 

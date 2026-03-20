@@ -143,20 +143,14 @@ func (c *Client) PublishCheckpoint(
 	messageMemo string,
 	transactionMemo string,
 ) (PublishResult, error) {
-	normalizedMetadata := metadata
-	if normalizedMetadata.Log != nil && isLegacyMerkleProfile(normalizedMetadata.Log.Merkle) {
-		normalizedLog := *normalizedMetadata.Log
-		normalizedLog.Merkle = merkleProfileRFC9162
-		normalizedMetadata.Log = &normalizedLog
-	}
-	if err := validateMetadata(normalizedMetadata); err != nil {
+	if err := validateMetadata(metadata); err != nil {
 		return PublishResult{}, err
 	}
 	if len(messageMemo) >= 300 {
 		return PublishResult{}, fmt.Errorf("message memo must be less than 300 characters")
 	}
 
-	metadataBytes, err := json.Marshal(normalizedMetadata)
+	metadataBytes, err := json.Marshal(metadata)
 	if err != nil {
 		return PublishResult{}, fmt.Errorf("failed to encode checkpoint metadata: %w", err)
 	}

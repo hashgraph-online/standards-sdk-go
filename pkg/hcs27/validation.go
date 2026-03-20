@@ -106,12 +106,8 @@ func validateMetadata(metadata CheckpointMetadata) error {
 	if strings.TrimSpace(metadata.Log.Leaf) == "" {
 		return fmt.Errorf("metadata.log.leaf is required")
 	}
-	if !isAcceptedMerkleProfile(metadata.Log.Merkle) {
-		return fmt.Errorf(
-			"metadata.log.merkle must be %s or %s",
-			merkleProfileRFC9162,
-			legacyMerkleProfileRFC6962,
-		)
+	if strings.TrimSpace(metadata.Log.Merkle) != merkleProfileRFC9162 {
+		return fmt.Errorf("metadata.log.merkle must be %s", merkleProfileRFC9162)
 	}
 	rootTreeSize, err := parseCanonicalUint64("metadata.root.treeSize", metadata.Root.TreeSize)
 	if err != nil {
@@ -147,15 +143,5 @@ func validateMetadata(metadata CheckpointMetadata) error {
 			return fmt.Errorf("metadata.sig.b64u must be base64url: %w", err)
 		}
 	}
-
 	return nil
-}
-
-func isAcceptedMerkleProfile(value string) bool {
-	normalized := strings.TrimSpace(value)
-	return normalized == merkleProfileRFC9162 || normalized == legacyMerkleProfileRFC6962
-}
-
-func isLegacyMerkleProfile(value string) bool {
-	return strings.TrimSpace(value) == legacyMerkleProfileRFC6962
 }

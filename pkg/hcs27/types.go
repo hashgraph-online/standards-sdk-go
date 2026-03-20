@@ -3,18 +3,15 @@ package hcs27
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"strings"
 
 	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 
 const (
-	ProtocolID                 = "hcs-27"
-	OperationName              = "register"
-	checkpointMetadataType     = "ans-checkpoint-v1"
-	merkleProfileRFC9162       = "rfc9162"
-	legacyMerkleProfileRFC6962 = "rfc6962"
+	ProtocolID             = "hcs-27"
+	OperationName          = "register"
+	checkpointMetadataType = "ans-checkpoint-v1"
+	merkleProfileRFC9162   = "rfc9162"
 )
 
 type StreamID struct {
@@ -33,51 +30,9 @@ type RootCommitment struct {
 	RootHashB64u string `json:"rootHashB64u"`
 }
 
-func (commitment *RootCommitment) UnmarshalJSON(data []byte) error {
-	type rawRootCommitment struct {
-		TreeSize     json.RawMessage `json:"treeSize"`
-		RootHashB64u string          `json:"rootHashB64u"`
-	}
-
-	var raw rawRootCommitment
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-
-	treeSize, err := decodeLegacyTreeSize(raw.TreeSize)
-	if err != nil {
-		return fmt.Errorf("treeSize must be a JSON string or number: %w", err)
-	}
-
-	commitment.TreeSize = treeSize
-	commitment.RootHashB64u = raw.RootHashB64u
-	return nil
-}
-
 type PreviousCommitment struct {
 	TreeSize     string `json:"treeSize"`
 	RootHashB64u string `json:"rootHashB64u"`
-}
-
-func (commitment *PreviousCommitment) UnmarshalJSON(data []byte) error {
-	type rawPreviousCommitment struct {
-		TreeSize     json.RawMessage `json:"treeSize"`
-		RootHashB64u string          `json:"rootHashB64u"`
-	}
-
-	var raw rawPreviousCommitment
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-
-	treeSize, err := decodeLegacyTreeSize(raw.TreeSize)
-	if err != nil {
-		return fmt.Errorf("treeSize must be a JSON string or number: %w", err)
-	}
-
-	commitment.TreeSize = treeSize
-	commitment.RootHashB64u = raw.RootHashB64u
-	return nil
 }
 
 type Signature struct {
@@ -162,23 +117,4 @@ type ClientConfig struct {
 type PublishResult struct {
 	TransactionID  string `json:"transaction_id"`
 	SequenceNumber int64  `json:"sequence_number"`
-}
-
-func decodeLegacyTreeSize(raw json.RawMessage) (string, error) {
-	trimmed := strings.TrimSpace(string(raw))
-	if trimmed == "" || trimmed == "null" {
-		return "", fmt.Errorf("treeSize is required")
-	}
-
-	var asString string
-	if err := json.Unmarshal(raw, &asString); err == nil {
-		return asString, nil
-	}
-
-	var asUint uint64
-	if err := json.Unmarshal(raw, &asUint); err == nil {
-		return canonicalUint64(asUint), nil
-	}
-
-	return "", fmt.Errorf("unsupported treeSize encoding")
 }
