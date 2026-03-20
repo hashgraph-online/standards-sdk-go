@@ -19,8 +19,8 @@ Runnable examples for common [HOL Standards SDK](https://hol.org/docs/libraries/
 | `hcs20-deploy-points` | [HCS-20](https://hol.org/docs/standards/hcs-20) | Deploys a private points topic |
 | `hcs21-build-declaration` | [HCS-21](https://hol.org/docs/standards/hcs-21) | Builds an adapter declaration |
 | `hcs26-parse-memos` | [HCS-26](https://hol.org/docs/standards/hcs-26) | Parses topic/transaction memos |
-| `hcs27-publish-checkpoint` | [HCS-27](https://hol.org/docs/standards/hcs-27) | Publishes a Merkle checkpoint |
-| `inscriber-auth-client` | [HCS-1](https://hol.org/docs/standards/hcs-1) | Authenticates with Kiloscribe |
+| `hcs27-publish-checkpoint` | [HCS-27](https://hol.org/docs/standards/hcs-27) | Publishes inline + HRL-backed checkpoints and validates the chain |
+| `inscriber-auth-client` | [HCS-1](https://hol.org/docs/standards/hcs-1) | Authenticates with the inscriber service |
 | `registry-broker-skill-domain-proof` | [HCS-26](https://hol.org/docs/standards/hcs-26) | Creates/verifies DNS TXT proof and checks trust delta |
 | `registry-broker-uaid-dns-verification` | [HCS-14](https://hol.org/docs/standards/hcs-14) | Verifies UAID DNS TXT binding and reads stored/live verification status |
 

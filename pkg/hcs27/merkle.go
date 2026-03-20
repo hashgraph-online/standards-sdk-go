@@ -149,13 +149,17 @@ func VerifyInclusionProofObject(proof *InclusionProof) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	rootHash, err := normalizeProofRootHash("rootHash", proof.RootHash)
+	if err != nil {
+		return false, err
+	}
 
 	return VerifyInclusionProof(
 		leafIndex,
 		treeSize,
 		proof.LeafHash,
 		proof.Path,
-		proof.RootHash,
+		rootHash,
 	)
 }
 
@@ -254,14 +258,46 @@ func VerifyConsistencyProofObject(proof *ConsistencyProof) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	if oldTreeSize == 0 {
+		return VerifyConsistencyProof(
+			oldTreeSize,
+			newTreeSize,
+			proof.OldRootHash,
+			proof.NewRootHash,
+			proof.ConsistencyPath,
+		)
+	}
+	oldRootHash, err := normalizeProofRootHash("oldRootHash", proof.OldRootHash)
+	if err != nil {
+		return false, err
+	}
+	newRootHash, err := normalizeProofRootHash("newRootHash", proof.NewRootHash)
+	if err != nil {
+		return false, err
+	}
 
 	return VerifyConsistencyProof(
 		oldTreeSize,
 		newTreeSize,
-		proof.OldRootHash,
-		proof.NewRootHash,
+		oldRootHash,
+		newRootHash,
 		proof.ConsistencyPath,
 	)
+}
+
+func normalizeProofRootHash(fieldName, value string) (string, error) {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return "", fmt.Errorf("%s is required", fieldName)
+	}
+	if decoded, err := base64.StdEncoding.DecodeString(trimmed); err == nil {
+		return base64.StdEncoding.EncodeToString(decoded), nil
+	}
+	decoded, err := base64.RawURLEncoding.DecodeString(trimmed)
+	if err != nil {
+		return "", fmt.Errorf("%s must be valid base64 or base64url: %w", fieldName, err)
+	}
+	return base64.StdEncoding.EncodeToString(decoded), nil
 }
 
 // CanonicalizeJSON performs the requested operation.

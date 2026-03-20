@@ -1,10 +1,10 @@
 # Inscriber: Authenticate and Initialize
 
-This example authenticates against [Kiloscribe](https://hol.org/docs/standards/hcs-1) and initializes an inscriber client.
+This example authenticates against the inscription service and initializes an inscriber client.
 
 ## What it does
 
-1. Authenticates a Hedera account with the Kiloscribe inscription service.
+1. Authenticates a Hedera account with the inscription service.
 2. Initializes an inscriber client for writing data to HCS topics.
 
 ## Run
