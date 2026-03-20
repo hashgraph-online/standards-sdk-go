@@ -9,23 +9,28 @@ import (
 	"testing"
 )
 
+const (
+	expectedTopicMemo = "hcs-27:0:86400:0"
+	testHCS1Reference = "hcs://1/0.0.99999"
+)
+
 func TestBuildTopicMemo(t *testing.T) {
 	memo := BuildTopicMemo(86400)
-	if memo != "hcs-27:0:86400:0" {
+	if memo != expectedTopicMemo {
 		t.Fatalf("unexpected memo: %s", memo)
 	}
 }
 
 func TestBuildTopicMemoDefault(t *testing.T) {
 	memo := BuildTopicMemo(0)
-	if memo != "hcs-27:0:86400:0" {
+	if memo != expectedTopicMemo {
 		t.Fatalf("expected default TTL, got: %s", memo)
 	}
 }
 
 func TestBuildTopicMemoNegative(t *testing.T) {
 	memo := BuildTopicMemo(-1)
-	if memo != "hcs-27:0:86400:0" {
+	if memo != expectedTopicMemo {
 		t.Fatalf("expected default TTL for negative, got: %s", memo)
 	}
 }
@@ -38,7 +43,7 @@ func TestBuildTopicMemoCustom(t *testing.T) {
 }
 
 func TestParseTopicMemo(t *testing.T) {
-	parsed, ok := ParseTopicMemo("hcs-27:0:86400:0")
+	parsed, ok := ParseTopicMemo(expectedTopicMemo)
 	if !ok {
 		t.Fatal("expected parse to succeed")
 	}
@@ -123,7 +128,7 @@ func buildValidMetadata() CheckpointMetadata {
 	rootHash := sha256.Sum256([]byte("test"))
 	rootHashB64 := base64.RawURLEncoding.EncodeToString(rootHash[:])
 	return CheckpointMetadata{
-		Type: "ans-checkpoint-v1",
+		Type: checkpointMetadataType,
 		Stream: StreamID{
 			Registry: "0.0.12345",
 			LogID:    "log-1",
@@ -131,7 +136,7 @@ func buildValidMetadata() CheckpointMetadata {
 		Log: &LogProfile{
 			Algorithm: "sha-256",
 			Leaf:      "sha256(jcs(event))",
-			Merkle:    "rfc9162",
+			Merkle:    merkleProfileRFC9162,
 		},
 		Root: RootCommitment{
 			TreeSize:     canonicalUint64(10),
@@ -218,6 +223,14 @@ func TestValidateMetadataLogMerkle(t *testing.T) {
 	err := validateMetadata(metadata)
 	if err == nil {
 		t.Fatal("expected error for missing log.merkle")
+	}
+}
+
+func TestValidateMetadataLegacyMerkleAccepted(t *testing.T) {
+	metadata := buildValidMetadata()
+	metadata.Log.Merkle = legacyMerkleProfileRFC6962
+	if err := validateMetadata(metadata); err != nil {
+		t.Fatalf("expected legacy merkle label to be accepted on reads, got: %v", err)
 	}
 }
 
@@ -343,11 +356,35 @@ func TestValidateMetadataTreeSizeCanonicalDecimal(t *testing.T) {
 	}
 }
 
+func TestValidateCheckpointMessageLegacyNumericTreeSize(t *testing.T) {
+	metadataBytes := []byte(`{
+		"type":"ans-checkpoint-v1",
+		"stream":{"registry":"0.0.12345","log_id":"log-1"},
+		"log":{"alg":"sha-256","leaf":"sha256(jcs(event))","merkle":"rfc6962"},
+		"root":{"treeSize":10,"rootHashB64u":"n4bQgYhMfBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU"}
+	}`)
+
+	result, err := ValidateCheckpointMessage(context.Background(), CheckpointMessage{
+		Protocol:  ProtocolID,
+		Operation: OperationName,
+		Metadata:  metadataBytes,
+	}, nil)
+	if err != nil {
+		t.Fatalf("expected legacy numeric treeSize to validate, got: %v", err)
+	}
+	if result.Root.TreeSize != canonicalUint64(10) {
+		t.Fatalf("expected numeric treeSize to normalize to canonical string, got: %s", result.Root.TreeSize)
+	}
+	if result.Log == nil || result.Log.Merkle != legacyMerkleProfileRFC6962 {
+		t.Fatalf("expected legacy merkle label to round-trip, got %+v", result.Log)
+	}
+}
+
 func TestValidateCheckpointMessageWithReference(t *testing.T) {
 	metadata := buildValidMetadata()
 	metadataBytes, _ := json.Marshal(metadata)
 
-	reference := "hcs://1/0.0.99999"
+	reference := testHCS1Reference
 	referenceBytes, _ := json.Marshal(reference)
 
 	resolver := func(ctx context.Context, ref string) ([]byte, error) {
@@ -384,7 +421,7 @@ func TestValidateCheckpointMessageReferenceNonHCS1(t *testing.T) {
 }
 
 func TestValidateCheckpointMessageReferenceNoResolver(t *testing.T) {
-	reference := "hcs://1/0.0.99999"
+	reference := testHCS1Reference
 	referenceBytes, _ := json.Marshal(reference)
 
 	msg := CheckpointMessage{
@@ -402,7 +439,7 @@ func TestValidateCheckpointMessageWithDigest(t *testing.T) {
 	metadata := buildValidMetadata()
 	metadataBytes, _ := json.Marshal(metadata)
 
-	reference := "hcs://1/0.0.99999"
+	reference := testHCS1Reference
 	referenceBytes, _ := json.Marshal(reference)
 
 	sum := sha256.Sum256(metadataBytes)
@@ -431,7 +468,7 @@ func TestValidateCheckpointMessageDigestMismatch(t *testing.T) {
 	metadata := buildValidMetadata()
 	metadataBytes, _ := json.Marshal(metadata)
 
-	reference := "hcs://1/0.0.99999"
+	reference := testHCS1Reference
 	referenceBytes, _ := json.Marshal(reference)
 
 	resolver := func(ctx context.Context, ref string) ([]byte, error) {
@@ -457,7 +494,7 @@ func TestValidateCheckpointMessageDigestBadAlg(t *testing.T) {
 	metadata := buildValidMetadata()
 	metadataBytes, _ := json.Marshal(metadata)
 
-	reference := "hcs://1/0.0.99999"
+	reference := testHCS1Reference
 	referenceBytes, _ := json.Marshal(reference)
 
 	resolver := func(ctx context.Context, ref string) ([]byte, error) {
