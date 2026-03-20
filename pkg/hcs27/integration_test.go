@@ -60,15 +60,11 @@ func TestHCS27Integration_CheckpointChain(t *testing.T) {
 		Log: &LogProfile{
 			Algorithm: "sha-256",
 			Leaf:      "sha256(jcs(event))",
-			Merkle:    "rfc6962",
+			Merkle:    "rfc9162",
 		},
 		Root: RootCommitment{
-			TreeSize:    1,
-			RootHashB64: rootOne,
-		},
-		BatchRange: BatchRange{
-			Start: 1,
-			End:   1,
+			TreeSize:     canonicalUint64(1),
+			RootHashB64u: rootOne,
 		},
 	}
 
@@ -93,19 +89,15 @@ func TestHCS27Integration_CheckpointChain(t *testing.T) {
 		Log: &LogProfile{
 			Algorithm: "sha-256",
 			Leaf:      "sha256(jcs(event))",
-			Merkle:    "rfc6962",
+			Merkle:    "rfc9162",
 		},
 		Root: RootCommitment{
-			TreeSize:    2,
-			RootHashB64: rootTwo,
+			TreeSize:     canonicalUint64(2),
+			RootHashB64u: rootTwo,
 		},
 		Previous: &PreviousCommitment{
-			TreeSize:    1,
-			RootHashB64: rootOne,
-		},
-		BatchRange: BatchRange{
-			Start: 2,
-			End:   2,
+			TreeSize:     canonicalUint64(1),
+			RootHashB64u: rootOne,
 		},
 	}
 
@@ -170,15 +162,11 @@ func TestHCS27Integration_MetadataOverflowUsesHRL(t *testing.T) {
 		Log: &LogProfile{
 			Algorithm: "sha-256",
 			Leaf:      strings.Repeat("sha256(jcs(event))-", 90),
-			Merkle:    "rfc6962",
+			Merkle:    "rfc9162",
 		},
 		Root: RootCommitment{
-			TreeSize:    1,
-			RootHashB64: hashB64URL("go-sdk-hcs27-overflow-root-1"),
-		},
-		BatchRange: BatchRange{
-			Start: 1,
-			End:   1,
+			TreeSize:     canonicalUint64(1),
+			RootHashB64u: hashB64URL("go-sdk-hcs27-overflow-root-1"),
 		},
 	}
 

@@ -19,7 +19,7 @@ type Client struct {
 	operatorPrivateKey string
 	network            string
 	keyType            string
-	kiloScribeBaseURL  string
+	inscriberBaseURL   string
 	inscriberAuthURL   string
 	inscriberAPIURL    string
 }
@@ -98,9 +98,12 @@ func NewClient(config ClientConfig) (*Client, error) {
 		keyType = "ed25519"
 	}
 
-	kiloScribeBaseURL := strings.TrimSpace(config.KiloScribeBaseURL)
-	if kiloScribeBaseURL == "" {
-		kiloScribeBaseURL = "https://kiloscribe.com"
+	inscriberBaseURL := strings.TrimSpace(config.InscriberBaseURL)
+	if inscriberBaseURL == "" {
+		inscriberBaseURL = strings.TrimSpace(config.KiloScribeBaseURL)
+	}
+	if inscriberBaseURL == "" {
+		inscriberBaseURL = "https://kiloscribe.com"
 	}
 
 	return &Client{
@@ -110,7 +113,7 @@ func NewClient(config ClientConfig) (*Client, error) {
 		operatorPrivateKey: operatorPrivateKey,
 		network:            network,
 		keyType:            keyType,
-		kiloScribeBaseURL:  strings.TrimRight(kiloScribeBaseURL, "/"),
+		inscriberBaseURL:   strings.TrimRight(inscriberBaseURL, "/"),
 		inscriberAuthURL:   strings.TrimSpace(config.InscriberAuthURL),
 		inscriberAPIURL:    strings.TrimSpace(config.InscriberAPIURL),
 	}, nil

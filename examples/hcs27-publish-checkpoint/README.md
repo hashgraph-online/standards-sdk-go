@@ -4,8 +4,10 @@ This example publishes an [HCS-27](https://hol.org/docs/standards/hcs-27) checkp
 
 ## What it does
 
-1. Creates an HCS-27 checkpoint with a Merkle root commitment.
-2. Publishes the checkpoint to an HCS topic on testnet.
+1. Creates an HCS-27 checkpoint topic when `HCS27_CHECKPOINT_TOPIC_ID` is not set.
+2. Publishes an inline HCS-27 checkpoint to the topic.
+3. Publishes an overflow checkpoint that stores metadata via an `hcs://1/...` reference.
+4. Fetches the topic records, prints the HRL reference, and validates the checkpoint chain.
 
 ## Run
 

@@ -75,7 +75,7 @@ go get github.com/hashgraph-online/standards-sdk-go@latest
 | `pkg/hcs21` | HCS-21 adapter registry/declaration publish flows, topic helpers, and signature/digest verification utilities. |
 | `pkg/hcs26` | HCS-26 memo helpers and resolver flows for discovery, version, and manifest reconstruction. |
 | `pkg/hcs27` | HCS-27 checkpoint topic creation, publish/retrieval, validation, Merkle/proof helpers. |
-| `pkg/inscriber` | Kiloscribe auth flow, websocket-first high-level inscription utilities, quote generation, bulk-files support, registry-broker quote/job helpers, and skill inscription helpers. |
+| `pkg/inscriber` | Inscriber auth flow, websocket-first high-level inscription utilities, quote generation, bulk-files support, registry-broker quote/job helpers, and skill inscription helpers. |
 | `pkg/registrybroker` | Full Registry Broker client (search, adapters, agents, credits, verification, ledger auth, chat/encryption, feedback, skills). |
 | `pkg/mirror` | Mirror node client used by HCS and inscriber packages. |
 | `pkg/shared` | Network normalization, operator env loading, Hedera client/key parsing helpers. |
@@ -111,11 +111,7 @@ client, _ := hcs27.NewClient(hcs27.ClientConfig{
 metadata := hcs27.CheckpointMetadata{
 	Type:   "ans-checkpoint-v1",
 	Stream: hcs27.StreamID{Registry: "ans", LogID: "default"},
-	Root:   hcs27.RootCommitment{TreeSize: 1, RootHashB64: "<base64url-root>"},
-	BatchRange: hcs27.BatchRange{
-		Start: 1,
-		End:   1,
-	},
+	Root:   hcs27.RootCommitment{TreeSize: "1", RootHashB64u: "<base64url-root>"},
 }
 ```
 

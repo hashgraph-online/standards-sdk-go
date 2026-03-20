@@ -132,6 +132,37 @@ func VerifyInclusionProof(
 	return sn == 0 && base64.StdEncoding.EncodeToString(current) == expectedRootB64, nil
 }
 
+// VerifyInclusionProofObject verifies a proof object that follows the HCS-27 draft shape.
+func VerifyInclusionProofObject(proof *InclusionProof) (bool, error) {
+	if proof == nil {
+		return false, fmt.Errorf("proof is required")
+	}
+	if proof.TreeVersion != 1 {
+		return false, fmt.Errorf("treeVersion must be 1")
+	}
+
+	leafIndex, err := parseCanonicalUint64("leafIndex", proof.LeafIndex)
+	if err != nil {
+		return false, err
+	}
+	treeSize, err := parseCanonicalUint64("treeSize", proof.TreeSize)
+	if err != nil {
+		return false, err
+	}
+	rootHash, err := normalizeProofRootHash("rootHash", proof.RootHash)
+	if err != nil {
+		return false, err
+	}
+
+	return VerifyInclusionProof(
+		leafIndex,
+		treeSize,
+		proof.LeafHash,
+		proof.Path,
+		rootHash,
+	)
+}
+
 // VerifyConsistencyProof performs the requested operation.
 func VerifyConsistencyProof(
 	oldTreeSize uint64,
@@ -208,6 +239,65 @@ func VerifyConsistencyProof(
 	return sn == 0 &&
 		base64.StdEncoding.EncodeToString(fr) == oldRootB64 &&
 		base64.StdEncoding.EncodeToString(sr) == newRootB64, nil
+}
+
+// VerifyConsistencyProofObject verifies a consistency proof object that follows the HCS-27 draft shape.
+func VerifyConsistencyProofObject(proof *ConsistencyProof) (bool, error) {
+	if proof == nil {
+		return false, fmt.Errorf("proof is required")
+	}
+	if proof.TreeVersion != 1 {
+		return false, fmt.Errorf("treeVersion must be 1")
+	}
+
+	oldTreeSize, err := parseCanonicalUint64("oldTreeSize", proof.OldTreeSize)
+	if err != nil {
+		return false, err
+	}
+	newTreeSize, err := parseCanonicalUint64("newTreeSize", proof.NewTreeSize)
+	if err != nil {
+		return false, err
+	}
+	if oldTreeSize == 0 {
+		return VerifyConsistencyProof(
+			oldTreeSize,
+			newTreeSize,
+			proof.OldRootHash,
+			proof.NewRootHash,
+			proof.ConsistencyPath,
+		)
+	}
+	oldRootHash, err := normalizeProofRootHash("oldRootHash", proof.OldRootHash)
+	if err != nil {
+		return false, err
+	}
+	newRootHash, err := normalizeProofRootHash("newRootHash", proof.NewRootHash)
+	if err != nil {
+		return false, err
+	}
+
+	return VerifyConsistencyProof(
+		oldTreeSize,
+		newTreeSize,
+		oldRootHash,
+		newRootHash,
+		proof.ConsistencyPath,
+	)
+}
+
+func normalizeProofRootHash(fieldName, value string) (string, error) {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return "", fmt.Errorf("%s is required", fieldName)
+	}
+	if decoded, err := base64.StdEncoding.DecodeString(trimmed); err == nil {
+		return base64.StdEncoding.EncodeToString(decoded), nil
+	}
+	decoded, err := base64.RawURLEncoding.DecodeString(trimmed)
+	if err != nil {
+		return "", fmt.Errorf("%s must be valid base64 or base64url: %w", fieldName, err)
+	}
+	return base64.StdEncoding.EncodeToString(decoded), nil
 }
 
 // CanonicalizeJSON performs the requested operation.

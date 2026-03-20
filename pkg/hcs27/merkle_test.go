@@ -50,6 +50,21 @@ func TestSingleEntryLeafVector(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected inclusion proof to verify for single-entry tree")
 	}
+
+	ok, err = VerifyInclusionProofObject(&InclusionProof{
+		LeafHash:    leafHex,
+		LeafIndex:   "0",
+		TreeSize:    "1",
+		Path:        []string{},
+		RootHash:    base64.StdEncoding.EncodeToString(mustHex(leafHex)),
+		TreeVersion: 1,
+	})
+	if err != nil {
+		t.Fatalf("inclusion proof object verification returned error: %v", err)
+	}
+	if !ok {
+		t.Fatalf("expected inclusion proof object to verify for single-entry tree")
+	}
 }
 
 func TestConsistencyProof_EmptyToAny(t *testing.T) {
@@ -65,6 +80,56 @@ func TestConsistencyProof_EmptyToAny(t *testing.T) {
 	}
 	if !ok {
 		t.Fatalf("expected consistency proof to verify for oldTreeSize=0")
+	}
+
+	ok, err = VerifyConsistencyProofObject(&ConsistencyProof{
+		OldTreeSize:     "0",
+		NewTreeSize:     "10",
+		OldRootHash:     "",
+		NewRootHash:     "ignored",
+		ConsistencyPath: nil,
+		TreeVersion:     1,
+	})
+	if err != nil {
+		t.Fatalf("consistency proof object verification returned error: %v", err)
+	}
+	if !ok {
+		t.Fatalf("expected consistency proof object to verify for oldTreeSize=0")
+	}
+}
+
+func TestProofObjectRootsAcceptBase64URL(t *testing.T) {
+	leafHex := "a12882925d08570166fe748ebdc16670fc0c69428e2b60ed388b35b52c91d6e2"
+	rootB64URL := base64.RawURLEncoding.EncodeToString(mustHex(leafHex))
+
+	ok, err := VerifyInclusionProofObject(&InclusionProof{
+		LeafHash:    leafHex,
+		LeafIndex:   "0",
+		TreeSize:    "1",
+		Path:        []string{},
+		RootHash:    rootB64URL,
+		TreeVersion: 1,
+	})
+	if err != nil {
+		t.Fatalf("inclusion proof object verification returned error: %v", err)
+	}
+	if !ok {
+		t.Fatalf("expected inclusion proof object to verify with a base64url root hash")
+	}
+
+	ok, err = VerifyConsistencyProofObject(&ConsistencyProof{
+		OldTreeSize:     "1",
+		NewTreeSize:     "1",
+		OldRootHash:     rootB64URL,
+		NewRootHash:     rootB64URL,
+		ConsistencyPath: []string{},
+		TreeVersion:     1,
+	})
+	if err != nil {
+		t.Fatalf("consistency proof object verification returned error: %v", err)
+	}
+	if !ok {
+		t.Fatalf("expected consistency proof object to verify with base64url root hashes")
 	}
 }
 

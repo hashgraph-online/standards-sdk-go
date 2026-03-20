@@ -119,7 +119,7 @@ func (c *Client) fetchFromHCSReference(
 	profileTopicID := strings.TrimSpace(parts[3])
 	cdnURL := fmt.Sprintf(
 		"%s/api/inscription-cdn/%s?network=%s",
-		c.kiloScribeBaseURL,
+		c.inscriberBaseURL,
 		profileTopicID,
 		strings.TrimSpace(network),
 	)

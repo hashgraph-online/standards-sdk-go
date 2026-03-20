@@ -468,7 +468,7 @@ func (c *Client) submitMessage(
 	}, nil
 }
 
-// inscribeOverflow inscribes the payload via the Kiloscribe inscriber API and
+// inscribeOverflow inscribes the payload via the inscriber API and
 // returns an HRL reference (e.g. "hcs://1/0.0.12345").
 func (c *Client) inscribeOverflow(ctx context.Context, payload []byte) (string, error) {
 	network := inscriber.NetworkTestnet

@@ -117,9 +117,9 @@ func TestClientFetchProfileByAccountID(t *testing.T) {
 	defer server.Close()
 
 	client, err := NewClient(ClientConfig{
-		Network:           "testnet",
-		MirrorBaseURL:     server.URL,
-		KiloScribeBaseURL: server.URL,
+		Network:          "testnet",
+		MirrorBaseURL:    server.URL,
+		InscriberBaseURL: server.URL,
 	})
 	if err != nil {
 		t.Fatalf("failed to initialize client: %v", err)

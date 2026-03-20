@@ -133,15 +133,11 @@ func testCheckpointMetadata(leafProfile string) CheckpointMetadata {
 		Log: &LogProfile{
 			Algorithm: "sha-256",
 			Leaf:      leaf,
-			Merkle:    "rfc6962",
+			Merkle:    "rfc9162",
 		},
 		Root: RootCommitment{
-			TreeSize:    1,
-			RootHashB64: base64.RawURLEncoding.EncodeToString(make([]byte, 32)),
-		},
-		BatchRange: BatchRange{
-			Start: 1,
-			End:   1,
+			TreeSize:     canonicalUint64(1),
+			RootHashB64u: base64.RawURLEncoding.EncodeToString(make([]byte, 32)),
 		},
 	}
 }

@@ -8,8 +8,10 @@ import (
 )
 
 const (
-	ProtocolID    = "hcs-27"
-	OperationName = "register"
+	ProtocolID             = "hcs-27"
+	OperationName          = "register"
+	checkpointMetadataType = "ans-checkpoint-v1"
+	merkleProfileRFC9162   = "rfc9162"
 )
 
 type StreamID struct {
@@ -24,18 +26,13 @@ type LogProfile struct {
 }
 
 type RootCommitment struct {
-	TreeSize    uint64 `json:"treeSize"`
-	RootHashB64 string `json:"rootHashB64u"`
+	TreeSize     string `json:"treeSize"`
+	RootHashB64u string `json:"rootHashB64u"`
 }
 
 type PreviousCommitment struct {
-	TreeSize    uint64 `json:"treeSize"`
-	RootHashB64 string `json:"rootHashB64u"`
-}
-
-type BatchRange struct {
-	Start uint64 `json:"start"`
-	End   uint64 `json:"end"`
+	TreeSize     string `json:"treeSize"`
+	RootHashB64u string `json:"rootHashB64u"`
 }
 
 type Signature struct {
@@ -45,18 +42,37 @@ type Signature struct {
 }
 
 type CheckpointMetadata struct {
-	Type       string              `json:"type"`
-	Stream     StreamID            `json:"stream"`
-	Log        *LogProfile         `json:"log,omitempty"`
-	Root       RootCommitment      `json:"root"`
-	Previous   *PreviousCommitment `json:"prev,omitempty"`
-	BatchRange BatchRange          `json:"batch_range"`
-	Signature  *Signature          `json:"sig,omitempty"`
+	Type      string              `json:"type"`
+	Stream    StreamID            `json:"stream"`
+	Log       *LogProfile         `json:"log,omitempty"`
+	Root      RootCommitment      `json:"root"`
+	Previous  *PreviousCommitment `json:"prev,omitempty"`
+	Signature *Signature          `json:"sig,omitempty"`
 }
 
 type MetadataDigest struct {
 	Algorithm string `json:"alg"`
 	DigestB64 string `json:"b64u"`
+}
+
+type InclusionProof struct {
+	LeafHash  string   `json:"leafHash"`
+	LeafIndex string   `json:"leafIndex"`
+	TreeSize  string   `json:"treeSize"`
+	Path      []string `json:"path"`
+	RootHash  string   `json:"rootHash"`
+	// RootSignature is carried through for draft parity but is not verified here.
+	RootSignature string `json:"rootSignature,omitempty"`
+	TreeVersion   int    `json:"treeVersion"`
+}
+
+type ConsistencyProof struct {
+	OldTreeSize     string   `json:"oldTreeSize"`
+	NewTreeSize     string   `json:"newTreeSize"`
+	OldRootHash     string   `json:"oldRootHash"`
+	NewRootHash     string   `json:"newRootHash"`
+	ConsistencyPath []string `json:"consistencyPath"`
+	TreeVersion     int      `json:"treeVersion"`
 }
 
 type CheckpointMessage struct {

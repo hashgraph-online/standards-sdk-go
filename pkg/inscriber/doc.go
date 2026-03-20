@@ -1,10 +1,10 @@
-// Package inscriber provides the Kiloscribe authentication flow and high-level
+// Package inscriber provides the inscription-service authentication flow and high-level
 // inscription utilities for the HOL ecosystem. It supports
 // websocket-first inscription, quote generation, bulk-files support,
 // Registry Broker quote and job helpers, and skill inscription helpers.
 //
 // The inscriber package is the primary interface for writing data to the Hedera
-// public ledger via the Kiloscribe inscription service. It handles
+// public ledger via the inscription service. It handles
 // authentication, file chunking, websocket transport, and cost estimation.
 //
 // # Authentication

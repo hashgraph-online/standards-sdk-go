@@ -181,6 +181,7 @@ type ClientConfig struct {
 	Auth              Auth
 	KeyType           string
 	MirrorBaseURL     string
+	InscriberBaseURL  string
 	KiloScribeBaseURL string
 	InscriberAuthURL  string
 	InscriberAPIURL   string
