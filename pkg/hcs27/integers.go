@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func parseCanonicalUint64(fieldName string, value string) (uint64, error) {
+func parseCanonicalUint64(fieldName, value string) (uint64, error) {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {
 		return 0, fmt.Errorf("%s is required", fieldName)

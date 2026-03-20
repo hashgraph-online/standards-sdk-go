@@ -51,7 +51,7 @@ func TestSingleEntryLeafVector(t *testing.T) {
 		t.Fatalf("expected inclusion proof to verify for single-entry tree")
 	}
 
-	ok, err = VerifyInclusionProofObject(InclusionProof{
+	ok, err = VerifyInclusionProofObject(&InclusionProof{
 		LeafHash:    leafHex,
 		LeafIndex:   "0",
 		TreeSize:    "1",
@@ -82,7 +82,7 @@ func TestConsistencyProof_EmptyToAny(t *testing.T) {
 		t.Fatalf("expected consistency proof to verify for oldTreeSize=0")
 	}
 
-	ok, err = VerifyConsistencyProofObject(ConsistencyProof{
+	ok, err = VerifyConsistencyProofObject(&ConsistencyProof{
 		OldTreeSize:     "0",
 		NewTreeSize:     "10",
 		OldRootHash:     "",

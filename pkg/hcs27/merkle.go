@@ -133,7 +133,10 @@ func VerifyInclusionProof(
 }
 
 // VerifyInclusionProofObject verifies a proof object that follows the HCS-27 draft shape.
-func VerifyInclusionProofObject(proof InclusionProof) (bool, error) {
+func VerifyInclusionProofObject(proof *InclusionProof) (bool, error) {
+	if proof == nil {
+		return false, fmt.Errorf("proof is required")
+	}
 	if proof.TreeVersion != 1 {
 		return false, fmt.Errorf("treeVersion must be 1")
 	}
@@ -235,7 +238,10 @@ func VerifyConsistencyProof(
 }
 
 // VerifyConsistencyProofObject verifies a consistency proof object that follows the HCS-27 draft shape.
-func VerifyConsistencyProofObject(proof ConsistencyProof) (bool, error) {
+func VerifyConsistencyProofObject(proof *ConsistencyProof) (bool, error) {
+	if proof == nil {
+		return false, fmt.Errorf("proof is required")
+	}
 	if proof.TreeVersion != 1 {
 		return false, fmt.Errorf("treeVersion must be 1")
 	}
