@@ -5,6 +5,7 @@ Runnable examples for common [HOL Standards SDK](https://hol.org/docs/libraries/
 | Example | Specification | Description |
 | ------- | ------------- | ----------- |
 | `hcs2-create-registry` | [HCS-2](https://hol.org/docs/standards/hcs-2) | Creates an indexed topic registry |
+| `registry-broker-delegation` | Registry Broker | Calls `Delegate` and prints ranked delegation opportunities |
 | `hcs5-build-mint` | [HCS-5](https://hol.org/docs/standards/hcs-5) | Builds a Hashinal mint transaction |
 | `hcs6-create-registry` | [HCS-6](https://hol.org/docs/standards/hcs-6) | Creates a dynamic hashinal registry |
 | `hcs7-register-metadata` | [HCS-7](https://hol.org/docs/standards/hcs-7) | Registers metadata in an indexed registry |
@@ -19,8 +20,8 @@ Runnable examples for common [HOL Standards SDK](https://hol.org/docs/libraries/
 | `hcs20-deploy-points` | [HCS-20](https://hol.org/docs/standards/hcs-20) | Deploys a private points topic |
 | `hcs21-build-declaration` | [HCS-21](https://hol.org/docs/standards/hcs-21) | Builds an adapter declaration |
 | `hcs26-parse-memos` | [HCS-26](https://hol.org/docs/standards/hcs-26) | Parses topic/transaction memos |
-| `hcs27-publish-checkpoint` | [HCS-27](https://hol.org/docs/standards/hcs-27) | Publishes inline + HRL-backed checkpoints and validates the chain |
-| `inscriber-auth-client` | [HCS-1](https://hol.org/docs/standards/hcs-1) | Authenticates with the inscriber service |
+| `hcs27-publish-checkpoint` | [HCS-27](https://hol.org/docs/standards/hcs-27) | Publishes a Merkle checkpoint |
+| `inscriber-auth-client` | [HCS-1](https://hol.org/docs/standards/hcs-1) | Authenticates with Kiloscribe |
 | `registry-broker-skill-domain-proof` | [HCS-26](https://hol.org/docs/standards/hcs-26) | Creates/verifies DNS TXT proof and checks trust delta |
 | `registry-broker-uaid-dns-verification` | [HCS-14](https://hol.org/docs/standards/hcs-14) | Verifies UAID DNS TXT binding and reads stored/live verification status |
 
@@ -33,6 +34,7 @@ go run ./examples/hcs2-create-registry
 ## CodeSandbox
 
 - [`hcs2-create-registry`](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs2-create-registry)
+- [`registry-broker-delegation`](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/registry-broker-delegation)
 - [`hcs5-build-mint`](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs5-build-mint)
 - [`hcs6-create-registry`](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs6-create-registry)
 - [`hcs7-register-metadata`](https://codesandbox.io/s/github/hashgraph-online/standards-sdk-go/tree/main/examples/hcs7-register-metadata)

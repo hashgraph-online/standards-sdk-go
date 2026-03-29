@@ -2,6 +2,7 @@ package registrybroker
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -13,6 +14,39 @@ import (
 func (c *RegistryBrokerClient) Search(ctx context.Context, params SearchParams) (JSONObject, error) {
 	path := "/search" + buildSearchQuery(params)
 	return c.requestJSON(ctx, http.MethodGet, path, nil, nil)
+}
+
+// Delegate returns a typed delegation plan for the requested task.
+func (c *RegistryBrokerClient) Delegate(
+	ctx context.Context,
+	request DelegationPlanRequest,
+) (DelegationPlanResponse, error) {
+	var result DelegationPlanResponse
+
+	rawBody, rawHeaders, err := c.request(
+		ctx,
+		http.MethodPost,
+		"/delegate",
+		request,
+		map[string]string{"content-type": "application/json"},
+	)
+	if err != nil {
+		return result, err
+	}
+	if !isJSONContentType(rawHeaders.Get("content-type")) {
+		return result, &RegistryBrokerParseError{
+			Message: "expected JSON response from registry broker",
+			Body:    strings.TrimSpace(string(rawBody)),
+		}
+	}
+	if err := json.Unmarshal(rawBody, &result); err != nil {
+		return result, &RegistryBrokerParseError{
+			Message: "failed to decode registry broker response",
+			Body:    strings.TrimSpace(string(rawBody)),
+			Cause:   err,
+		}
+	}
+	return result, nil
 }
 
 // SearchErc8004ByAgentID performs the requested operation.
