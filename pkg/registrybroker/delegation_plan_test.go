@@ -3,10 +3,13 @@ package registrybroker
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
+
+const preservedValue = "preserved"
 
 func TestDelegate(t *testing.T) {
 	t.Helper()
@@ -31,7 +34,7 @@ func TestDelegate(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{
+		_, _ = fmt.Fprintf(w, `{
 			"task": "Review SDK PR feedback",
 			"context": "Need a docs-focused sidecar pass.",
 			"summary": "Delegate documentation follow-up.",
@@ -47,7 +50,7 @@ func TestDelegate(t *testing.T) {
 					"type": "sidecar",
 					"suggestedMode": "parallel",
 					"searchQueries": ["docs markdown docusaurus"],
-					"extraOpportunityField": "preserved",
+					"extraOpportunityField": "%s",
 					"candidates": [
 						{
 							"uaid": "uaid-1",
@@ -62,18 +65,18 @@ func TestDelegate(t *testing.T) {
 							"matchedRoles": ["docs"],
 							"reasons": ["Strong docs match"],
 							"suggestedMessage": "Update the docs tab set.",
-							"extraCandidateField": "preserved",
+							"extraCandidateField": "%s",
 							"agent": {
 								"name": "Docs Agent",
 								"verified": true,
-								"extraAgentField": "preserved"
+								"extraAgentField": "%s"
 							}
 						}
 					]
 				}
 			],
-			"extraRootField": "preserved"
-		}`))
+			"extraRootField": "%s"
+		}`, preservedValue, preservedValue, preservedValue, preservedValue)
 	}))
 	defer server.Close()
 
@@ -105,11 +108,11 @@ func TestDelegate(t *testing.T) {
 	if len(response.Opportunities) != 1 {
 		t.Fatalf("expected one opportunity, got %d", len(response.Opportunities))
 	}
-	if response.Extras["extraRootField"] != "preserved" {
+	if response.Extras["extraRootField"] != preservedValue {
 		t.Fatalf("expected additive root field to survive, got %#v", response.Extras)
 	}
 	opportunity := response.Opportunities[0]
-	if opportunity.Extras["extraOpportunityField"] != "preserved" {
+	if opportunity.Extras["extraOpportunityField"] != preservedValue {
 		t.Fatalf("expected additive opportunity field to survive, got %#v", opportunity.Extras)
 	}
 	candidate := opportunity.Candidates[0]
@@ -122,10 +125,10 @@ func TestDelegate(t *testing.T) {
 	if candidate.Verified == nil || !*candidate.Verified {
 		t.Fatal("expected verified candidate")
 	}
-	if candidate.Extras["extraCandidateField"] != "preserved" {
+	if candidate.Extras["extraCandidateField"] != preservedValue {
 		t.Fatalf("expected additive candidate field to survive, got %#v", candidate.Extras)
 	}
-	if candidate.Agent["extraAgentField"] != "preserved" {
+	if candidate.Agent["extraAgentField"] != preservedValue {
 		t.Fatalf("expected additive agent field to survive, got %#v", candidate.Agent)
 	}
 }

@@ -50,7 +50,8 @@ func run() error {
 	if response.LocalFirstReason != "" {
 		fmt.Printf("localFirstReason=%s\n", response.LocalFirstReason)
 	}
-	for _, opportunity := range response.Opportunities {
+	for index := range response.Opportunities {
+		opportunity := &response.Opportunities[index]
 		fmt.Printf("\nopportunity=%s title=%s\n", opportunity.ID, opportunity.Title)
 		fmt.Printf("reason=%s\n", opportunity.Reason)
 		if len(opportunity.Candidates) == 0 {
@@ -67,7 +68,7 @@ func run() error {
 	return nil
 }
 
-func getEnvOrDefault(key string, fallback string) string {
+func getEnvOrDefault(key, fallback string) string {
 	value := strings.TrimSpace(os.Getenv(key))
 	if value == "" {
 		return fallback

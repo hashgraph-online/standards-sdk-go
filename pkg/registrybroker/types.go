@@ -249,7 +249,7 @@ func extractUnknownFields(data []byte, knownKeys ...string) (JSONObject, error) 
 		delete(payload, key)
 	}
 	if len(payload) == 0 {
-		return nil, nil
+		return JSONObject{}, nil
 	}
 	return JSONObject(payload), nil
 }
