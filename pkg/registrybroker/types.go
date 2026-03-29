@@ -2,6 +2,7 @@ package registrybroker
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 )
@@ -107,6 +108,7 @@ type DelegationPlanCandidate struct {
 	Reasons                []string   `json:"reasons,omitempty"`
 	SuggestedMessage       string     `json:"suggestedMessage,omitempty"`
 	Agent                  JSONObject `json:"agent,omitempty"`
+	Extras                 JSONObject `json:"-"`
 }
 
 type DelegationOpportunity struct {
@@ -122,6 +124,7 @@ type DelegationOpportunity struct {
 	Languages     []string                  `json:"languages,omitempty"`
 	Artifacts     []string                  `json:"artifacts,omitempty"`
 	Candidates    []DelegationPlanCandidate `json:"candidates,omitempty"`
+	Extras        JSONObject                `json:"-"`
 }
 
 type DelegationPlanResponse struct {
@@ -137,6 +140,118 @@ type DelegationPlanResponse struct {
 	LocalFirstReason string                        `json:"localFirstReason,omitempty"`
 	Recommendation   *DelegationPlanRecommendation `json:"recommendation,omitempty"`
 	Opportunities    []DelegationOpportunity       `json:"opportunities,omitempty"`
+	Extras           JSONObject                    `json:"-"`
+}
+
+func (c *DelegationPlanCandidate) UnmarshalJSON(data []byte) error {
+	type candidateAlias DelegationPlanCandidate
+	aux := candidateAlias{}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	candidate := DelegationPlanCandidate(aux)
+	extras, err := extractUnknownFields(
+		data,
+		"uaid",
+		"label",
+		"registry",
+		"score",
+		"trustScore",
+		"verified",
+		"communicationSupported",
+		"availability",
+		"explanation",
+		"matchedQueries",
+		"matchedRoles",
+		"matchedProtocols",
+		"matchedSurfaces",
+		"matchedLanguages",
+		"matchedArtifacts",
+		"matchedTaskTags",
+		"reasons",
+		"suggestedMessage",
+		"agent",
+	)
+	if err != nil {
+		return err
+	}
+	candidate.Extras = extras
+	*c = candidate
+	return nil
+}
+
+func (o *DelegationOpportunity) UnmarshalJSON(data []byte) error {
+	type opportunityAlias DelegationOpportunity
+	aux := opportunityAlias{}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	opportunity := DelegationOpportunity(aux)
+	extras, err := extractUnknownFields(
+		data,
+		"id",
+		"title",
+		"reason",
+		"role",
+		"type",
+		"suggestedMode",
+		"searchQueries",
+		"protocols",
+		"surfaces",
+		"languages",
+		"artifacts",
+		"candidates",
+	)
+	if err != nil {
+		return err
+	}
+	opportunity.Extras = extras
+	*o = opportunity
+	return nil
+}
+
+func (r *DelegationPlanResponse) UnmarshalJSON(data []byte) error {
+	type responseAlias DelegationPlanResponse
+	aux := responseAlias{}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	response := DelegationPlanResponse(aux)
+	extras, err := extractUnknownFields(
+		data,
+		"task",
+		"context",
+		"summary",
+		"intents",
+		"surfaces",
+		"protocols",
+		"languages",
+		"artifacts",
+		"shouldDelegate",
+		"localFirstReason",
+		"recommendation",
+		"opportunities",
+	)
+	if err != nil {
+		return err
+	}
+	response.Extras = extras
+	*r = response
+	return nil
+}
+
+func extractUnknownFields(data []byte, knownKeys ...string) (JSONObject, error) {
+	var payload map[string]any
+	if err := json.Unmarshal(data, &payload); err != nil {
+		return nil, err
+	}
+	for _, key := range knownKeys {
+		delete(payload, key)
+	}
+	if len(payload) == 0 {
+		return nil, nil
+	}
+	return JSONObject(payload), nil
 }
 
 type VectorSearchFilter struct {

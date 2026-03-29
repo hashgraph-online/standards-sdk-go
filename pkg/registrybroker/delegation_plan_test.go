@@ -105,7 +105,14 @@ func TestDelegate(t *testing.T) {
 	if len(response.Opportunities) != 1 {
 		t.Fatalf("expected one opportunity, got %d", len(response.Opportunities))
 	}
-	candidate := response.Opportunities[0].Candidates[0]
+	if response.Extras["extraRootField"] != "preserved" {
+		t.Fatalf("expected additive root field to survive, got %#v", response.Extras)
+	}
+	opportunity := response.Opportunities[0]
+	if opportunity.Extras["extraOpportunityField"] != "preserved" {
+		t.Fatalf("expected additive opportunity field to survive, got %#v", opportunity.Extras)
+	}
+	candidate := opportunity.Candidates[0]
 	if candidate.Registry != "hcs-11" {
 		t.Fatalf("expected registry to parse, got %q", candidate.Registry)
 	}
@@ -114,6 +121,9 @@ func TestDelegate(t *testing.T) {
 	}
 	if candidate.Verified == nil || !*candidate.Verified {
 		t.Fatal("expected verified candidate")
+	}
+	if candidate.Extras["extraCandidateField"] != "preserved" {
+		t.Fatalf("expected additive candidate field to survive, got %#v", candidate.Extras)
 	}
 	if candidate.Agent["extraAgentField"] != "preserved" {
 		t.Fatalf("expected additive agent field to survive, got %#v", candidate.Agent)
