@@ -2,6 +2,7 @@ package registrybroker
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 )
@@ -60,6 +61,197 @@ type SearchParams struct {
 	Online       *bool
 	SortBy       string
 	SortOrder    string
+}
+
+type DelegationPlanFilter struct {
+	Registry     string   `json:"registry,omitempty"`
+	Registries   []string `json:"registries,omitempty"`
+	Capabilities []string `json:"capabilities,omitempty"`
+	Protocols    []string `json:"protocols,omitempty"`
+	Adapters     []string `json:"adapters,omitempty"`
+	Type         string   `json:"type,omitempty"`
+	Surfaces     []string `json:"surfaces,omitempty"`
+	Languages    []string `json:"languages,omitempty"`
+	Artifacts    []string `json:"artifacts,omitempty"`
+}
+
+type DelegationPlanRequest struct {
+	Task      string                `json:"task"`
+	Context   string                `json:"context,omitempty"`
+	Limit     int                   `json:"limit,omitempty"`
+	Filter    *DelegationPlanFilter `json:"filter,omitempty"`
+	Workspace JSONObject            `json:"workspace,omitempty"`
+}
+
+type DelegationPlanRecommendation struct {
+	Summary string `json:"summary,omitempty"`
+	Mode    string `json:"mode,omitempty"`
+}
+
+type DelegationPlanCandidate struct {
+	UAID                   string     `json:"uaid"`
+	Label                  string     `json:"label,omitempty"`
+	Registry               string     `json:"registry,omitempty"`
+	Score                  float64    `json:"score,omitempty"`
+	TrustScore             float64    `json:"trustScore,omitempty"`
+	Verified               *bool      `json:"verified,omitempty"`
+	CommunicationSupported *bool      `json:"communicationSupported,omitempty"`
+	Availability           string     `json:"availability,omitempty"`
+	Explanation            string     `json:"explanation,omitempty"`
+	MatchedQueries         []string   `json:"matchedQueries,omitempty"`
+	MatchedRoles           []string   `json:"matchedRoles,omitempty"`
+	MatchedProtocols       []string   `json:"matchedProtocols,omitempty"`
+	MatchedSurfaces        []string   `json:"matchedSurfaces,omitempty"`
+	MatchedLanguages       []string   `json:"matchedLanguages,omitempty"`
+	MatchedArtifacts       []string   `json:"matchedArtifacts,omitempty"`
+	MatchedTaskTags        []string   `json:"matchedTaskTags,omitempty"`
+	Reasons                []string   `json:"reasons,omitempty"`
+	SuggestedMessage       string     `json:"suggestedMessage,omitempty"`
+	Agent                  JSONObject `json:"agent,omitempty"`
+	Extras                 JSONObject `json:"-"`
+}
+
+type DelegationOpportunity struct {
+	ID            string                    `json:"id"`
+	Title         string                    `json:"title"`
+	Reason        string                    `json:"reason"`
+	Role          string                    `json:"role,omitempty"`
+	Type          string                    `json:"type,omitempty"`
+	SuggestedMode string                    `json:"suggestedMode,omitempty"`
+	SearchQueries []string                  `json:"searchQueries,omitempty"`
+	Protocols     []string                  `json:"protocols,omitempty"`
+	Surfaces      []string                  `json:"surfaces,omitempty"`
+	Languages     []string                  `json:"languages,omitempty"`
+	Artifacts     []string                  `json:"artifacts,omitempty"`
+	Candidates    []DelegationPlanCandidate `json:"candidates,omitempty"`
+	Extras        JSONObject                `json:"-"`
+}
+
+type DelegationPlanResponse struct {
+	Task             string                        `json:"task"`
+	Context          string                        `json:"context,omitempty"`
+	Summary          string                        `json:"summary,omitempty"`
+	Intents          []string                      `json:"intents,omitempty"`
+	Surfaces         []string                      `json:"surfaces,omitempty"`
+	Protocols        []string                      `json:"protocols,omitempty"`
+	Languages        []string                      `json:"languages,omitempty"`
+	Artifacts        []string                      `json:"artifacts,omitempty"`
+	ShouldDelegate   bool                          `json:"shouldDelegate"`
+	LocalFirstReason string                        `json:"localFirstReason,omitempty"`
+	Recommendation   *DelegationPlanRecommendation `json:"recommendation,omitempty"`
+	Opportunities    []DelegationOpportunity       `json:"opportunities,omitempty"`
+	Extras           JSONObject                    `json:"-"`
+}
+
+func (c *DelegationPlanCandidate) UnmarshalJSON(data []byte) error {
+	type candidateAlias DelegationPlanCandidate
+	aux := candidateAlias{}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	candidate := DelegationPlanCandidate(aux)
+	extras, err := extractUnknownFields(
+		data,
+		"uaid",
+		"label",
+		"registry",
+		"score",
+		"trustScore",
+		"verified",
+		"communicationSupported",
+		"availability",
+		"explanation",
+		"matchedQueries",
+		"matchedRoles",
+		"matchedProtocols",
+		"matchedSurfaces",
+		"matchedLanguages",
+		"matchedArtifacts",
+		"matchedTaskTags",
+		"reasons",
+		"suggestedMessage",
+		"agent",
+	)
+	if err != nil {
+		return err
+	}
+	candidate.Extras = extras
+	*c = candidate
+	return nil
+}
+
+func (o *DelegationOpportunity) UnmarshalJSON(data []byte) error {
+	type opportunityAlias DelegationOpportunity
+	aux := opportunityAlias{}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	opportunity := DelegationOpportunity(aux)
+	extras, err := extractUnknownFields(
+		data,
+		"id",
+		"title",
+		"reason",
+		"role",
+		"type",
+		"suggestedMode",
+		"searchQueries",
+		"protocols",
+		"surfaces",
+		"languages",
+		"artifacts",
+		"candidates",
+	)
+	if err != nil {
+		return err
+	}
+	opportunity.Extras = extras
+	*o = opportunity
+	return nil
+}
+
+func (r *DelegationPlanResponse) UnmarshalJSON(data []byte) error {
+	type responseAlias DelegationPlanResponse
+	aux := responseAlias{}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	response := DelegationPlanResponse(aux)
+	extras, err := extractUnknownFields(
+		data,
+		"task",
+		"context",
+		"summary",
+		"intents",
+		"surfaces",
+		"protocols",
+		"languages",
+		"artifacts",
+		"shouldDelegate",
+		"localFirstReason",
+		"recommendation",
+		"opportunities",
+	)
+	if err != nil {
+		return err
+	}
+	response.Extras = extras
+	*r = response
+	return nil
+}
+
+func extractUnknownFields(data []byte, knownKeys ...string) (JSONObject, error) {
+	var payload map[string]any
+	if err := json.Unmarshal(data, &payload); err != nil {
+		return nil, err
+	}
+	for _, key := range knownKeys {
+		delete(payload, key)
+	}
+	if len(payload) == 0 {
+		return JSONObject{}, nil
+	}
+	return JSONObject(payload), nil
 }
 
 type VectorSearchFilter struct {
@@ -311,10 +503,6 @@ type ListSkillsOptions struct {
 	AccountID    string
 }
 
-type SkillSecurityBreakdownOptions struct {
-	JobID string
-}
-
 type ListMySkillsOptions struct {
 	Limit *int
 }
@@ -323,6 +511,10 @@ type MySkillsListOptions struct {
 	Limit     *int
 	Cursor    string
 	AccountID string
+}
+
+type SkillSecurityBreakdownOptions struct {
+	JobID string
 }
 
 type SkillPublishJobOptions struct {
