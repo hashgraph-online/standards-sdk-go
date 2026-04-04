@@ -10,6 +10,9 @@ on:
 permissions:
   contents: read
 
+env:
+  HOL_SDK_DOCS_URL: https://hol.org/docs/libraries/standards-sdk/
+
 jobs:
   lint:
     name: Lint Code
@@ -205,6 +208,92 @@ jobs:
             --title "${tag}" \
             --generate-notes \
             --target "${GITHUB_SHA}"
+
+      - name: Ensure GitHub release includes automated notes and canonical docs URL
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag="${{ steps.release_tag.outputs.tag }}"
+          docs_line="- Standards SDK docs: ${HOL_SDK_DOCS_URL}"
+          release_notes="$(printf '## Documentation\n%s\n' "${docs_line}")"
+
+          if ! gh release view "${tag}" >/dev/null 2>&1; then
+            gh release create "${tag}" \
+              --title "${tag}" \
+              --generate-notes \
+              --notes "${release_notes}" \
+              --target "${GITHUB_SHA}"
+            exit 0
+          fi
+
+          body="$(gh release view "${tag}" --json body --jq '.body // ""')"
+          if printf '%s' "${body}" | grep -Fq "${HOL_SDK_DOCS_URL}"; then
+            echo "Release ${tag} already contains canonical docs URL."
+            exit 0
+          fi
+
+          notes_file="$(mktemp)"
+          {
+            printf '%s\n' "${body}"
+            printf '\n%s' "${release_notes}"
+          } > "${notes_file}"
+          gh release edit "${tag}" --notes-file "${notes_file}"
+          rm -f "${notes_file}"
+
+      - name: Wait for Go module proxy index
+        id: go_proxy_index
+        continue-on-error: true
+        env:
+          RELEASE_TAG: ${{ steps.release_tag.outputs.tag }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          import sys
+          import time
+          import urllib.error
+          import urllib.request
+
+          module_path = os.environ["MODULE_PATH"]
+          release_tag = os.environ["RELEASE_TAG"]
+          url = f"https://proxy.golang.org/{module_path}/@v/{release_tag}.info"
+
+          attempts = 40
+          delay_seconds = 15
+          timeout_seconds = 20
+
+          print(f"Polling {url} for {release_tag}")
+          for attempt in range(1, attempts + 1):
+              try:
+                  with urllib.request.urlopen(url, timeout=timeout_seconds) as response:
+                      body = response.read().decode("utf-8", "ignore")
+                      ok = response.status == 200 and release_tag in body
+                      print(f"attempt {attempt:02d}: status={response.status} indexed={ok}")
+                      if ok:
+                          sys.exit(0)
+              except urllib.error.HTTPError as error:
+                  print(f"attempt {attempt:02d}: status={error.code} indexed=False")
+              except Exception as error:
+                  print(f"attempt {attempt:02d}: error={error} indexed=False")
+
+              time.sleep(delay_seconds)
+
+          raise SystemExit(
+              f"Timed out waiting for proxy.golang.org to index {module_path}@{release_tag}"
+          )
+          PY
+
+      - name: Report Go proxy indexing delay
+        if: steps.go_proxy_index.outcome == 'failure'
+        env:
+          RELEASE_TAG: ${{ steps.release_tag.outputs.tag }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          echo "::warning::proxy.golang.org indexing timed out for ${MODULE_PATH}@${RELEASE_TAG}. Release was published; recheck later. Run: ${GITHUB_RUN_URL}"
 
       - name: Wait for pkg.go.dev index
         id: pkg_index
