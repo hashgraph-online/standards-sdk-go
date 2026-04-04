@@ -233,6 +233,34 @@ func (c *RegistryBrokerClient) requestJSON(
 	return parsed, nil
 }
 
+func (c *RegistryBrokerClient) requestTypedJSON(
+	ctx context.Context,
+	method string,
+	path string,
+	body any,
+	headers map[string]string,
+	target any,
+) error {
+	rawBody, rawHeaders, err := c.request(ctx, method, path, body, headers)
+	if err != nil {
+		return err
+	}
+	if !isJSONContentType(rawHeaders.Get("content-type")) {
+		return &RegistryBrokerParseError{
+			Message: "expected JSON response from registry broker",
+			Body:    strings.TrimSpace(string(rawBody)),
+		}
+	}
+	if err := json.Unmarshal(rawBody, target); err != nil {
+		return &RegistryBrokerParseError{
+			Message: "failed to decode registry broker response",
+			Body:    strings.TrimSpace(string(rawBody)),
+			Cause:   err,
+		}
+	}
+	return nil
+}
+
 func (c *RegistryBrokerClient) requestNoResponse(
 	ctx context.Context,
 	method string,
