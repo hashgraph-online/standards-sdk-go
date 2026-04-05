@@ -128,3 +128,47 @@ type SkillStatusResponse struct {
 	Preview             *SkillStatusPreviewMetadata    `json:"preview,omitempty"`
 	StatusURL           *string                        `json:"statusUrl,omitempty"`
 }
+
+type SkillQuotePreviewRequest struct {
+	FileCount  int    `json:"fileCount"`
+	TotalBytes int    `json:"totalBytes"`
+	Name       string `json:"name,omitempty"`
+	Version    string `json:"version,omitempty"`
+	RepoURL    string `json:"repoUrl,omitempty"`
+	SkillDir   string `json:"skillDir,omitempty"`
+}
+
+type SkillQuotePreviewRange struct {
+	Min int `json:"min"`
+	Max int `json:"max"`
+}
+
+type SkillQuotePreviewResponse struct {
+	EstimatedCredits SkillQuotePreviewRange `json:"estimatedCredits"`
+	EstimatedHbar    JSONObject             `json:"estimatedHbar,omitempty"`
+	PricingVersion   string                 `json:"pricingVersion"`
+	Assumptions      []string               `json:"assumptions,omitempty"`
+	PurchaseURL      string                 `json:"purchaseUrl,omitempty"`
+	PublishURL       string                 `json:"publishUrl,omitempty"`
+	VerificationURL  string                 `json:"verificationUrl,omitempty"`
+}
+
+type SkillConversionSignalsResponse struct {
+	RepoURL                     string                `json:"repoUrl"`
+	SkillDir                    string                `json:"skillDir"`
+	TrustTier                   SkillTrustTier        `json:"trustTier"`
+	ActionInstalled             bool                  `json:"actionInstalled"`
+	PreviewUploaded             bool                  `json:"previewUploaded"`
+	PreviewID                   string                `json:"previewId,omitempty"`
+	LastValidateSuccessAt       string                `json:"lastValidateSuccessAt,omitempty"`
+	StalePreviewAgeDays         int                   `json:"stalePreviewAgeDays,omitempty"`
+	Published                   bool                  `json:"published"`
+	Verified                    bool                  `json:"verified"`
+	PublishReady                bool                  `json:"publishReady"`
+	PublishBlockedByMissingAuth bool                  `json:"publishBlockedByMissingAuth"`
+	StatusURL                   string                `json:"statusUrl,omitempty"`
+	PurchaseURL                 string                `json:"purchaseUrl,omitempty"`
+	PublishURL                  string                `json:"publishUrl,omitempty"`
+	VerificationURL             string                `json:"verificationUrl,omitempty"`
+	NextSteps                   []SkillStatusNextStep `json:"nextSteps,omitempty"`
+}

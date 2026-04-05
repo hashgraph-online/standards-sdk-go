@@ -2,6 +2,7 @@ package registrybroker
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -49,26 +50,43 @@ func (c *RegistryBrokerClient) GetSkillStatusByRepo(
 	return response, err
 }
 
-func (c *RegistryBrokerClient) UploadSkillPreviewFromGithubOIDC(
+func (c *RegistryBrokerClient) QuoteSkillPublishPreview(
 	ctx context.Context,
-	token string,
-	report *SkillPreviewReport,
-) (SkillPreviewRecord, error) {
-	if err := ensureNonEmpty(token, "token"); err != nil {
-		return SkillPreviewRecord{}, err
+	request SkillQuotePreviewRequest,
+) (SkillQuotePreviewResponse, error) {
+	if request.FileCount <= 0 {
+		return SkillQuotePreviewResponse{}, fmt.Errorf("fileCount must be greater than 0")
 	}
-	if report == nil {
-		return SkillPreviewRecord{}, ensureNonEmpty("", "report")
+	if request.TotalBytes <= 0 {
+		return SkillQuotePreviewResponse{}, fmt.Errorf("totalBytes must be greater than 0")
 	}
-	var response SkillPreviewRecord
+	var response SkillQuotePreviewResponse
 	err := c.requestTypedJSON(
 		ctx,
 		http.MethodPost,
-		"/skills/preview/github-oidc",
-		report,
-		map[string]string{
-			"authorization": "Bearer " + token,
-		},
+		"/skills/quote-preview",
+		request,
+		nil,
+		&response,
+	)
+	return response, err
+}
+
+func (c *RegistryBrokerClient) GetSkillConversionSignalsByRepo(
+	ctx context.Context,
+	request SkillPreviewByRepoRequest,
+) (SkillConversionSignalsResponse, error) {
+	query, err := skillPreviewRepoQuery(request)
+	if err != nil {
+		return SkillConversionSignalsResponse{}, err
+	}
+	var response SkillConversionSignalsResponse
+	err = c.requestTypedJSON(
+		ctx,
+		http.MethodGet,
+		pathWithQuery("/skills/conversion-signals/by-repo", query),
+		nil,
+		nil,
 		&response,
 	)
 	return response, err
@@ -133,6 +151,39 @@ func (c *RegistryBrokerClient) GetSkillPreviewByID(
 		&response,
 	)
 	return response, err
+}
+
+func (c *RegistryBrokerClient) UploadSkillPreviewFromGithubOIDC(
+	ctx context.Context,
+	token string,
+	report *SkillPreviewReport,
+) (SkillPreviewRecord, error) {
+	if err := ensureNonEmpty(token, "token"); err != nil {
+		return SkillPreviewRecord{}, err
+	}
+	if report == nil {
+		return SkillPreviewRecord{}, ensureNonEmpty("", "report")
+	}
+	var response SkillPreviewRecord
+	err := c.requestTypedJSON(
+		ctx,
+		http.MethodPost,
+		"/skills/preview/github-oidc",
+		report,
+		map[string]string{
+			"authorization": "Bearer " + strings.TrimSpace(token),
+		},
+		&response,
+	)
+	return response, err
+}
+
+func (c *RegistryBrokerClient) UploadSkillPreviewFromGitHubOIDC(
+	ctx context.Context,
+	token string,
+	report *SkillPreviewReport,
+) (SkillPreviewRecord, error) {
+	return c.UploadSkillPreviewFromGithubOIDC(ctx, token, report)
 }
 
 func skillPreviewRepoQuery(request SkillPreviewByRepoRequest) (url.Values, error) {
