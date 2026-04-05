@@ -297,7 +297,7 @@ func TestSkillPreviewEndpointsUseCanonicalPaths(t *testing.T) {
 		t.Fatalf("expected publish to be ready")
 	}
 
-	quote, err := client.QuoteSkillPublishPreview(context.Background(), SkillQuotePreviewRequest{
+	quote, err := client.QuoteSkillPublishPreview(context.Background(), &SkillQuotePreviewRequest{
 		FileCount:  2,
 		TotalBytes: 3072,
 		Name:       "registry-broker",

@@ -18,7 +18,7 @@ func TestLiveSkillGrowthEndpoints(t *testing.T) {
 		t.Fatalf("failed to create client: %v", err)
 	}
 
-	quote, err := client.QuoteSkillPublishPreview(context.Background(), SkillQuotePreviewRequest{
+	quote, err := client.QuoteSkillPublishPreview(context.Background(), &SkillQuotePreviewRequest{
 		FileCount:  2,
 		TotalBytes: 3072,
 		Name:       "registry-broker",

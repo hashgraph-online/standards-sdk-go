@@ -52,8 +52,11 @@ func (c *RegistryBrokerClient) GetSkillStatusByRepo(
 
 func (c *RegistryBrokerClient) QuoteSkillPublishPreview(
 	ctx context.Context,
-	request SkillQuotePreviewRequest,
+	request *SkillQuotePreviewRequest,
 ) (SkillQuotePreviewResponse, error) {
+	if request == nil {
+		return SkillQuotePreviewResponse{}, fmt.Errorf("request is required")
+	}
 	if request.FileCount <= 0 {
 		return SkillQuotePreviewResponse{}, fmt.Errorf("fileCount must be greater than 0")
 	}
