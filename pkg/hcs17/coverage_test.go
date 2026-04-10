@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashgraph/hedera-sdk-go/v2"
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 )
 
 func TestNewClientSuccess(t *testing.T) {
@@ -83,7 +83,7 @@ func TestNewClientInvalidOperatorKey(t *testing.T) {
 	}
 }
 
-	// Test completely removed.
+// Test completely removed.
 
 func TestCreateStateTopicFailsExecute(t *testing.T) {
 	key, _ := hedera.PrivateKeyGenerateEcdsa()
@@ -185,9 +185,9 @@ func TestGetRecentMessages(t *testing.T) {
 			}
 			list := List{
 				Messages: []MirrorMessage{
-					{Message: validMsgB64},     // valid
-					{Message: "bad-base64!"},   // invalid base64
-					{Message: "eyJibGFoIjo=]"}, // invalid json in base64
+					{Message: validMsgB64},                                     // valid
+					{Message: "bad-base64!"},                                   // invalid base64
+					{Message: "eyJibGFoIjo=]"},                                 // invalid json in base64
 					{Message: base64.StdEncoding.EncodeToString([]byte(`{}`))}, // missing fields (validation fails)
 				},
 			}
@@ -338,7 +338,7 @@ func TestCalculateKeyFingerprintCoverage(t *testing.T) {
 	client := &Client{}
 	key1, _ := hedera.PrivateKeyGenerateEcdsa()
 	key2, _ := hedera.PrivateKeyGenerateEcdsa()
-	
+
 	_, err := client.CalculateKeyFingerprint(nil, 1)
 	if err == nil {
 		t.Fatal("expected error for empty keys")
@@ -365,7 +365,7 @@ func TestVerifyStateHash(t *testing.T) {
 		PublicKey: "pubkey",
 	}
 	expectedAcc, _ := client.CalculateAccountStateHash(inputAcc)
-	
+
 	ok, err := client.VerifyStateHash(inputAcc, expectedAcc.StateHash)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -381,7 +381,7 @@ func TestVerifyStateHash(t *testing.T) {
 	if ok {
 		t.Fatal("expected verify to fail")
 	}
-	
+
 	_, err = client.VerifyStateHash(AccountStateInput{AccountID: ""}, "any")
 	if err == nil {
 		t.Fatal("expected error for invalid input generating hash")
@@ -391,7 +391,7 @@ func TestVerifyStateHash(t *testing.T) {
 		CompositeAccountID: "0.0.1",
 	}
 	expectedComp, _ := client.CalculateCompositeStateHash(inputComp)
-	
+
 	ok, err = client.VerifyStateHash(inputComp, expectedComp.StateHash)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -404,7 +404,7 @@ func TestVerifyStateHash(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for invalid composite generating hash")
 	}
-	
+
 	_, err = client.VerifyStateHash("unsupported_type", "any")
 	if err == nil {
 		t.Fatal("expected error for unsupported type")
@@ -416,12 +416,12 @@ func TestNormalizePublicKeyValue(t *testing.T) {
 	if err != nil || val != "pubkey" {
 		t.Fatal("unexpected string normalize")
 	}
-	
+
 	_, err = normalizePublicKeyValue("   ")
 	if err == nil {
 		t.Fatal("expected error for empty string")
 	}
-	
+
 	pk, _ := hedera.PrivateKeyGenerateEcdsa()
 	val, err = normalizePublicKeyValue(pk.PublicKey())
 	if err != nil || val == "" {
@@ -447,7 +447,7 @@ func TestCreateStateHashMessageCoverage(t *testing.T) {
 	if msg.Epoch == nil || *msg.Epoch != 1 {
 		t.Fatal("expected epoch")
 	}
-	
+
 	msgNoEpoch := client.CreateStateHashMessage("hash", "0.0.1", []string{"0.0.2"}, "memo", nil)
 	if msgNoEpoch.Epoch != nil {
 		t.Fatal("expected no epoch")
@@ -483,8 +483,8 @@ func TestBuildCreateStateTopicTxCoverage(t *testing.T) {
 	key, _ := hedera.PrivateKeyGenerateEcdsa()
 	tx := BuildCreateStateTopicTx(CreateTopicOptions{
 		TTLSeconds: 123,
-		AdminKey: key.PublicKey(),
-		SubmitKey: key.PublicKey(),
+		AdminKey:   key.PublicKey(),
+		SubmitKey:  key.PublicKey(),
 	})
 	if tx == nil {
 		t.Fatal("expected tx")
@@ -512,7 +512,7 @@ func TestBuildStateHashMessageTxCoverage(t *testing.T) {
 	if tx.GetTransactionMemo() != "" && tx.GetTransactionMemo() != "hcs-17:op:state_hash" {
 		t.Fatalf("expected empty or hcs-17:op:state_hash memo, got %s", tx.GetTransactionMemo())
 	}
-	
+
 	_, err = BuildStateHashMessageTx("invalid", StateHashMessage{}, "")
 	if err == nil {
 		t.Fatal("expected error for invalid topic ID")

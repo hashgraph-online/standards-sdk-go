@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hashgraph/hedera-sdk-go/v2"
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 )
 
 func TestFormatTinybarToHBAR(t *testing.T) {
@@ -110,9 +110,9 @@ func TestParseTransferTinybarAndQuote(t *testing.T) {
 		AddHbarTransfer(accountID, hedera.NewHbar(-1)).
 		AddHbarTransfer(otherAccountID, hedera.NewHbar(1)).
 		Freeze()
-	
+
 	bytes, _ := tx.ToBytes()
-	
+
 	val, err := parseTransferTinybar(bytes)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)

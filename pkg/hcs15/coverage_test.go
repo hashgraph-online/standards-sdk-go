@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hashgraph/hedera-sdk-go/v2"
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 )
 
 func TestNewClientSuccess(t *testing.T) {
@@ -203,16 +203,16 @@ func TestCreateBaseAccountFailsExecution(t *testing.T) {
 		OperatorAccountID:  "0.0.1", // invalid operator
 		OperatorPrivateKey: key.String(),
 	})
-	
+
 	// Close client to ensure fast precheck failure
 	client.HederaClient().Close()
 
 	maxAssoc := int32(10)
 	_, err := client.CreateBaseAccount(context.Background(), BaseAccountCreateOptions{
-		InitialBalanceHbar: -5, // Test defaulting to 10
+		InitialBalanceHbar:            -5, // Test defaulting to 10
 		MaxAutomaticTokenAssociations: &maxAssoc,
-		AccountMemo: "memo",
-		TransactionMemo: "txmemo",
+		AccountMemo:                   "memo",
+		TransactionMemo:               "txmemo",
 	})
 	if err == nil {
 		t.Fatal("expected error on execute from closed client")
@@ -226,17 +226,17 @@ func TestCreatePetalAccountFailsExecution(t *testing.T) {
 		OperatorAccountID:  "0.0.1",
 		OperatorPrivateKey: operatorKey.String(),
 	})
-	
+
 	client.HederaClient().Close()
 
 	petalKey, _ := hedera.PrivateKeyGenerateEcdsa()
 	maxAssoc := int32(10)
 	_, err := client.CreatePetalAccount(context.Background(), PetalAccountCreateOptions{
-		BasePrivateKey: petalKey.String(),
-		InitialBalanceHbar: -1, // defaults to 1
+		BasePrivateKey:                petalKey.String(),
+		InitialBalanceHbar:            -1, // defaults to 1
 		MaxAutomaticTokenAssociations: &maxAssoc,
-		AccountMemo: "memo",
-		TransactionMemo: "txmemo",
+		AccountMemo:                   "memo",
+		TransactionMemo:               "txmemo",
 	})
 	if err == nil {
 		t.Fatal("expected error on execute from closed client")
@@ -257,7 +257,7 @@ func TestCreatePetalAccountInvalidKey(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for invalid petal private key")
 	}
-	
+
 	_, err = client.CreatePetalAccount(context.Background(), PetalAccountCreateOptions{
 		BasePrivateKey: "",
 	})
@@ -284,4 +284,3 @@ func TestVerifyPetalAccountMirrorError(t *testing.T) {
 		t.Fatal("expected error from mirror node")
 	}
 }
-

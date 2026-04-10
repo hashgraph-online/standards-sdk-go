@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hashgraph/hedera-sdk-go/v2"
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 )
 
 func TestNewAuthClient(t *testing.T) {
@@ -60,7 +60,7 @@ func TestAuthenticateSuccess(t *testing.T) {
 
 	client := NewAuthClient(ts.URL)
 	res, err := client.Authenticate(context.Background(), "0.0.1", pk.String(), NetworkTestnet)
-	
+
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -99,7 +99,7 @@ func TestAuthenticateFailOnAuth(t *testing.T) {
 
 	client := NewAuthClient(ts.URL)
 	_, err := client.Authenticate(context.Background(), "0.0.1", pk.String(), NetworkTestnet)
-	
+
 	if err == nil {
 		t.Fatal("expected auth post to fail")
 	}

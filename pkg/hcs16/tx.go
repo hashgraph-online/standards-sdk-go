@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	hedera "github.com/hashgraph/hedera-sdk-go/v2"
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 )
 
 var hcs16OperationEnumByOperation = map[FloraOperation]int{

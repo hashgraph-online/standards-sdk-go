@@ -3,19 +3,31 @@ package inscriber
 import (
 	"bytes"
 	"context"
+	"crypto/sha512"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/hiero-ledger/hiero-sdk-go/v2/proto/sdk"
+	protobufservices "github.com/hiero-ledger/hiero-sdk-go/v2/proto/services"
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	protobuf "google.golang.org/protobuf/proto"
+
 	"github.com/hashgraph-online/standards-sdk-go/pkg/mirror"
 	"github.com/hashgraph-online/standards-sdk-go/pkg/shared"
-	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 
 type Config struct {
@@ -42,6 +54,13 @@ type WaitOptions struct {
 	MaxAttempts int
 	Interval    time.Duration
 }
+
+const (
+	transactionStatusSuccess = "SUCCESS"
+	ed25519PublicKeyLength   = 32
+	ecdsaPublicKeyLength     = 33
+	hederaNodeAccountOffset  = 3
+)
 
 // NewClient creates a new Client.
 func NewClient(config Config) (*Client, error) {
@@ -311,20 +330,59 @@ func ExecuteTransaction(
 	if err != nil {
 		return "", fmt.Errorf("invalid account ID: %w", err)
 	}
-	privateKey, err := parseOperatorPrivateKey(ctx, network, accountID.String(), config.PrivateKey)
+	privateKey, err := parseOperatorPrivateKey(
+		ctx,
+		network,
+		accountID.String(),
+		strings.TrimSpace(config.PrivateKey),
+	)
 	if err != nil {
 		return "", err
 	}
-
-	client, err := shared.NewHederaClient(network)
-	if err != nil {
-		return "", err
-	}
-	client.SetOperator(accountID, privateKey)
 
 	rawBytes, err := base64.StdEncoding.DecodeString(transactionBytes)
 	if err != nil {
 		return "", fmt.Errorf("transaction bytes must be base64: %w", err)
+	}
+
+	preSignedBytes, err := appendSerializedTransactionSignature(rawBytes, privateKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to append operator signature to serialized transaction: %w", err)
+	}
+
+	submittedTransactionID, serializedDirectErr := executeSerializedTransferTransaction(
+		ctx,
+		preSignedBytes,
+		network,
+	)
+	if serializedDirectErr == nil {
+		return submittedTransactionID, nil
+	}
+
+	preSignedTransaction, err := decodeTransferTransaction(preSignedBytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode serialized signed transaction bytes: %w", err)
+	}
+	preSignedTransaction.SetRegenerateTransactionID(false)
+
+	passThroughClient, err := shared.NewHederaClient(network)
+	if err != nil {
+		return "", err
+	}
+	passThroughResponse, serializedPassThroughErr := preSignedTransaction.Execute(passThroughClient)
+	if serializedPassThroughErr == nil {
+		receipt, receiptErr := passThroughResponse.GetReceipt(passThroughClient)
+		if receiptErr != nil {
+			return "", fmt.Errorf("failed to get transaction receipt via serialized-signature-pass-through: %w", receiptErr)
+		}
+		if receipt.Status.String() != transactionStatusSuccess {
+			return "", fmt.Errorf(
+				"transaction via serialized-signature-pass-through failed with status %s",
+				receipt.Status.String(),
+			)
+		}
+
+		return passThroughResponse.TransactionID.String(), nil
 	}
 
 	type executeAttempt struct {
@@ -346,6 +404,11 @@ func ExecuteTransaction(
 		},
 		{
 			operatorClient: false,
+			manualSign:     true,
+			label:          "manual-sign-pass-through",
+		},
+		{
+			operatorClient: false,
 			manualSign:     false,
 			label:          "unsigned-pass-through",
 		},
@@ -361,21 +424,17 @@ func ExecuteTransaction(
 			executionClient.SetOperator(accountID, privateKey)
 		}
 
-		transaction, decodeErr := hedera.TransactionFromBytes(rawBytes)
+		transaction, decodeErr := decodeTransferTransaction(rawBytes)
 		if decodeErr != nil {
 			return "", fmt.Errorf("failed to decode transaction bytes: %w", decodeErr)
 		}
+		transaction.SetRegenerateTransactionID(false)
 
-		executable := transaction
 		if attempt.manualSign {
-			signedTransaction, signErr := hedera.TransactionSign(transaction, privateKey)
-			if signErr != nil {
-				return "", fmt.Errorf("failed to sign transaction during %s: %w", attempt.label, signErr)
-			}
-			executable = signedTransaction
+			transaction.Sign(privateKey)
 		}
 
-		response, executeErr := hedera.TransactionExecute(executable, executionClient)
+		response, executeErr := transaction.Execute(executionClient)
 		if executeErr != nil {
 			if strings.Contains(strings.ToUpper(executeErr.Error()), "INVALID_SIGNATURE") {
 				invalidSignatureErrors = append(invalidSignatureErrors, fmt.Sprintf("%s=%v", attempt.label, executeErr))
@@ -396,6 +455,12 @@ func ExecuteTransaction(
 	}
 
 	if len(invalidSignatureErrors) > 0 {
+		invalidSignatureErrors = append(
+			invalidSignatureErrors,
+			fmt.Sprintf("serialized-direct-grpc-submit=%v", serializedDirectErr),
+			fmt.Sprintf("serialized-signature-pass-through=%v", serializedPassThroughErr),
+		)
+
 		rebuiltTransactionID, rebuildErr := executeRebuiltTransferTransaction(
 			rawBytes,
 			network,
@@ -411,6 +476,442 @@ func ExecuteTransaction(
 	}
 
 	return "", fmt.Errorf("no execution strategy succeeded")
+}
+
+func decodeTransferTransaction(rawBytes []byte) (*hedera.TransferTransaction, error) {
+	transaction, err := hedera.TransactionFromBytes(rawBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return asTransferTransaction(transaction)
+}
+
+func appendSerializedTransactionSignature(
+	rawBytes []byte,
+	privateKey hedera.PrivateKey,
+) ([]byte, error) {
+	var transactionList sdk.TransactionList
+	if err := protobuf.Unmarshal(rawBytes, &transactionList); err != nil {
+		return nil, fmt.Errorf("failed to decode transaction list: %w", err)
+	}
+	if len(transactionList.TransactionList) == 0 {
+		return nil, fmt.Errorf("serialized transaction list is empty")
+	}
+
+	publicKey := privateKey.PublicKey()
+
+	for index := range transactionList.TransactionList {
+		transaction := transactionList.TransactionList[index]
+		if len(transaction.SignedTransactionBytes) == 0 {
+			return nil, fmt.Errorf("serialized transaction %d does not contain SignedTransactionBytes", index)
+		}
+
+		var signedTransaction protobufservices.SignedTransaction
+		if err := protobuf.Unmarshal(transaction.SignedTransactionBytes, &signedTransaction); err != nil {
+			return nil, fmt.Errorf("failed to decode signed transaction %d: %w", index, err)
+		}
+
+		signaturePair, err := buildSignaturePair(publicKey, privateKey.Sign(signedTransaction.GetBodyBytes()))
+		if err != nil {
+			return nil, err
+		}
+
+		if !signaturePairPresent(signedTransaction.GetSigMap().GetSigPair(), signaturePair) {
+			if signedTransaction.SigMap == nil {
+				signedTransaction.SigMap = &protobufservices.SignatureMap{}
+			}
+			signedTransaction.SigMap.SigPair = append(signedTransaction.SigMap.SigPair, signaturePair)
+		}
+
+		signedTransactionBytes, err := protobuf.Marshal(&signedTransaction)
+		if err != nil {
+			return nil, fmt.Errorf("failed to encode signed transaction %d: %w", index, err)
+		}
+
+		transactionList.TransactionList[index].SignedTransactionBytes = signedTransactionBytes
+	}
+
+	updatedTransactionBytes, err := protobuf.Marshal(&transactionList)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode transaction list: %w", err)
+	}
+
+	return updatedTransactionBytes, nil
+}
+
+func buildSignaturePair(
+	publicKey hedera.PublicKey,
+	signature []byte,
+) (*protobufservices.SignaturePair, error) {
+	publicKeyBytes := publicKey.BytesRaw()
+
+	switch len(publicKeyBytes) {
+	case ed25519PublicKeyLength:
+		return &protobufservices.SignaturePair{
+			PubKeyPrefix: publicKeyBytes,
+			Signature: &protobufservices.SignaturePair_Ed25519{
+				Ed25519: signature,
+			},
+		}, nil
+	case ecdsaPublicKeyLength:
+		return &protobufservices.SignaturePair{
+			PubKeyPrefix: publicKeyBytes,
+			Signature: &protobufservices.SignaturePair_ECDSASecp256K1{
+				ECDSASecp256K1: signature,
+			},
+		}, nil
+	default:
+		return nil, fmt.Errorf("unsupported public key length %d", len(publicKeyBytes))
+	}
+}
+
+func signaturePairPresent(
+	existingPairs []*protobufservices.SignaturePair,
+	candidate *protobufservices.SignaturePair,
+) bool {
+	for _, existing := range existingPairs {
+		if !bytes.Equal(existing.GetPubKeyPrefix(), candidate.GetPubKeyPrefix()) {
+			continue
+		}
+		if bytes.Equal(existing.GetEd25519(), candidate.GetEd25519()) &&
+			bytes.Equal(existing.GetECDSASecp256K1(), candidate.GetECDSASecp256K1()) {
+			return true
+		}
+	}
+
+	return false
+}
+
+//nolint:gocyclo
+func executeSerializedTransferTransaction(
+	ctx context.Context,
+	rawBytes []byte,
+	network string,
+) (string, error) {
+	var transactionList sdk.TransactionList
+	if err := protobuf.Unmarshal(rawBytes, &transactionList); err != nil {
+		return "", fmt.Errorf("failed to decode serialized transaction list: %w", err)
+	}
+	if len(transactionList.TransactionList) == 0 {
+		return "", fmt.Errorf("serialized transaction list is empty")
+	}
+
+	receiptClient, err := shared.NewHederaClient(network)
+	if err != nil {
+		return "", err
+	}
+	defer receiptClient.Close()
+
+	addressBook, err := hedera.NewAddressBookQuery().
+		SetFileID(hedera.FileIDForAddressBook()).
+		Execute(receiptClient)
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve Hedera address book for direct submit: %w", err)
+	}
+	nodeCertHashes := buildNodeCertHashIndex(addressBook)
+
+	var submitErrors []string
+	for index, transaction := range transactionList.TransactionList {
+		transactionID, nodeAccountID, err := serializedTransactionMetadata(transaction)
+		if err != nil {
+			submitErrors = append(submitErrors, fmt.Sprintf("tx[%d]=%v", index, err))
+			continue
+		}
+
+		nodeAddress, err := networkNodeAddress(receiptClient, network, nodeAccountID)
+		if err != nil {
+			submitErrors = append(submitErrors, fmt.Sprintf("tx[%d]=%v", index, err))
+			continue
+		}
+
+		serverName, serverNameErr := nodeAddressServerName(nodeAddress)
+		if serverNameErr != nil {
+			submitErrors = append(submitErrors, fmt.Sprintf("tx[%d]=%v", index, serverNameErr))
+			continue
+		}
+
+		certHash, ok := nodeCertHashes[nodeAccountID.String()]
+		if !ok || strings.TrimSpace(certHash) == "" {
+			submitErrors = append(
+				submitErrors,
+				fmt.Sprintf("tx[%d]=no certificate hash found for node account %s", index, nodeAccountID.String()),
+			)
+			continue
+		}
+
+		connection, err := grpc.NewClient(
+			nodeAddress,
+			grpc.WithTransportCredentials(credentials.NewTLS(buildPinnedTLSConfig(serverName, certHash))),
+		)
+		if err != nil {
+			submitErrors = append(submitErrors, fmt.Sprintf("tx[%d]=failed to connect to %s: %v", index, nodeAddress, err))
+			continue
+		}
+
+		response, callErr := protobufservices.NewCryptoServiceClient(connection).CryptoTransfer(
+			ctx,
+			&protobufservices.Transaction{
+				SignedTransactionBytes: transaction.SignedTransactionBytes,
+			},
+		)
+		connection.Close()
+		if callErr != nil {
+			submitErrors = append(submitErrors, fmt.Sprintf("tx[%d]=gRPC error: %v", index, callErr))
+			continue
+		}
+
+		precheck := response.GetNodeTransactionPrecheckCode()
+		if precheck != protobufservices.ResponseCodeEnum_OK {
+			submitErrors = append(
+				submitErrors,
+				fmt.Sprintf(
+					"tx[%d]=precheck status %s received for transaction %s",
+					index,
+					precheck.String(),
+					transactionID.String(),
+				),
+			)
+			continue
+		}
+
+		receipt, receiptErr := hedera.NewTransactionReceiptQuery().
+			SetTransactionID(transactionID).
+			Execute(receiptClient)
+		if receiptErr != nil {
+			return "", fmt.Errorf(
+				"submitted serialized transaction %s but failed to fetch receipt: %w",
+				transactionID.String(),
+				receiptErr,
+			)
+		}
+		if receipt.Status.String() != transactionStatusSuccess {
+			return "", fmt.Errorf(
+				"serialized transaction %s completed with status %s",
+				transactionID.String(),
+				receipt.Status.String(),
+			)
+		}
+
+		return transactionID.String(), nil
+	}
+
+	return "", fmt.Errorf("serialized direct submit failed: %s", strings.Join(submitErrors, "; "))
+}
+
+func serializedTransactionMetadata(
+	transaction *protobufservices.Transaction,
+) (hedera.TransactionID, hedera.AccountID, error) {
+	if transaction == nil || len(transaction.SignedTransactionBytes) == 0 {
+		return hedera.TransactionID{}, hedera.AccountID{}, fmt.Errorf("serialized transaction is missing SignedTransactionBytes")
+	}
+
+	var signedTransaction protobufservices.SignedTransaction
+	if err := protobuf.Unmarshal(transaction.SignedTransactionBytes, &signedTransaction); err != nil {
+		return hedera.TransactionID{}, hedera.AccountID{}, fmt.Errorf("failed to decode signed transaction bytes: %w", err)
+	}
+
+	var body protobufservices.TransactionBody
+	if err := protobuf.Unmarshal(signedTransaction.GetBodyBytes(), &body); err != nil {
+		return hedera.TransactionID{}, hedera.AccountID{}, fmt.Errorf("failed to decode signed transaction body: %w", err)
+	}
+
+	if _, ok := body.GetData().(*protobufservices.TransactionBody_CryptoTransfer); !ok {
+		return hedera.TransactionID{}, hedera.AccountID{}, fmt.Errorf("signed transaction body is not a crypto transfer")
+	}
+	if body.GetTransactionID() == nil {
+		return hedera.TransactionID{}, hedera.AccountID{}, fmt.Errorf("signed transaction body is missing transaction ID")
+	}
+	if body.GetNodeAccountID() == nil {
+		return hedera.TransactionID{}, hedera.AccountID{}, fmt.Errorf("signed transaction body is missing node account ID")
+	}
+
+	transactionID, err := protobufTransactionID(body.GetTransactionID())
+	if err != nil {
+		return hedera.TransactionID{}, hedera.AccountID{}, err
+	}
+	nodeAccountID, err := protobufAccountID(body.GetNodeAccountID())
+	if err != nil {
+		return hedera.TransactionID{}, hedera.AccountID{}, err
+	}
+
+	return transactionID, nodeAccountID, nil
+}
+
+//nolint:gocyclo
+func networkNodeAddress(client *hedera.Client, network string, nodeAccountID hedera.AccountID) (string, error) {
+	if client == nil {
+		return "", fmt.Errorf("hedera client is required")
+	}
+
+	var fallbackAddress string
+	for address, networkAccountID := range client.GetNetwork() {
+		if networkAccountID.String() != nodeAccountID.String() {
+			continue
+		}
+
+		if nodeAccountID.Shard == 0 && nodeAccountID.Realm == 0 && nodeAccountID.Account >= hederaNodeAccountOffset {
+			index := nodeAccountID.Account - hederaNodeAccountOffset
+			switch network {
+			case shared.NetworkMainnet, shared.NetworkTestnet, "previewnet":
+				return fmt.Sprintf("%d.%s.hedera.com:50212", index, network), nil
+			}
+		}
+
+		secureAddress := secureNodeAddress(address)
+		serverName, err := nodeAddressServerName(secureAddress)
+		if err == nil && strings.Contains(serverName, ".") {
+			return secureAddress, nil
+		}
+		if fallbackAddress == "" {
+			fallbackAddress = secureAddress
+		}
+	}
+
+	if nodeAccountID.Shard == 0 && nodeAccountID.Realm == 0 && nodeAccountID.Account >= hederaNodeAccountOffset {
+		index := nodeAccountID.Account - hederaNodeAccountOffset
+		switch network {
+		case shared.NetworkMainnet, shared.NetworkTestnet, "previewnet":
+			return fmt.Sprintf("%d.%s.hedera.com:50212", index, network), nil
+		}
+	}
+
+	if fallbackAddress != "" {
+		return fallbackAddress, nil
+	}
+
+	return "", fmt.Errorf("node account ID %s not found in Hedera client network", nodeAccountID.String())
+}
+
+func secureNodeAddress(address string) string {
+	if strings.HasSuffix(address, ":50211") {
+		return strings.TrimSuffix(address, ":50211") + ":50212"
+	}
+
+	return address
+}
+
+func nodeAddressServerName(address string) (string, error) {
+	host, _, err := net.SplitHostPort(address)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse node address %q: %w", address, err)
+	}
+
+	return host, nil
+}
+
+func buildNodeCertHashIndex(addressBook hedera.NodeAddressBook) map[string]string {
+	index := make(map[string]string, len(addressBook.NodeAddresses))
+	for _, nodeAddress := range addressBook.NodeAddresses {
+		if nodeAddress.AccountID == nil {
+			continue
+		}
+
+		hashValue := strings.TrimSpace(string(nodeAddress.CertHash))
+		if hashValue == "" {
+			continue
+		}
+
+		index[nodeAddress.AccountID.String()] = hashValue
+	}
+
+	return index
+}
+
+func buildPinnedTLSConfig(serverName, certHash string) *tls.Config {
+	return &tls.Config{
+		MinVersion:         tls.VersionTLS12,
+		ServerName:         serverName,
+		InsecureSkipVerify: true, //nolint:gosec // Hedera nodes are pinned via address-book certificate hashes, matching the official Go SDK transport model.
+		VerifyPeerCertificate: func(rawCerts [][]byte, _ [][]*x509.Certificate) error {
+			return verifyPinnedNodeCertificates(rawCerts, certHash)
+		},
+		VerifyConnection: func(state tls.ConnectionState) error {
+			return verifyPinnedNodeConnection(&state, certHash)
+		},
+	}
+}
+
+func verifyPinnedNodeCertificates(rawCerts [][]byte, certHash string) error {
+	for _, cert := range rawCerts {
+		hashValue, err := hederaCertHash(cert)
+		if err != nil {
+			return err
+		}
+		if hashValue == certHash {
+			return nil
+		}
+	}
+
+	return x509.CertificateInvalidError{Reason: x509.Expired}
+}
+
+func verifyPinnedNodeConnection(state *tls.ConnectionState, certHash string) error {
+	for _, cert := range state.PeerCertificates {
+		hashValue, err := hederaCertHash(cert.Raw)
+		if err != nil {
+			return err
+		}
+		if hashValue == certHash {
+			return nil
+		}
+	}
+
+	return x509.CertificateInvalidError{Reason: x509.Expired}
+}
+
+func hederaCertHash(certBytes []byte) (string, error) {
+	block := &pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: certBytes,
+	}
+
+	var encoded bytes.Buffer
+	if err := pem.Encode(&encoded, block); err != nil {
+		return "", err
+	}
+
+	digest := sha512.New384()
+	if _, err := digest.Write(encoded.Bytes()); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(digest.Sum(nil)), nil
+}
+
+func protobufAccountID(accountID *protobufservices.AccountID) (hedera.AccountID, error) {
+	if accountID == nil {
+		return hedera.AccountID{}, fmt.Errorf("account ID is missing")
+	}
+
+	return hedera.AccountIDFromString(
+		fmt.Sprintf("%d.%d.%d", accountID.GetShardNum(), accountID.GetRealmNum(), accountID.GetAccountNum()),
+	)
+}
+
+func protobufTransactionID(transactionID *protobufservices.TransactionID) (hedera.TransactionID, error) {
+	if transactionID == nil {
+		return hedera.TransactionID{}, fmt.Errorf("transaction ID is missing")
+	}
+
+	accountID, err := protobufAccountID(transactionID.GetAccountID())
+	if err != nil {
+		return hedera.TransactionID{}, err
+	}
+
+	validStart := transactionID.GetTransactionValidStart()
+	if validStart == nil {
+		return hedera.TransactionID{}, fmt.Errorf("transaction valid start is missing")
+	}
+
+	return hedera.TransactionIdFromString(
+		fmt.Sprintf(
+			"%s@%d.%09d",
+			accountID.String(),
+			validStart.GetSeconds(),
+			validStart.GetNanos(),
+		),
+	)
 }
 
 func parseOperatorPrivateKey(
@@ -442,7 +943,12 @@ func parseOperatorPrivateKey(
 		if parseErr == nil {
 			return ed25519Key, nil
 		}
-		return hedera.PrivateKey{}, fmt.Errorf("failed to parse private key as ED25519 for account %s: %w", accountID, parseErr)
+		return hedera.PrivateKey{}, fmt.Errorf(
+			"failed to parse private key as ED25519 for account %s using mirror key hint %q: %w",
+			accountID,
+			keyTypeHint,
+			parseErr,
+		)
 	}
 
 	return shared.ParsePrivateKey(trimmedKey)
@@ -586,7 +1092,7 @@ func (c *Client) getJSON(ctx context.Context, endpoint string, target any) error
 	if err != nil {
 		return err
 	}
-	request.Header.Set("x-api-key", c.apiKey)
+	c.applyAuthHeaders(request)
 	request.Header.Set("Accept", "application/json")
 
 	response, err := c.httpClient.Do(request)
@@ -625,7 +1131,7 @@ func (c *Client) postJSON(ctx context.Context, endpoint string, payload any, tar
 	if err != nil {
 		return err
 	}
-	request.Header.Set("x-api-key", c.apiKey)
+	c.applyAuthHeaders(request)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
 
@@ -663,6 +1169,10 @@ func (c *Client) resolveURL(endpoint string) string {
 		return c.baseURL + endpoint
 	}
 	return c.baseURL + "/" + endpoint
+}
+
+func (c *Client) applyAuthHeaders(request *http.Request) {
+	request.Header.Set("x-api-key", c.apiKey)
 }
 
 func parseInscriptionJob(raw map[string]any) (InscriptionJob, error) {

@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hashgraph/hedera-sdk-go/v2"
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 )
 
 func TestNewClientCoverage(t *testing.T) {
@@ -31,7 +31,7 @@ func TestNewClientCoverage(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected err invalid op string")
 	}
-	
+
 	_, err = NewClient(ClientConfig{Network: "testnet", OperatorAccountID: "0.0.1", OperatorPrivateKey: "invalid-pk"})
 	if err == nil {
 		t.Fatal("expected err invalid pk string")
@@ -55,7 +55,7 @@ func TestNewClientCoverage(t *testing.T) {
 
 func TestParseTopicMemoCoverage(t *testing.T) {
 	client := &Client{}
-	
+
 	res := client.ParseTopicMemo("hcs-16:0.0.1:0")
 	if res.TopicType != FloraTopicTypeCommunication {
 		t.Fatal("unexpected type")
@@ -134,47 +134,69 @@ func TestExecuteNetworkCommandsFail(t *testing.T) {
 		OperatorAccountID:  "0.0.1", // invalid operator
 		OperatorPrivateKey: pk.String(),
 	})
-	
+
 	client.HederaClient().Close() // Force execution fail
 
 	_, err := client.CreateFloraTopic(context.Background(), CreateFloraTopicOptions{
 		FloraAccountID: "0.0.2",
-		TopicType: FloraTopicTypeCommunication,
+		TopicType:      FloraTopicTypeCommunication,
 	})
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, _, err = client.CreateFloraAccount(context.Background(), CreateFloraAccountOptions{})
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.SendFloraCreated(context.Background(), "0.0.1", "0.0.2", "0.0.3", FloraTopics{})
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.SendTransaction(context.Background(), "0.0.1", "0.0.2", "s", "d")
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.SendStateUpdate(context.Background(), "0.0.1", "0.0.2", "hash", nil, "0.0.3", nil, "m", "t", nil)
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.SendFloraJoinRequest(context.Background(), "0.0.1", "0.0.2", "0.0.3", 1, "t", 2, nil)
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.SendFloraJoinVote(context.Background(), "0.0.1", "0.0.2", "0.0.3", true, 1, 2, nil)
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.SendFloraJoinAccepted(context.Background(), "0.0.1", "0.0.2", []string{"m"}, nil, nil)
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.SignSchedule(context.Background(), "0.0.1", pk)
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.PublishFloraCreated(context.Background(), "0.0.1", "0.0.2", "0.0.3", FloraTopics{})
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.CreateFloraProfile(context.Background(), CreateFloraProfileOptions{
 		FloraAccountID: "0.0.2",
 	})
 	// Mock inscriber failure inside CreateFloraProfile
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 }
 
 func TestConvertFloraMembers(t *testing.T) {

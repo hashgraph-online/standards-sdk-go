@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"strings"
 
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
+
 	"github.com/hashgraph-online/standards-sdk-go/pkg/mirror"
 	"github.com/hashgraph-online/standards-sdk-go/pkg/shared"
-	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 
 type Client struct {

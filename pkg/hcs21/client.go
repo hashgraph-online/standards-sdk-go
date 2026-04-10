@@ -7,10 +7,11 @@ import (
 	"fmt"
 	"strings"
 
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
+
 	"github.com/hashgraph-online/standards-sdk-go/pkg/hcs2"
 	"github.com/hashgraph-online/standards-sdk-go/pkg/mirror"
 	"github.com/hashgraph-online/standards-sdk-go/pkg/shared"
-	hedera "github.com/hashgraph/hedera-sdk-go/v2"
 )
 
 type Client struct {
@@ -359,10 +360,11 @@ func (c *Client) ResolveLatestVersionPointer(
 	ctx context.Context,
 	versionTopicID string,
 ) (string, int64, string, error) {
-	networkName := c.hederaClient.GetNetworkName()
 	networkStr := ""
-	if networkName != nil {
-		networkStr = string(*networkName)
+	if ledgerID := c.hederaClient.GetLedgerID(); ledgerID != nil {
+		if networkName, networkErr := ledgerID.ToNetworkName(); networkErr == nil {
+			networkStr = string(networkName)
+		}
 	}
 	registryClient, err := hcs2.NewClient(hcs2.ClientConfig{
 		OperatorAccountID:  c.operatorID.String(),

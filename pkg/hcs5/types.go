@@ -1,7 +1,7 @@
 package hcs5
 
 import (
-	hedera "github.com/hashgraph/hedera-sdk-go/v2"
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 
 	"github.com/hashgraph-online/standards-sdk-go/pkg/inscriber"
 )
