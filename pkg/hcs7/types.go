@@ -1,6 +1,6 @@
 package hcs7
 
-import hedera "github.com/hashgraph/hedera-sdk-go/v2"
+import hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 
 type Operation string
 

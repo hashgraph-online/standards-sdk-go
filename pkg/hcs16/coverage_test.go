@@ -3,7 +3,7 @@ package hcs16
 import (
 	"testing"
 
-	hedera "github.com/hashgraph/hedera-sdk-go/v2"
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 )
 
 func TestBuildCreateFloraTopicTxSuccess(t *testing.T) {
@@ -92,8 +92,8 @@ func TestBuildCreateTransactionTopicTxEmptyMemo(t *testing.T) {
 func TestBuildCreateTransactionTopicTxFeeConfig(t *testing.T) {
 	privKey, _ := hedera.PrivateKeyGenerateEd25519()
 	_, err := BuildCreateTransactionTopicTx(TransactionTopicConfig{
-		Memo:            "test",
-		FeeScheduleKey:  privKey.PublicKey(),
+		Memo:           "test",
+		FeeScheduleKey: privKey.PublicKey(),
 	})
 	if err == nil {
 		t.Fatal("expected error for unsupported HIP-991")

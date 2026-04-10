@@ -3,7 +3,7 @@ package hcs15
 import (
 	"testing"
 
-	hedera "github.com/hashgraph/hedera-sdk-go/v2"
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 )
 
 func TestBuildBaseAccountCreateTx(t *testing.T) {

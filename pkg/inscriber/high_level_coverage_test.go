@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hashgraph/hedera-sdk-go/v2"
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 )
 
 func TestBoolOptionOrDefault(t *testing.T) {
@@ -21,7 +21,7 @@ func TestBoolOptionOrDefault(t *testing.T) {
 
 func TestNormalizeInscriptionOptions(t *testing.T) {
 	config := HederaClientConfig{Network: NetworkTestnet}
-	
+
 	opt1 := InscriptionOptions{}
 	res1 := normalizeInscriptionOptions(opt1, config)
 	if res1.Mode != ModeFile {
@@ -80,15 +80,15 @@ func TestGenerateQuote(t *testing.T) {
 	config := HederaClientConfig{AccountID: "0.0.1", PrivateKey: pk.String()}
 
 	resp, err := GenerateQuote(context.Background(), InscriptionInput{Type: InscriptionInputTypeBuffer, Buffer: []byte("test"), FileName: "t.txt"}, config, InscriptionOptions{APIKey: "key", BaseURL: ts.URL}, nil)
-	
+
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	
+
 	if !resp.Quote {
 		t.Fatal("expected quote response")
 	}
-	
+
 	qr, ok := resp.Result.(QuoteResult)
 	if !ok || qr.TotalCostHBAR != "5" {
 		t.Fatal("expected quote result with 5 hbar")
@@ -106,7 +106,7 @@ func TestInscribeHTTPFailureStart(t *testing.T) {
 	opts := InscriptionOptions{APIKey: "key", BaseURL: ts.URL, ConnectionMode: ConnectionModeHTTP}
 
 	_, err := Inscribe(context.Background(), InscriptionInput{Type: InscriptionInputTypeBuffer, Buffer: []byte("test"), FileName: "t.txt"}, config, opts, nil)
-	
+
 	if err == nil {
 		t.Fatal("expected start to fail")
 	}
@@ -120,9 +120,9 @@ func TestRetrieveInscriptionHighLevel(t *testing.T) {
 
 	pk, _ := hedera.PrivateKeyGenerateEcdsa()
 	opts := RetrieveInscriptionOptions{
-		AccountID: "0.0.1",
+		AccountID:  "0.0.1",
 		PrivateKey: pk.String(),
-		BaseURL: ts.URL,
+		BaseURL:    ts.URL,
 	}
 
 	_, err := RetrieveInscription(context.Background(), "0.0.1-1-1", opts)
@@ -132,7 +132,7 @@ func TestRetrieveInscriptionHighLevel(t *testing.T) {
 	}
 
 	optsApiKey := RetrieveInscriptionOptions{
-		APIKey: "key",
+		APIKey:  "key",
 		BaseURL: ts.URL,
 	}
 	job, err := RetrieveInscription(context.Background(), "0.0.1-1-1", optsApiKey)
@@ -156,4 +156,3 @@ func TestWaitForInscriptionConfirmationHighLevel(t *testing.T) {
 	if err == nil {
 	}
 }
-

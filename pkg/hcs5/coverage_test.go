@@ -6,8 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
+
 	"github.com/hashgraph-online/standards-sdk-go/pkg/inscriber"
-	"github.com/hashgraph/hedera-sdk-go/v2"
 )
 
 func TestNewClient(t *testing.T) {
@@ -32,7 +33,7 @@ func TestNewClient(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected err invalid op string")
 	}
-	
+
 	_, err = NewClient(ClientConfig{Network: "testnet", OperatorAccountID: "0.0.1", OperatorPrivateKey: "invalid-pk"})
 	if err == nil {
 		t.Fatal("expected err invalid pk string")
@@ -115,7 +116,7 @@ func TestBuildMintTxFailures(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected missing token id")
 	}
-	
+
 	_, err = BuildMintTx("invalid-token", "meta", "memo")
 	if err == nil {
 		t.Fatal("expected invalid token id")

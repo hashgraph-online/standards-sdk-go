@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashgraph/hedera-sdk-go/v2"
-	"github.com/hashgraph/hedera-sdk-go/v2/proto/sdk"
-	protobufservices "github.com/hashgraph/hedera-sdk-go/v2/proto/services"
+	"github.com/hiero-ledger/hiero-sdk-go/v2/proto/sdk"
+	protobufservices "github.com/hiero-ledger/hiero-sdk-go/v2/proto/services"
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -448,8 +448,8 @@ func TestSerializedTransactionMetadata(t *testing.T) {
 	}
 
 	var transactionList sdk.TransactionList
-	if err := proto.Unmarshal(serializedBytes, &transactionList); err != nil {
-		t.Fatalf("failed to decode transaction list: %v", err)
+	if unmarshalErr := proto.Unmarshal(serializedBytes, &transactionList); unmarshalErr != nil {
+		t.Fatalf("failed to decode transaction list: %v", unmarshalErr)
 	}
 
 	transactionID, parsedNodeAccountID, err := serializedTransactionMetadata(transactionList.TransactionList[0])
@@ -470,7 +470,7 @@ func TestNetworkNodeAddress(t *testing.T) {
 		t.Fatalf("failed to parse node account ID: %v", err)
 	}
 
-	nodeAddress, err := networkNodeAddress(string(NetworkTestnet), nodeAccountID)
+	nodeAddress, err := networkNodeAddress(hedera.ClientForTestnet(), string(NetworkTestnet), nodeAccountID)
 	if err != nil {
 		t.Fatalf("failed to derive network node address: %v", err)
 	}
@@ -478,8 +478,32 @@ func TestNetworkNodeAddress(t *testing.T) {
 		t.Fatalf("unexpected node address %s", nodeAddress)
 	}
 
-	_, err = networkNodeAddress("invalid", nodeAccountID)
+	_, err = networkNodeAddress(nil, string(NetworkTestnet), nodeAccountID)
 	if err == nil {
-		t.Fatal("expected unsupported network error")
+		t.Fatal("expected missing client error")
+	}
+
+	missingNodeAccountID, err := hedera.AccountIDFromString("0.0.999")
+	if err != nil {
+		t.Fatalf("failed to parse missing node account ID: %v", err)
+	}
+
+	_, err = networkNodeAddress(hedera.ClientForTestnet(), "invalid-network", missingNodeAccountID)
+	if err == nil {
+		t.Fatal("expected missing node error")
+	}
+}
+
+func TestNodeAddressServerName(t *testing.T) {
+	serverName, err := nodeAddressServerName("0.testnet.hedera.com:50212")
+	if err != nil {
+		t.Fatalf("failed to parse node server name: %v", err)
+	}
+	if serverName != "0.testnet.hedera.com" {
+		t.Fatalf("unexpected server name %s", serverName)
+	}
+
+	if _, err := nodeAddressServerName("invalid-address"); err == nil {
+		t.Fatal("expected invalid node address error")
 	}
 }

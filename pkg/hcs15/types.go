@@ -1,6 +1,6 @@
 package hcs15
 
-import hedera "github.com/hashgraph/hedera-sdk-go/v2"
+import hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
 
 const (
 	HCS15BaseAccountCreateTransactionMemo  = "hcs-15:op:base_create"

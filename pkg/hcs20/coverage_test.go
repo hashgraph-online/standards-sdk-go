@@ -5,8 +5,9 @@ import (
 	"testing"
 	"time"
 
+	hedera "github.com/hiero-ledger/hiero-sdk-go/v2/sdk"
+
 	"github.com/hashgraph-online/standards-sdk-go/pkg/hcs2"
-	"github.com/hashgraph/hedera-sdk-go/v2"
 )
 
 func TestNewClientFailures(t *testing.T) {
@@ -31,7 +32,7 @@ func TestNewClientFailures(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected err invalid op string")
 	}
-	
+
 	_, err = NewClient(ClientConfig{Network: "testnet", OperatorAccountID: "0.0.1", OperatorPrivateKey: "invalid-pk"})
 	if err == nil {
 		t.Fatal("expected err invalid pk string")
@@ -76,25 +77,39 @@ func TestExecutionFailures(t *testing.T) {
 	ctx := context.Background()
 
 	_, _, err := client.CreatePublicTopic(ctx, CreateTopicOptions{})
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, _, err = client.CreateRegistryTopic(ctx, hcs2.CreateRegistryOptions{})
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.DeployPoints(ctx, DeployPointsOptions{})
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.MintPoints(ctx, MintPointsOptions{})
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.TransferPoints(ctx, TransferPointsOptions{})
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.BurnPoints(ctx, BurnPointsOptions{})
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 
 	_, err = client.RegisterTopic(ctx, RegisterTopicOptions{})
-	if err == nil { t.Fatal("expected fail") }
+	if err == nil {
+		t.Fatal("expected fail")
+	}
 }
 
 func TestErrorsCoverage(t *testing.T) {
@@ -118,7 +133,7 @@ func TestIndexerPollingFail(t *testing.T) {
 	indexer, _ := NewPointsIndexer(IndexerConfig{
 		Network: "testnet",
 	})
-	
+
 	// Start polling immediately stops because config or context mock
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -128,7 +143,7 @@ func TestIndexerPollingFail(t *testing.T) {
 
 	// Since it's stopped/canceled via context, stop should just clear signal
 	indexer.StopPolling()
-	
+
 	// And state snapshot should be 0
 	if indexer.StateSnapshot().LastProcessedTimestamp != "" {
 		t.Fatal("expected empty")
