@@ -938,7 +938,7 @@ func parseOperatorPrivateKey(
 		}
 		return hedera.PrivateKey{}, fmt.Errorf("failed to parse private key as ECDSA for account %s: %w", accountID, parseErr)
 	}
-	if lowerHint != "" {
+	if strings.Contains(lowerHint, "ed25519") {
 		ed25519Key, parseErr := hedera.PrivateKeyFromStringEd25519(trimmedKey)
 		if parseErr == nil {
 			return ed25519Key, nil
