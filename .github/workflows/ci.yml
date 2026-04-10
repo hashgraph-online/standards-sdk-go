@@ -29,15 +29,13 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v1.64.8
-          install-mode: goinstall
+          version: v2.11.4
           args: --new-from-rev=${{ github.event.pull_request.base.sha }}
       - name: golangci-lint (push)
         if: github.event_name != 'pull_request'
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v1.64.8
-          install-mode: goinstall
+          version: v2.11.4
           args: --new-from-rev=${{ github.event.before }}
 
   security:
