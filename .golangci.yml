@@ -1,48 +1,45 @@
+version: "2"
+
 run:
   timeout: 5m
   modules-download-mode: readonly
 
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-  govet:
-    enable-all: true
-    disable:
-      - fieldalignment
-  gocyclo:
-    min-complexity: 15
-  goconst:
-    min-len: 3
-    min-occurrences: 3
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport
-      - ifElseChain
-      - octalLiteral
-      - whyNoLint
-  revive:
-    rules:
-      - name: exported
-        severity: warning
-  goimports:
-    local-prefixes: github.com/hashgraph-online/standards-sdk-go
-
 linters:
-  disable-all: true
+  default: none
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+    gocyclo:
+      min-complexity: 15
+    goconst:
+      min-len: 3
+      min-occurrences: 3
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+      disabled-checks:
+        - dupImport
+        - ifElseChain
+        - octalLiteral
+        - whyNoLint
+    revive:
+      rules:
+        - name: exported
+          severity: warning
   enable:
     - errcheck
-    - gosimple
+    - staticcheck
     - govet
     - ineffassign
-    - staticcheck
-    - typecheck
     - unused
     - asasalint
     - asciicheck
@@ -58,7 +55,6 @@ linters:
     - gocritic
     - gocyclo
     - godot
-    - goimports
     - mnd
     - gomoddirectives
     - gomodguard
@@ -74,18 +70,26 @@ linters:
     - predeclared
     - promlinter
     - revive
-    - stylecheck
     - tparallel
     - unconvert
     - unparam
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - gocyclo
+          - errcheck
+          - dupl
+          - gosec
+
+formatters:
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/hashgraph-online/standards-sdk-go
+  enable:
+    - goimports
 
 issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - gocyclo
-        - errcheck
-        - dupl
-        - gosec
   max-issues-per-linter: 0
   max-same-issues: 0
