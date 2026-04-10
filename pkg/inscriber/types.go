@@ -171,7 +171,8 @@ type InscriptionResult struct {
 }
 
 type AuthResult struct {
-	APIKey string `json:"apiKey"`
+	APIKey       string `json:"apiKey"`
+	SessionToken string `json:"sessionToken"`
 }
 
 type BrokerQuoteRequest struct {
