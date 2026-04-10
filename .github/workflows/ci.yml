@@ -19,15 +19,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: golangci-lint
+      - name: golangci-lint (pull request)
+        if: github.event_name == 'pull_request'
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.64.5
-          # Only report issues introduced in the PR.
-          only-new-issues: true
+          args: --new-from-rev=${{ github.event.pull_request.base.sha }}
+      - name: golangci-lint (push)
+        if: github.event_name != 'pull_request'
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.64.5
 
   security:
     name: Security Scans
