@@ -37,6 +37,7 @@ jobs:
         with:
           version: v1.64.8
           install-mode: goinstall
+          args: --new-from-rev=${{ github.event.before }}
 
   security:
     name: Security Scans
