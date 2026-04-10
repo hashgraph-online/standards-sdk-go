@@ -11,6 +11,7 @@ permissions:
   contents: read
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   HOL_SDK_DOCS_URL: https://hol.org/docs/libraries/standards-sdk/
 
 jobs:
@@ -18,25 +19,23 @@ jobs:
     name: Lint Code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       - name: golangci-lint (pull request)
         if: github.event_name == 'pull_request'
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: v1.64.8
-          install-mode: goinstall
+          version: v2.11.4
           args: --new-from-rev=${{ github.event.pull_request.base.sha }}
       - name: golangci-lint (push)
         if: github.event_name != 'pull_request'
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: v1.64.8
-          install-mode: goinstall
+          version: v2.11.4
           args: --new-from-rev=${{ github.event.before }}
 
   security:
@@ -46,13 +45,13 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
       - name: Run Gosec Security Scanner
-        uses: securego/gosec@master
+        uses: securego/gosec@v2.25.0
         with:
           args: '-no-fail -fmt sarif -out results.sarif ./...'
 
@@ -66,7 +65,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         continue-on-error: true
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           scan-type: 'fs'
           ignore-unfixed: true
@@ -76,7 +75,7 @@ jobs:
 
       - name: Run OSV vulnerability scanner
         continue-on-error: true
-        uses: google/osv-scanner-action/osv-scanner-action@v2.3.3
+        uses: google/osv-scanner-action/osv-scanner-action@v2.3.5
         with:
           scan-args: |-
             --recursive
@@ -86,7 +85,7 @@ jobs:
 
       - name: Build OSV SARIF report
         continue-on-error: true
-        uses: google/osv-scanner-action/osv-reporter-action@v2.3.3
+        uses: google/osv-scanner-action/osv-reporter-action@v2.3.5
         with:
           scan-args: |-
             --output=osv-results.sarif
@@ -96,14 +95,14 @@ jobs:
 
       - name: Run TruffleHog secret scanner
         continue-on-error: true
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.94.3
         with:
           path: ./
 
       - name: Upload Gosec SARIF
         if: always() && hashFiles('results.sarif') != ''
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
           category: gosec
@@ -111,7 +110,7 @@ jobs:
       - name: Upload OSV SARIF
         if: always() && hashFiles('osv-results.sarif') != ''
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: osv-results.sarif
           category: osv-scanner
@@ -119,7 +118,7 @@ jobs:
       - name: Upload Trivy SARIF
         if: always() && hashFiles('trivy-results.sarif') != ''
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-results.sarif
           category: trivy
@@ -128,15 +127,15 @@ jobs:
     name: Test and Coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       - name: Run Tests
         run: go test -v -coverprofile=coverage.out ./...
       
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v6
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -144,8 +143,8 @@ jobs:
     name: Build Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       - name: Verify Build
@@ -174,7 +173,7 @@ jobs:
     env:
       MODULE_PATH: github.com/hashgraph-online/standards-sdk-go
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
