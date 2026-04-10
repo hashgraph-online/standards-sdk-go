@@ -28,13 +28,13 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.64.5
+          version: v1.64.8
           args: --new-from-rev=${{ github.event.pull_request.base.sha }}
       - name: golangci-lint (push)
         if: github.event_name != 'pull_request'
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.64.5
+          version: v1.64.8
 
   security:
     name: Security Scans
